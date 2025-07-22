@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add New Member{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-user-plus"></i> Add New Member</h1>
+        <a href="{% url 'members:list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Members
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-container">
+            <form method="post" enctype="multipart/form-data" class="modern-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3>Personal Information</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="first_name">First Name *</label>
+                            <input type="text" id="first_name" name="first_name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="last_name">Last Name *</label>
+                            <input type="text" id="last_name" name="last_name" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email Address</label>
+                            <input type="email" id="email" name="email">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="phone_number">Phone Number *</label>
+                            <input type="tel" id="phone_number" name="phone_number" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="national_id">National ID *</label>
+                            <input type="text" id="national_id" name="national_id" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="date_of_birth">Date of Birth</label>
+                            <input type="date" id="date_of_birth" name="date_of_birth">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Location & Organization</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="stage">Stage</label>
+                            <select id="stage" name="stage">
+                                <option value="">Select Stage</option>
+                                {% for stage in stages %}
+                                    <option value="{{ stage.id }}">{{ stage.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="chama">Chama</label>
+                            <select id="chama" name="chama">
+                                <option value="">Select Chama</option>
+                                {% for chama in chamas %}
+                                    <option value="{{ chama.id }}">{{ chama.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="address">Address</label>
+                            <textarea id="address" name="address" rows="3"></textarea>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Emergency Contact</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="emergency_contact_name">Emergency Contact Name</label>
+                            <input type="text" id="emergency_contact_name" name="emergency_contact_name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emergency_contact_phone">Emergency Contact Phone</label>
+                            <input type="tel" id="emergency_contact_phone" name="emergency_contact_phone">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="emergency_contact_relationship">Relationship</label>
+                            <input type="text" id="emergency_contact_relationship" name="emergency_contact_relationship">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Profile Photo</h3>
+                    
+                    <div class="form-group">
+                        <label for="photo">Upload Photo</label>
+                        <input type="file" id="photo" name="photo" accept="image/*">
+                        <small class="form-help">Recommended size: 400x400px, Max: 5MB</small>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save"></i> Save Member
+                    </button>
+                    <a href="{% url 'members:list' %}" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-container {
+    background: white;
+    border-radius: 8px;
+    padding: 2rem;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.form-section {
+    margin-bottom: 2rem;
+}
+
+.form-section h3 {
+    color: #333;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #e9ecef;
+}
+
+.form-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+}
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    outline: none;
+    border-color: #007bff;
+    box-shadow: 0 0 0 2px rgba(0,123,255,0.25);
+}
+
+.form-help {
+    display: block;
+    margin-top: 0.25rem;
+    color: #6c757d;
+    font-size: 0.875rem;
+}
+
+.form-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: flex-end;
+    margin-top: 2rem;
+    padding-top: 1rem;
+    border-top: 1px solid #e9ecef;
+}
+</style>
+{% endblock %}

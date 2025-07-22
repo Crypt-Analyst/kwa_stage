@@ -1,0 +1,86 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Send Email Verification{% endblock %}
+
+{% block content %}
+<div class="container-fluid d-flex align-items-center justify-content-center" style="min-height: calc(100vh - 200px);">
+    <div class="row w-100 justify-content-center">
+        <div class="col-md-6 col-lg-4">
+            <div class="card shadow-lg border-0">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <div class="mb-3">
+                            <i class="fas fa-envelope-check fa-3x text-primary"></i>
+                        </div>
+                        <h3 class="fw-bold text-dark">Email Verification</h3>
+                        <p class="text-muted">Enter your email to receive verification link</p>
+                    </div>
+
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <form method="post" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        
+                        <div class="mb-4">
+                            <label for="email" class="form-label fw-semibold">
+                                <i class="fas fa-envelope me-2"></i>Email Address
+                            </label>
+                            <input type="email" 
+                                   class="form-control form-control-lg" 
+                                   id="email" 
+                                   name="email" 
+                                   value="{{ email }}"
+                                   placeholder="Enter your email address"
+                                   required>
+                            <div class="invalid-feedback">
+                                Please provide a valid email address.
+                            </div>
+                        </div>
+
+                        <div class="d-grid mb-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-paper-plane me-2"></i>
+                                Send Verification Email
+                            </button>
+                        </div>
+                    </form>
+
+                    <div class="text-center">
+                        <a href="{% url 'authentication:login' %}" class="text-decoration-none">
+                            <i class="fas fa-arrow-left me-1"></i>
+                            Back to Login
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Bootstrap form validation
+(function() {
+    'use strict';
+    window.addEventListener('load', function() {
+        var forms = document.getElementsByClassName('needs-validation');
+        var validation = Array.prototype.filter.call(forms, function(form) {
+            form.addEventListener('submit', function(event) {
+                if (form.checkValidity() === false) {
+                    event.preventDefault();
+                    event.stopPropagation();
+                }
+                form.classList.add('was-validated');
+            }, false);
+        });
+    }, false);
+})();
+</script>
+{% endblock %}

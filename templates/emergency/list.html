@@ -1,0 +1,173 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emergency Fund{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-first-aid"></i> Emergency Fund Management</h1>
+        <a href="{% url 'emergency:request' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Request Emergency Fund
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ total_fund|default:0|floatformat:0 }}</h3>
+                    <p>Total Emergency Fund</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ disbursed|default:0|floatformat:0 }}</h3>
+                    <p>Total Disbursed</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ pending_requests|default:0 }}</h3>
+                    <p>Pending Requests</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ beneficiaries|default:0 }}</h3>
+                    <p>Beneficiaries</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>Emergency Requests</h3>
+                <div class="table-actions">
+                    <a href="{% url 'emergency:my_requests' %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i> My Requests
+                    </a>
+                    <a href="{% url 'emergency:reports' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Member</th>
+                        <th>Emergency Type</th>
+                        <th>Amount Requested</th>
+                        <th>Amount Approved</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for request in emergency_requests %}
+                    <tr>
+                        <td>{{ request.date_created|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ request.member.first_name }} {{ request.member.last_name }}</strong>
+                                <small>{{ request.member.member_id }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <span class="emergency-type emergency-{{ request.emergency_type }}">
+                                {{ request.get_emergency_type_display }}
+                            </span>
+                        </td>
+                        <td><strong>KSh {{ request.amount_requested|floatformat:0 }}</strong></td>
+                        <td>
+                            {% if request.amount_approved %}
+                                <strong>KSh {{ request.amount_approved|floatformat:0 }}</strong>
+                            {% else %}
+                                -
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if request.status == 'approved' %}
+                                <span class="status-badge status-success">Approved</span>
+                            {% elif request.status == 'pending' %}
+                                <span class="status-badge status-warning">Pending</span>
+                            {% elif request.status == 'rejected' %}
+                                <span class="status-badge status-danger">Rejected</span>
+                            {% elif request.status == 'disbursed' %}
+                                <span class="status-badge status-success">Disbursed</span>
+                            {% else %}
+                                <span class="status-badge status-secondary">{{ request.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'emergency:detail' request.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if request.status == 'pending' %}
+                                <a href="{% url 'emergency:review' request.id %}" class="btn btn-sm btn-primary" title="Review">
+                                    <i class="fas fa-gavel"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No emergency requests found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.emergency-type {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.emergency-medical {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.emergency-accident {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.emergency-funeral {
+    background: #d1ecf1;
+    color: #0c5460;
+}
+
+.emergency-family {
+    background: #d4edda;
+    color: #155724;
+}
+
+.emergency-other {
+    background: #e2e3e5;
+    color: #383d41;
+}
+</style>
+{% endblock %}

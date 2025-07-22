@@ -1,0 +1,318 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Stage Stories{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-images"></i> Stage Stories</h1>
+        <div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#storyModal">
+                <i class="fas fa-plus"></i> Share Story
+            </button>
+            <a href="{% url 'social:feed' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Feed
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stories-container">
+            {% if stories %}
+                <div class="stories-grid">
+                    {% for story in stories %}
+                    <div class="story-card">
+                        <div class="story-header">
+                            <div class="author-info">
+                                {% if story.author.profile_photo %}
+                                    <img src="{{ story.author.profile_photo.url }}" alt="{{ story.author.user.get_full_name }}" class="author-avatar">
+                                {% else %}
+                                    <div class="author-avatar-placeholder">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="author-details">
+                                    <h6>{{ story.author.user.get_full_name }}</h6>
+                                    <small>{{ story.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                            <div class="story-timer">
+                                <i class="fas fa-clock"></i>
+                                <small>{{ story.expires_at|timeuntil }} left</small>
+                            </div>
+                        </div>
+                        
+                        {% if story.image %}
+                        <div class="story-image">
+                            <img src="{{ story.image.url }}" alt="Story image">
+                        </div>
+                        {% endif %}
+                        
+                        {% if story.content %}
+                        <div class="story-content">
+                            <p>{{ story.content }}</p>
+                        </div>
+                        {% endif %}
+                        
+                        <div class="story-footer">
+                            <div class="story-stats">
+                                <span class="views">
+                                    <i class="fas fa-eye"></i>
+                                    {{ story.views.count }} views
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-images"></i>
+                    </div>
+                    <h3>No Stories Yet</h3>
+                    <p>Be the first to share a story with your stage members!</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#storyModal">
+                        <i class="fas fa-plus"></i> Share Your Story
+                    </button>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- Story Creation Modal -->
+<div class="modal fade" id="storyModal" tabindex="-1" aria-labelledby="storyModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="storyModalLabel">
+                    <i class="fas fa-plus"></i> Share Your Story
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="modal-body">
+                    <div class="mb-3">
+                        <label for="content" class="form-label">Story Content</label>
+                        <textarea class="form-control" id="content" name="content" rows="4" 
+                                placeholder="Share something with your stage members..."></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="image" class="form-label">Add Image (Optional)</label>
+                        <input type="file" class="form-control" id="image" name="image" accept="image/*">
+                        <div class="form-text">Images will be visible for 24 hours</div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-share"></i> Share Story
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.stories-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.stories-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    gap: 1.5rem;
+}
+
+.story-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.story-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.story-header {
+    padding: 1rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #eee;
+}
+
+.author-info {
+    display: flex;
+    align-items: center;
+}
+
+.author-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-right: 0.75rem;
+}
+
+.author-avatar-placeholder {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 0.75rem;
+    color: var(--dark-color);
+}
+
+.author-details h6 {
+    margin: 0;
+    font-weight: 600;
+    color: var(--dark-color);
+}
+
+.author-details small {
+    color: #6c757d;
+}
+
+.story-timer {
+    display: flex;
+    align-items: center;
+    color: var(--primary-color);
+    font-size: 0.85rem;
+}
+
+.story-timer i {
+    margin-right: 0.25rem;
+}
+
+.story-image {
+    width: 100%;
+    max-height: 300px;
+    overflow: hidden;
+}
+
+.story-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.story-content {
+    padding: 1rem;
+}
+
+.story-content p {
+    margin: 0;
+    color: var(--dark-color);
+    line-height: 1.6;
+}
+
+.story-footer {
+    padding: 1rem;
+    border-top: 1px solid #eee;
+    background: #f8f9fa;
+}
+
+.story-stats {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.views {
+    display: flex;
+    align-items: center;
+    color: #6c757d;
+    font-size: 0.9rem;
+}
+
+.views i {
+    margin-right: 0.25rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+@media (max-width: 768px) {
+    .stories-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .story-header {
+        padding: 0.75rem;
+    }
+    
+    .story-content {
+        padding: 0.75rem;
+    }
+    
+    .story-footer {
+        padding: 0.75rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Preview image before upload
+    const imageInput = document.getElementById('image');
+    const form = imageInput.closest('form');
+    
+    imageInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Remove existing preview
+            const existingPreview = form.querySelector('.image-preview');
+            if (existingPreview) {
+                existingPreview.remove();
+            }
+            
+            // Create preview
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const preview = document.createElement('div');
+                preview.className = 'image-preview mt-2';
+                preview.innerHTML = `
+                    <img src="${e.target.result}" style="max-width: 100%; height: 150px; object-fit: cover; border-radius: 8px;">
+                    <small class="text-muted d-block mt-1">Image preview</small>
+                `;
+                imageInput.parentElement.appendChild(preview);
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+});
+</script>
+{% endblock %}

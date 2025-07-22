@@ -1,0 +1,364 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Leadership - Members{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-crown"></i> Leadership Management</h1>
+        <a href="{% url 'members:list' %}" class="btn btn-outline">
+            <i class="fas fa-users"></i> All Members
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Leadership Summary -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h3 class="mb-2">{{ total_leaders|default:0 }}</h3>
+                        <p class="text-muted mb-0">Total Leaders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <h3 class="mb-2">{{ chairpersons|default:0 }}</h3>
+                        <p class="text-muted mb-0">Chairpersons</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                            <i class="fas fa-money-check-alt"></i>
+                        </div>
+                        <h3 class="mb-2">{{ treasurers|default:0 }}</h3>
+                        <p class="text-muted mb-0">Treasurers</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                            <i class="fas fa-pen-fancy"></i>
+                        </div>
+                        <h3 class="mb-2">{{ secretaries|default:0 }}</h3>
+                        <p class="text-muted mb-0">Secretaries</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Leadership Structure -->
+        <div class="row">
+            <div class="col-lg-8 mb-4">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Current Leadership</h5>
+                        <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#addLeaderModal">
+                            <i class="fas fa-plus"></i> Add Leader
+                        </button>
+                    </div>
+                    <div class="card-body">
+                        <!-- Executive Committee -->
+                        <div class="mb-4">
+                            <h6 class="text-primary border-bottom pb-2 mb-3">
+                                <i class="fas fa-users-cog me-2"></i>Executive Committee
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-primary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">John Mwangi</h6>
+                                                <p class="text-muted mb-1">Chairperson</p>
+                                                <small class="text-success">Active since Jan 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-success"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">Mary Wanjiku</h6>
+                                                <p class="text-muted mb-1">Treasurer</p>
+                                                <small class="text-success">Active since Feb 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-info"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">Peter Kamau</h6>
+                                                <p class="text-muted mb-1">Secretary</p>
+                                                <small class="text-success">Active since Jan 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-warning"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">Grace Njeri</h6>
+                                                <p class="text-muted mb-1">Vice Chairperson</p>
+                                                <small class="text-success">Active since Mar 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Committee Members -->
+                        <div class="mb-4">
+                            <h6 class="text-secondary border-bottom pb-2 mb-3">
+                                <i class="fas fa-users me-2"></i>Committee Members
+                            </h6>
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">David Otieno</h6>
+                                                <p class="text-muted mb-1">Finance Committee</p>
+                                                <small class="text-success">Active since Apr 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <div class="leader-card p-3 border rounded bg-light">
+                                        <div class="d-flex align-items-center">
+                                            <div class="leader-avatar me-3">
+                                                <i class="fas fa-user-circle fa-2x text-secondary"></i>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <h6 class="mb-1">Sarah Mutiso</h6>
+                                                <p class="text-muted mb-1">Welfare Committee</p>
+                                                <small class="text-success">Active since May 2024</small>
+                                            </div>
+                                            <div class="dropdown">
+                                                <button class="btn btn-sm btn-outline-secondary" data-bs-toggle="dropdown">
+                                                    <i class="fas fa-ellipsis-v"></i>
+                                                </button>
+                                                <ul class="dropdown-menu">
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Profile</a></li>
+                                                    <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit Role</a></li>
+                                                    <li><hr class="dropdown-divider"></li>
+                                                    <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-times me-2"></i>Remove</a></li>
+                                                </ul>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leadership Activities -->
+            <div class="col-lg-4 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Activities</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-feed">
+                            <div class="activity-item d-flex mb-3">
+                                <div class="activity-icon bg-primary bg-opacity-10 text-primary me-3">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">New Committee Member</h6>
+                                    <p class="text-muted mb-1">Sarah Mutiso added to Welfare Committee</p>
+                                    <small class="text-muted">2 days ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item d-flex mb-3">
+                                <div class="activity-icon bg-success bg-opacity-10 text-success me-3">
+                                    <i class="fas fa-calendar-check"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Meeting Scheduled</h6>
+                                    <p class="text-muted mb-1">Monthly leadership meeting set for next week</p>
+                                    <small class="text-muted">3 days ago</small>
+                                </div>
+                            </div>
+                            <div class="activity-item d-flex mb-3">
+                                <div class="activity-icon bg-warning bg-opacity-10 text-warning me-3">
+                                    <i class="fas fa-vote-yea"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Leadership Election</h6>
+                                    <p class="text-muted mb-1">Annual elections completed successfully</p>
+                                    <small class="text-muted">1 week ago</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeaderModal">
+                                <i class="fas fa-plus me-2"></i>Add New Leader
+                            </button>
+                            <button class="btn btn-outline-primary">
+                                <i class="fas fa-calendar me-2"></i>Schedule Meeting
+                            </button>
+                            <button class="btn btn-outline-secondary">
+                                <i class="fas fa-file-alt me-2"></i>Generate Report
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Leader Modal -->
+<div class="modal fade" id="addLeaderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Leader</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Select Member</label>
+                        <select class="form-select">
+                            <option>Choose a member...</option>
+                            <option>Alice Njoki</option>
+                            <option>James Kiprotich</option>
+                            <option>Jane Achieng</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Leadership Role</label>
+                        <select class="form-select">
+                            <option>Choose a role...</option>
+                            <option>Chairperson</option>
+                            <option>Vice Chairperson</option>
+                            <option>Secretary</option>
+                            <option>Treasurer</option>
+                            <option>Committee Member</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Committee (if applicable)</label>
+                        <select class="form-select">
+                            <option>None</option>
+                            <option>Finance Committee</option>
+                            <option>Welfare Committee</option>
+                            <option>Disciplinary Committee</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Leader</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

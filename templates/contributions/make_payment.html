@@ -1,0 +1,184 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Make Payment{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-credit-card"></i> Make Payment</h1>
+        <a href="{% url 'contributions:list' %}" class="btn btn-outline">
+            <i class="fas fa-arrow-left"></i> Back to Contributions
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-container">
+            <form method="post" class="modern-form">
+                {% csrf_token %}
+                
+                <div class="form-section">
+                    <h3>Payment Details</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="contribution_type">Contribution Type *</label>
+                            <select id="contribution_type" name="contribution_type" required>
+                                <option value="">Select Type</option>
+                                <option value="monthly">Monthly Contribution</option>
+                                <option value="emergency">Emergency Fund</option>
+                                <option value="welfare">Welfare Fund</option>
+                                <option value="development">Development Fund</option>
+                                <option value="penalty">Penalty</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="amount">Amount (KSh) *</label>
+                            <input type="number" id="amount" name="amount" min="1" step="0.01" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="payment_method">Payment Method *</label>
+                            <select id="payment_method" name="payment_method" required>
+                                <option value="">Select Method</option>
+                                <option value="mpesa">M-Pesa</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="cash">Cash</option>
+                                <option value="cheque">Cheque</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" id="mpesa-section" style="display: none;">
+                    <h3>M-Pesa Details</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="mpesa_phone">M-Pesa Phone Number *</label>
+                            <input type="tel" id="mpesa_phone" name="mpesa_phone" placeholder="2547XXXXXXXX">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mpesa_transaction_id">Transaction ID</label>
+                            <input type="text" id="mpesa_transaction_id" name="mpesa_transaction_id" placeholder="Enter M-Pesa transaction ID">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section" id="bank-section" style="display: none;">
+                    <h3>Bank Transfer Details</h3>
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label for="bank_name">Bank Name *</label>
+                            <input type="text" id="bank_name" name="bank_name">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="bank_reference">Bank Reference *</label>
+                            <input type="text" id="bank_reference" name="bank_reference">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-section">
+                    <h3>Additional Information</h3>
+                    
+                    <div class="form-group">
+                        <label for="description">Description/Notes</label>
+                        <textarea id="description" name="description" rows="3" placeholder="Optional notes about this payment"></textarea>
+                    </div>
+                </div>
+
+                <div class="payment-summary">
+                    <h4>Payment Summary</h4>
+                    <div class="summary-item">
+                        <span>Amount:</span>
+                        <span id="summary-amount">KSh 0.00</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Type:</span>
+                        <span id="summary-type">-</span>
+                    </div>
+                    <div class="summary-item">
+                        <span>Method:</span>
+                        <span id="summary-method">-</span>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-credit-card"></i> Process Payment
+                    </button>
+                    <a href="{% url 'contributions:list' %}" class="btn btn-outline">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.payment-summary {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    margin: 1rem 0;
+}
+
+.payment-summary h4 {
+    margin-bottom: 1rem;
+    color: #333;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 0.5rem;
+    padding: 0.25rem 0;
+}
+
+.summary-item:last-child {
+    margin-bottom: 0;
+    padding-top: 0.5rem;
+    border-top: 1px solid #dee2e6;
+    font-weight: bold;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const paymentMethodSelect = document.getElementById('payment_method');
+    const mpesaSection = document.getElementById('mpesa-section');
+    const bankSection = document.getElementById('bank-section');
+    const amountInput = document.getElementById('amount');
+    const contributionTypeSelect = document.getElementById('contribution_type');
+    
+    // Show/hide payment method sections
+    paymentMethodSelect.addEventListener('change', function() {
+        mpesaSection.style.display = this.value === 'mpesa' ? 'block' : 'none';
+        bankSection.style.display = this.value === 'bank_transfer' ? 'block' : 'none';
+        updateSummary();
+    });
+    
+    // Update payment summary
+    function updateSummary() {
+        const amount = amountInput.value || '0';
+        const type = contributionTypeSelect.options[contributionTypeSelect.selectedIndex].text;
+        const method = paymentMethodSelect.options[paymentMethodSelect.selectedIndex].text;
+        
+        document.getElementById('summary-amount').textContent = `KSh ${parseFloat(amount).toLocaleString()}`;
+        document.getElementById('summary-type').textContent = contributionTypeSelect.value ? type : '-';
+        document.getElementById('summary-method').textContent = paymentMethodSelect.value ? method : '-';
+    }
+    
+    amountInput.addEventListener('input', updateSummary);
+    contributionTypeSelect.addEventListener('change', updateSummary);
+});
+</script>
+{% endblock %}

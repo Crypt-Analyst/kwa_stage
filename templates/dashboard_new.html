@@ -1,0 +1,452 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Boda Boda Welfare System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        padding: 1rem;
+        min-height: calc(100vh - 140px);
+    }
+
+    .dashboard-header {
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 4px 15px rgba(44, 90, 160, 0.2);
+    }
+
+    .dashboard-header h1 {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header .text-light {
+        opacity: 0.9;
+    }
+
+    .stats-cards .card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        margin-bottom: 1rem;
+    }
+
+    .stats-cards .card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stats-cards .card-body {
+        padding: 1.25rem;
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.25rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-number {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #2c5aa0;
+        margin-bottom: 0.25rem;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-size: 0.9rem;
+        margin: 0;
+    }
+
+    .quick-actions .card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
+        transition: transform 0.3s ease;
+    }
+
+    .quick-actions .card:hover {
+        transform: translateY(-2px);
+    }
+
+    .action-btn {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        text-decoration: none;
+        color: inherit;
+        border-radius: 8px;
+        transition: background-color 0.3s ease;
+    }
+
+    .action-btn:hover {
+        background-color: #f8f9fa;
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .action-btn i {
+        width: 40px;
+        height: 40px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .activity-feed {
+        max-height: 400px;
+        overflow-y: auto;
+    }
+
+    .activity-item {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        display: flex;
+        align-items: start;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    .activity-icon {
+        width: 35px;
+        height: 35px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 0.9rem;
+        flex-shrink: 0;
+    }
+
+    .activity-content h6 {
+        font-size: 0.9rem;
+        margin-bottom: 0.25rem;
+    }
+
+    .activity-content p {
+        font-size: 0.8rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .activity-time {
+        font-size: 0.75rem;
+        color: #adb5bd;
+        margin-left: auto;
+        flex-shrink: 0;
+    }
+
+    /* Mobile responsive */
+    @media (max-width: 768px) {
+        .dashboard-container {
+            padding: 0.5rem;
+        }
+        
+        .dashboard-header {
+            padding: 1.5rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .stats-cards .col-lg-3 {
+            margin-bottom: 1rem;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .dashboard-header {
+            padding: 1rem;
+        }
+        
+        .dashboard-header h1 {
+            font-size: 1.25rem;
+        }
+        
+        .stats-cards .card-body {
+            padding: 1rem;
+        }
+        
+        .quick-actions .action-btn {
+            padding: 0.75rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Main Dashboard Content -->
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-tachometer-alt me-2"></i>
+                    Dashboard
+                </h1>
+                <p class="text-light mb-0">Welcome to your Boda Boda Welfare System dashboard</p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="text-light">
+                    <small>Today: {{ current_date|date:"M d, Y" }}</small><br>
+                    <small>{{ current_time|time:"H:i A" }}</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-cards mb-4">
+        <div class="row g-3">
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-number">{{ total_members|default:0 }}</div>
+                        <p class="stat-label">Total Members</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="stat-number">KSh {{ total_contributions|default:0|floatformat:0 }}</div>
+                        <p class="stat-label">Total Contributions</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-number">{{ active_emergencies|default:0 }}</div>
+                        <p class="stat-label">Active Emergencies</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="stat-number">{{ bikes_registered|default:0 }}</div>
+                        <p class="stat-label">Bikes Registered</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions and Activity -->
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-8 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt text-primary me-2"></i>
+                        Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="row g-0">
+                        <div class="col-md-6">
+                            <a href="{% url 'members:add' %}" class="action-btn">
+                                <div class="action-btn i bg-primary bg-opacity-10 text-primary">
+                                    <i class="fas fa-user-plus"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Add New Member</h6>
+                                    <small class="text-muted">Register a new welfare member</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'contributions:make_payment' %}" class="action-btn">
+                                <div class="action-btn i bg-success bg-opacity-10 text-success">
+                                    <i class="fas fa-money-bill-wave"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Make Payment</h6>
+                                    <small class="text-muted">Contribute to welfare fund</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'emergency:report_case' %}" class="action-btn">
+                                <div class="action-btn i bg-warning bg-opacity-10 text-warning">
+                                    <i class="fas fa-plus-circle"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Report Emergency</h6>
+                                    <small class="text-muted">Submit an emergency case</small>
+                                </div>
+                            </a>
+                        </div>
+                        <div class="col-md-6">
+                            <a href="{% url 'bikes:register' %}" class="action-btn">
+                                <div class="action-btn i bg-info bg-opacity-10 text-info">
+                                    <i class="fas fa-motorcycle"></i>
+                                </div>
+                                <div>
+                                    <h6 class="mb-1">Register Bike</h6>
+                                    <small class="text-muted">Add your motorcycle details</small>
+                                </div>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Activity -->
+        <div class="col-lg-4 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        Recent Activity
+                    </h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="activity-feed">
+                        <div class="activity-item">
+                            <div class="activity-icon bg-success bg-opacity-10 text-success">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>New Member Registered</h6>
+                                <p>John Doe joined the welfare system</p>
+                            </div>
+                            <div class="activity-time">2h ago</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-primary bg-opacity-10 text-primary">
+                                <i class="fas fa-money-bill-wave"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>Payment Received</h6>
+                                <p>KSh 500 contribution from Jane Smith</p>
+                            </div>
+                            <div class="activity-time">4h ago</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-warning bg-opacity-10 text-warning">
+                                <i class="fas fa-exclamation-triangle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>Emergency Reported</h6>
+                                <p>Accident case needs immediate attention</p>
+                            </div>
+                            <div class="activity-time">6h ago</div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon bg-info bg-opacity-10 text-info">
+                                <i class="fas fa-motorcycle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <h6>Bike Registered</h6>
+                                <p>New motorcycle added by Peter Mwangi</p>
+                            </div>
+                            <div class="activity-time">8h ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Additional Insights -->
+    <div class="row">
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie text-primary me-2"></i>
+                        Monthly Overview
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <span class="stat-number text-primary">{{ monthly_contributions|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">This Month<br>Contributions</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <span class="stat-number text-success">{{ monthly_members|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">New<br>Members</small>
+                        </div>
+                        <div class="col-4">
+                            <div class="mb-2">
+                                <span class="stat-number text-warning">{{ monthly_emergencies|default:0 }}</span>
+                            </div>
+                            <small class="text-muted">Emergency<br>Cases</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-6 mb-4">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bell text-primary me-2"></i>
+                        System Notifications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-info alert-sm mb-2">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Monthly contribution reminder: Payment due in 5 days
+                    </div>
+                    <div class="alert alert-warning alert-sm mb-2">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        2 emergency cases require attention
+                    </div>
+                    <div class="alert alert-success alert-sm mb-0">
+                        <i class="fas fa-check-circle me-2"></i>
+                        System backup completed successfully
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

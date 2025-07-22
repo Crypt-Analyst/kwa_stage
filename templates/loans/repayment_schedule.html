@@ -1,0 +1,144 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Repayment Schedule - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-calendar-alt"></i> Repayment Schedule</h1>
+        <p>Track and manage loan repayment schedules</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'loans:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Loans
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-check"></i> Upcoming Repayments</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Borrower</th>
+                                <th>Loan Amount</th>
+                                <th>Due Date</th>
+                                <th>Amount Due</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>John Doe</td>
+                                <td>KSh 50,000</td>
+                                <td>2025-08-01</td>
+                                <td>KSh 5,500</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Mark Paid
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Jane Smith</td>
+                                <td>KSh 30,000</td>
+                                <td>2025-08-05</td>
+                                <td>KSh 3,300</td>
+                                <td><span class="badge bg-success">Paid</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Peter Ochieng</td>
+                                <td>KSh 75,000</td>
+                                <td>2025-08-10</td>
+                                <td>KSh 8,250</td>
+                                <td><span class="badge bg-danger">Overdue</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-warning">
+                                        <i class="fas fa-exclamation-triangle"></i> Send Reminder
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Repayment Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-value text-success">KSh 150,000</div>
+                            <div class="stat-label">Total Paid This Month</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-item">
+                            <div class="stat-value text-warning">KSh 85,000</div>
+                            <div class="stat-label">Pending Payments</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Filter Options</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET">
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">All</option>
+                            <option value="pending">Pending</option>
+                            <option value="paid">Paid</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <input type="date" class="form-control" name="from_date">
+                        <small class="text-muted">From</small>
+                        <input type="date" class="form-control mt-2" name="to_date">
+                        <small class="text-muted">To</small>
+                    </div>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-search"></i> Filter
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

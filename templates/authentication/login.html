@@ -1,0 +1,276 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Secure Login - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    max-width: 400px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+}
+
+.auth-logo {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 2rem;
+}
+
+.security-badge {
+    display: inline-flex;
+    align-items: center;
+    background: #e8f5e8;
+    color: #2d5a2d;
+    padding: 8px 12px;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    margin-bottom: 20px;
+}
+
+.security-badge i {
+    margin-right: 5px;
+}
+
+.form-floating {
+    margin-bottom: 15px;
+}
+
+.btn-login {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.btn-login:hover {
+    transform: translateY(-2px);
+    color: white;
+}
+
+.security-features {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+}
+
+.security-feature {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.875rem;
+    color: #666;
+}
+
+.security-feature i {
+    color: #28a745;
+    margin-right: 10px;
+    width: 16px;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="auth-logo">
+            <i class="fas fa-motorcycle"></i>
+        </div>
+        
+        <h2 class="h4 mb-3">Secure Login</h2>
+        <div class="security-badge">
+            <i class="fas fa-shield-alt"></i>
+            2FA Protected System
+        </div>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        {% if show_resend_verification %}
+            <div class="alert alert-info">
+                <i class="fas fa-envelope"></i>
+                Need a new verification email?
+                <a href="{% url 'authentication:send_verification' %}?email={{ email }}" class="btn btn-sm btn-outline-primary ms-2">
+                    Resend Verification
+                </a>
+            </div>
+        {% endif %}
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            
+            <div class="form-floating">
+                <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                <label for="username">
+                    <i class="fas fa-user me-2"></i>Username
+                </label>
+            </div>
+            
+            <div class="form-floating">
+                <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                <label for="password">
+                    <i class="fas fa-lock me-2"></i>Password
+                </label>
+            </div>
+            
+            <div class="form-check text-start mb-3">
+                <input class="form-check-input" type="checkbox" id="remember_me" name="remember_me">
+                <label class="form-check-label" for="remember_me">
+                    Remember me
+                </label>
+            </div>
+            
+            <button type="submit" class="btn btn-login">
+                <i class="fas fa-sign-in-alt me-2"></i>Sign In
+            </button>
+        </form>
+        
+        <div class="mt-3 text-center">
+            <div class="row">
+                <div class="col-6">
+                    <a href="{% url 'authentication:forgot_password' %}" class="text-decoration-none small">
+                        <i class="fas fa-key me-1"></i>Forgot password?
+                    </a>
+                </div>
+                <div class="col-6">
+                    <a href="{% url 'authentication:send_verification' %}" class="text-decoration-none small">
+                        <i class="fas fa-envelope me-1"></i>Verify Email
+                    </a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="security-features">
+            <h6 class="text-start mb-3">Security Features:</h6>
+            <div class="security-feature">
+                <i class="fas fa-mobile-alt"></i>
+                Two-Factor Authentication (2FA)
+            </div>
+            <div class="security-feature">
+                <i class="fas fa-shield-alt"></i>
+                End-to-End Encryption
+            </div>
+            <div class="security-feature">
+                <i class="fas fa-clock"></i>
+                Session Timeout Protection
+            </div>
+            <div class="security-feature">
+                <i class="fas fa-eye-slash"></i>
+                Privacy Protected
+            </div>
+        </div>
+        
+        <!-- Google Sign In -->
+        <div class="mt-4 pt-3 border-top">
+            <h6 class="text-center mb-3">Or sign in with</h6>
+            <button type="button" class="btn btn-outline-danger w-100 mb-3" onclick="signInWithGoogle()">
+                <i class="fab fa-google me-2"></i>
+                Continue with Google
+            </button>
+            
+            <!-- QR Code Login -->
+            <div class="text-center">
+                <a href="{% url 'authentication:generate_qr' %}" class="btn btn-outline-info btn-sm">
+                    <i class="fas fa-qrcode me-1"></i>
+                    Generate QR Code
+                </a>
+            </div>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top">
+            <p class="small text-muted mb-0">
+                Boda Boda is Family - Don't Forget That
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Google Sign-In API -->
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add some interactive effects
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+});
+
+// Google Sign-In Functions
+function signInWithGoogle() {
+    // Initialize Google Sign-In (you would need to configure this with your Google OAuth credentials)
+    alert('Google Sign-In will be configured with your Google OAuth credentials.\n\nFor now, this shows the integration point.\n\nTo complete setup:\n1. Get Google OAuth2 Client ID\n2. Configure it in settings.py\n3. Add the actual Google Sign-In implementation');
+}
+
+// Initialize Google Sign-In when page loads
+window.onload = function () {
+    // This would be your actual Google Sign-In initialization
+    // google.accounts.id.initialize({
+    //     client_id: "YOUR_GOOGLE_CLIENT_ID",
+    //     callback: handleCredentialResponse
+    // });
+};
+
+function handleCredentialResponse(response) {
+    // Handle the Google Sign-In response
+    // Send the credential to your backend for verification
+    fetch('{% url "authentication:google_signin" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        },
+        body: JSON.stringify({
+            'credential': response.credential
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            window.location.href = data.redirect_url;
+        } else {
+            alert('Google Sign-In failed: ' + data.error);
+        }
+    });
+}
+</script>
+{% endblock %}

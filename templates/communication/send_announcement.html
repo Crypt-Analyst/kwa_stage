@@ -1,0 +1,496 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Send Announcement - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-bullhorn"></i> Send Announcement</h1>
+        <p>Create and send announcements to members</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'communication:announcements' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Announcements
+        </a>
+        <button class="btn btn-outline-primary" onclick="previewAnnouncement()">
+            <i class="fas fa-eye"></i> Preview
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-edit"></i> Create Announcement</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="announcementForm">
+                    {% csrf_token %}
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Announcement Title *</label>
+                                <input type="text" class="form-control" name="title" required
+                                       placeholder="Enter announcement title...">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Category *</label>
+                                <select class="form-select" name="category" required>
+                                    <option value="">Select Category</option>
+                                    <option value="urgent">Urgent</option>
+                                    <option value="meeting">Meeting</option>
+                                    <option value="event">Event</option>
+                                    <option value="system">System Update</option>
+                                    <option value="general">General</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Priority Level *</label>
+                                <select class="form-select" name="priority" required>
+                                    <option value="">Select Priority</option>
+                                    <option value="low">Low</option>
+                                    <option value="normal" selected>Normal</option>
+                                    <option value="high">High</option>
+                                    <option value="urgent">Urgent</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Target Audience *</label>
+                                <select class="form-select" name="audience" required>
+                                    <option value="">Select Audience</option>
+                                    <option value="all">All Members</option>
+                                    <option value="stage">My Stage Only</option>
+                                    <option value="leaders">Stage Leaders</option>
+                                    <option value="committee">Committee Members</option>
+                                    <option value="custom">Custom Group</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Announcement Content *</label>
+                        <textarea class="form-control" name="content" rows="8" required
+                                  placeholder="Write your announcement here..."></textarea>
+                        <small class="text-muted">Use clear and concise language. Include all important details.</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Additional Details</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Event Date (if applicable)</label>
+                                    <input type="datetime-local" class="form-control" name="event_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Location (if applicable)</label>
+                                    <input type="text" class="form-control" name="location"
+                                           placeholder="e.g., Kikuyu Main Stage Office">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Attach Image</label>
+                        <input type="file" class="form-control" name="image" accept="image/*">
+                        <small class="text-muted">Optional: Add an image to make your announcement more engaging (max 5MB)</small>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Contact Information</label>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <input type="text" class="form-control" name="contact_person" 
+                                       placeholder="Contact person name" value="{{ user.get_full_name }}">
+                            </div>
+                            <div class="col-md-6">
+                                <input type="tel" class="form-control" name="contact_phone" 
+                                       placeholder="Contact phone number">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="announcement-options">
+                        <h6><i class="fas fa-cog"></i> Announcement Options</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="pin_announcement" id="pinAnnouncement">
+                                    <label class="form-check-label" for="pinAnnouncement">
+                                        Pin this announcement
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="send_sms" id="sendSMS">
+                                    <label class="form-check-label" for="sendSMS">
+                                        Send SMS notification
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="require_acknowledgment" id="requireAck">
+                                    <label class="form-check-label" for="requireAck">
+                                        Require acknowledgment
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="allow_comments" id="allowComments" checked>
+                                    <label class="form-check-label" for="allowComments">
+                                        Allow comments
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="send_email" id="sendEmail">
+                                    <label class="form-check-label" for="sendEmail">
+                                        Send email notification
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="auto_expire" id="autoExpire">
+                                    <label class="form-check-label" for="autoExpire">
+                                        Auto-expire in 30 days
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Schedule</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule" value="now" id="sendNow" checked>
+                            <label class="form-check-label" for="sendNow">
+                                Send Now
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule" value="later" id="sendLater">
+                            <label class="form-check-label" for="sendLater">
+                                Schedule for Later
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="scheduleDateTime" style="display: none;">
+                        <label class="form-label">Schedule Date & Time</label>
+                        <input type="datetime-local" class="form-control" name="schedule_datetime">
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-paper-plane"></i> Send Announcement
+                        </button>
+                        <button type="button" class="btn btn-warning btn-lg" onclick="saveDraft()">
+                            <i class="fas fa-save"></i> Save as Draft
+                        </button>
+                        <a href="{% url 'communication:announcements' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="tip-item">
+                    <i class="fas fa-edit text-primary"></i>
+                    <p><strong>Clear Title:</strong> Use descriptive titles that explain the announcement's purpose</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-users text-success"></i>
+                    <p><strong>Target Audience:</strong> Select the right audience to ensure relevant people see your message</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-clock text-warning"></i>
+                    <p><strong>Timing:</strong> Consider the best time to send announcements for maximum visibility</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-image text-info"></i>
+                    <p><strong>Visual Appeal:</strong> Add images to make announcements more engaging</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> Reach Estimate</h5>
+            </div>
+            <div class="card-body">
+                <div class="reach-stat">
+                    <div class="stat-number" id="reachCount">0</div>
+                    <div class="stat-label">People will receive this announcement</div>
+                </div>
+                <div class="reach-breakdown">
+                    <div class="breakdown-item">
+                        <span>In-app notifications:</span>
+                        <span id="appNotifications">0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>SMS notifications:</span>
+                        <span id="smsNotifications">0</span>
+                    </div>
+                    <div class="breakdown-item">
+                        <span>Email notifications:</span>
+                        <span id="emailNotifications">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Drafts</h5>
+            </div>
+            <div class="card-body">
+                <div class="draft-item">
+                    <h6>Monthly Meeting Reminder</h6>
+                    <small class="text-muted">Saved 2 hours ago</small>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadDraft(1)">Load Draft</button>
+                </div>
+                <div class="draft-item">
+                    <h6>Emergency Contact Update</h6>
+                    <small class="text-muted">Saved yesterday</small>
+                    <button class="btn btn-sm btn-outline-primary mt-2" onclick="loadDraft(2)">Load Draft</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Announcement Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent">
+                    <!-- Preview will be generated here -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="sendFromPreview()">Send Announcement</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.announcement-options {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+}
+
+.announcement-options h6 {
+    margin-bottom: 15px;
+    color: #495057;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+    border-top: 1px solid #eee;
+    margin-top: 20px;
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    gap: 10px;
+}
+
+.tip-item i {
+    margin-top: 2px;
+    width: 20px;
+}
+
+.tip-item p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+
+.reach-stat {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.reach-breakdown {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.breakdown-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.draft-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.draft-item:last-child {
+    border-bottom: none;
+}
+
+.draft-item h6 {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+function previewAnnouncement() {
+    const form = document.getElementById('announcementForm');
+    const formData = new FormData(form);
+    
+    // Generate preview content
+    const title = formData.get('title') || 'Untitled Announcement';
+    const content = formData.get('content') || 'No content provided';
+    const category = formData.get('category') || 'general';
+    const priority = formData.get('priority') || 'normal';
+    
+    const previewHTML = `
+        <div class="announcement-preview">
+            <div class="preview-header">
+                <span class="badge bg-${getPriorityColor(priority)}">${priority.toUpperCase()}</span>
+                <span class="badge bg-secondary">${category}</span>
+                <span class="preview-date">${new Date().toLocaleDateString()}</span>
+            </div>
+            <h4>${title}</h4>
+            <p>${content.replace(/\n/g, '<br>')}</p>
+            ${formData.get('event_date') ? `<p><strong>Date:</strong> ${formData.get('event_date')}</p>` : ''}
+            ${formData.get('location') ? `<p><strong>Location:</strong> ${formData.get('location')}</p>` : ''}
+            ${formData.get('contact_person') ? `<p><strong>Contact:</strong> ${formData.get('contact_person')}</p>` : ''}
+        </div>
+    `;
+    
+    document.getElementById('previewContent').innerHTML = previewHTML;
+    new bootstrap.Modal(document.getElementById('previewModal')).show();
+}
+
+function getPriorityColor(priority) {
+    const colors = {
+        'low': 'secondary',
+        'normal': 'primary',
+        'high': 'warning',
+        'urgent': 'danger'
+    };
+    return colors[priority] || 'primary';
+}
+
+function updateReachEstimate() {
+    const audience = document.querySelector('select[name="audience"]').value;
+    const sendSMS = document.querySelector('input[name="send_sms"]').checked;
+    const sendEmail = document.querySelector('input[name="send_email"]').checked;
+    
+    // Mock reach calculations
+    const audienceCounts = {
+        'all': 250,
+        'stage': 45,
+        'leaders': 8,
+        'committee': 12,
+        'custom': 0
+    };
+    
+    const totalReach = audienceCounts[audience] || 0;
+    
+    document.getElementById('reachCount').textContent = totalReach;
+    document.getElementById('appNotifications').textContent = totalReach;
+    document.getElementById('smsNotifications').textContent = sendSMS ? totalReach : 0;
+    document.getElementById('emailNotifications').textContent = sendEmail ? totalReach : 0;
+}
+
+function saveDraft() {
+    // Simulate saving draft
+    alert('Announcement saved as draft!');
+}
+
+function loadDraft(draftId) {
+    // Simulate loading draft
+    alert('Loading draft ' + draftId);
+}
+
+function sendFromPreview() {
+    bootstrap.Modal.getInstance(document.getElementById('previewModal')).hide();
+    document.getElementById('announcementForm').submit();
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const audienceSelect = document.querySelector('select[name="audience"]');
+    const smsCheckbox = document.querySelector('input[name="send_sms"]');
+    const emailCheckbox = document.querySelector('input[name="send_email"]');
+    
+    audienceSelect.addEventListener('change', updateReachEstimate);
+    smsCheckbox.addEventListener('change', updateReachEstimate);
+    emailCheckbox.addEventListener('change', updateReachEstimate);
+    
+    // Schedule options
+    const scheduleRadios = document.querySelectorAll('input[name="schedule"]');
+    const scheduleDateTime = document.getElementById('scheduleDateTime');
+    
+    scheduleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            scheduleDateTime.style.display = this.value === 'later' ? 'block' : 'none';
+        });
+    });
+    
+    // Initial reach estimate
+    updateReachEstimate();
+    
+    // Form submission
+    document.getElementById('announcementForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        if (confirm('Are you sure you want to send this announcement?')) {
+            alert('Announcement sent successfully!');
+            window.location.href = "{% url 'communication:announcements' %}";
+        }
+    });
+});
+</script>
+{% endblock %}

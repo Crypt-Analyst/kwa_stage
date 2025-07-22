@@ -1,0 +1,321 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ chat.name }} - Group Chat{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-comments"></i> {{ chat.name }}</h1>
+        <div>
+            <span class="badge bg-primary">{{ chat.members.count }} members</span>
+            <a href="{% url 'social:group_chats' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Chats
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="chat-container">
+            <div class="chat-messages" id="chat-messages">
+                {% for message in messages_list %}
+                <div class="message {% if message.sender == member %}own-message{% endif %}">
+                    <div class="message-avatar">
+                        {% if message.sender.profile_photo %}
+                            <img src="{{ message.sender.profile_photo.url }}" alt="{{ message.sender.user.get_full_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="message-content">
+                        <div class="message-header">
+                            <span class="sender-name">{{ message.sender.user.get_full_name }}</span>
+                            <span class="message-time">{{ message.created_at|date:"M d, H:i" }}</span>
+                        </div>
+                        <div class="message-text">
+                            {{ message.content|linebreaks }}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="no-messages">
+                    <i class="fas fa-comments"></i>
+                    <p>No messages yet. Start the conversation!</p>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <div class="chat-input">
+                <form method="post" id="message-form">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <input type="text" name="content" class="form-control" 
+                               placeholder="Type your message..." required>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        
+        <div class="chat-sidebar">
+            <div class="chat-info">
+                <h5>Chat Information</h5>
+                <p><strong>Name:</strong> {{ chat.name }}</p>
+                {% if chat.description %}
+                <p><strong>Description:</strong> {{ chat.description }}</p>
+                {% endif %}
+                <p><strong>Created:</strong> {{ chat.created_at|date:"M d, Y" }}</p>
+            </div>
+            
+            <div class="chat-members">
+                <h5>Members ({{ chat.members.count }})</h5>
+                <div class="members-list">
+                    {% for chat_member in chat.members.all %}
+                    <div class="member-item">
+                        {% if chat_member.profile_photo %}
+                            <img src="{{ chat_member.profile_photo.url }}" alt="{{ chat_member.user.get_full_name }}">
+                        {% else %}
+                            <div class="member-avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <span>{{ chat_member.user.get_full_name }}</span>
+                        {% if chat_member == member %}
+                            <span class="badge bg-primary">You</span>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.chat-container {
+    display: flex;
+    gap: 2rem;
+    height: calc(100vh - 250px);
+    min-height: 500px;
+}
+
+.chat-messages {
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-height: calc(100vh - 350px);
+}
+
+.message {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+}
+
+.message.own-message {
+    flex-direction: row-reverse;
+}
+
+.message.own-message .message-content {
+    background: var(--primary-color);
+    color: white;
+}
+
+.message-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+
+.message-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+}
+
+.message-content {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 0.75rem 1rem;
+    max-width: 70%;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.25rem;
+}
+
+.sender-name {
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.message-time {
+    font-size: 0.8rem;
+    opacity: 0.7;
+}
+
+.message-text {
+    margin: 0;
+}
+
+.no-messages {
+    text-align: center;
+    color: #6c757d;
+    padding: 3rem;
+}
+
+.no-messages i {
+    font-size: 3rem;
+    margin-bottom: 1rem;
+    opacity: 0.5;
+}
+
+.chat-input {
+    background: white;
+    border-radius: 12px;
+    padding: 1rem;
+    margin-top: 1rem;
+    box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.chat-sidebar {
+    width: 300px;
+    flex-shrink: 0;
+}
+
+.chat-info, .chat-members {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.chat-info h5, .chat-members h5 {
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: 1px solid #eee;
+    padding-bottom: 0.5rem;
+}
+
+.members-list {
+    max-height: 300px;
+    overflow-y: auto;
+}
+
+.member-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f8f9fa;
+}
+
+.member-item:last-child {
+    border-bottom: none;
+}
+
+.member-item img, .member-avatar-placeholder {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
+
+.member-avatar-placeholder {
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+    font-size: 0.8rem;
+}
+
+.member-item span {
+    flex-grow: 1;
+    font-weight: 500;
+}
+
+.member-item .badge {
+    font-size: 0.7rem;
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        flex-direction: column;
+        height: auto;
+    }
+    
+    .chat-sidebar {
+        width: 100%;
+    }
+    
+    .chat-messages {
+        height: 400px;
+    }
+    
+    .message-content {
+        max-width: 85%;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const messagesContainer = document.getElementById('chat-messages');
+    const messageForm = document.getElementById('message-form');
+    
+    // Scroll to bottom of messages
+    function scrollToBottom() {
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+    
+    // Initial scroll to bottom
+    scrollToBottom();
+    
+    // Handle form submission
+    messageForm.addEventListener('submit', function(e) {
+        const submitBtn = this.querySelector('button[type="submit"]');
+        const input = this.querySelector('input[name="content"]');
+        
+        // Disable submit button
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        // Re-enable after a short delay if form submission fails
+        setTimeout(() => {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i>';
+        }, 3000);
+    });
+    
+    // Auto-refresh messages (simple polling - in production, use WebSockets)
+    setInterval(() => {
+        // This would typically be an AJAX call to get new messages
+        // For now, we'll just reload the page if there's activity
+    }, 30000);
+});
+</script>
+{% endblock %}

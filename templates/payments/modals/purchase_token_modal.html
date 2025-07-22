@@ -1,0 +1,144 @@
+<!-- Purchase Token Modal -->
+<div class="modal fade" id="purchaseTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-coins"></i> Purchase Digital Tokens</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'payments:purchase_token' %}" id="purchaseTokenForm">
+                    {% csrf_token %}
+                    
+                    <!-- Token Type -->
+                    <div class="mb-3">
+                        <label class="form-label">Token Type *</label>
+                        <select class="form-select" name="token_type" id="tokenType" required>
+                            <option value="">Select token type</option>
+                            <option value="fuel">Fuel Token</option>
+                            <option value="maintenance">Maintenance Token</option>
+                            <option value="insurance">Insurance Token</option>
+                            <option value="parking">Parking Token</option>
+                        </select>
+                    </div>
+
+                    <!-- Token Value -->
+                    <div class="mb-3">
+                        <label class="form-label">Token Value *</label>
+                        <div class="token-values">
+                            <div class="row">
+                                <div class="col-6 mb-2">
+                                    <button type="button" class="btn btn-outline-warning w-100 token-value-btn" data-value="500">KSh 500</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button type="button" class="btn btn-outline-warning w-100 token-value-btn" data-value="1000">KSh 1,000</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button type="button" class="btn btn-outline-warning w-100 token-value-btn" data-value="2000">KSh 2,000</button>
+                                </div>
+                                <div class="col-6 mb-2">
+                                    <button type="button" class="btn btn-outline-warning w-100 token-value-btn" data-value="5000">KSh 5,000</button>
+                                </div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="token_value" id="tokenValue" required>
+                    </div>
+
+                    <!-- Payment Source -->
+                    <div class="mb-3">
+                        <label class="form-label">Payment Source *</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_source" value="wallet" id="payFromWallet" checked>
+                            <label class="form-check-label" for="payFromWallet">
+                                E-Wallet (Balance: KSh {{ ewallet.balance|floatformat:2 }})
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="payment_source" value="mobile" id="payFromMobile">
+                            <label class="form-check-label" for="payFromMobile">
+                                Mobile Money
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Expiry Period -->
+                    <div class="mb-3">
+                        <label class="form-label">Token Validity *</label>
+                        <select class="form-select" name="validity_period" required>
+                            <option value="30">30 Days</option>
+                            <option value="60">60 Days</option>
+                            <option value="90" selected>90 Days</option>
+                            <option value="180">180 Days</option>
+                        </select>
+                    </div>
+
+                    <!-- PIN (for wallet payment) -->
+                    <div class="mb-3" id="pinField">
+                        <label class="form-label">Wallet PIN *</label>
+                        <input type="password" class="form-control" name="pin" id="tokenPin" 
+                               placeholder="Enter your 4-digit PIN" maxlength="4">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="purchaseTokenForm" class="btn btn-warning" id="purchaseTokenBtn" disabled>
+                    <i class="fas fa-shopping-cart"></i> Purchase Token
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenValueBtns = document.querySelectorAll('.token-value-btn');
+    const tokenValueInput = document.getElementById('tokenValue');
+    const paymentSourceRadios = document.querySelectorAll('input[name="payment_source"]');
+    const pinField = document.getElementById('pinField');
+    const purchaseBtn = document.getElementById('purchaseTokenBtn');
+
+    // Token value selection
+    tokenValueBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            tokenValueBtns.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            tokenValueInput.value = this.dataset.value;
+            validateForm();
+        });
+    });
+
+    // Payment source change
+    paymentSourceRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            pinField.style.display = this.value === 'wallet' ? 'block' : 'none';
+            validateForm();
+        });
+    });
+
+    function validateForm() {
+        const tokenValue = tokenValueInput.value;
+        const paymentSource = document.querySelector('input[name="payment_source"]:checked').value;
+        const pin = document.getElementById('tokenPin').value;
+        
+        let isValid = tokenValue !== '';
+        
+        if (paymentSource === 'wallet') {
+            isValid = isValid && pin.length === 4;
+        }
+        
+        purchaseBtn.disabled = !isValid;
+    }
+
+    // PIN input validation
+    document.getElementById('tokenPin').addEventListener('input', validateForm);
+});
+</script>
+
+<style>
+.token-value-btn.active {
+    background-color: #ffc107;
+    color: #000;
+    border-color: #ffc107;
+}
+</style>

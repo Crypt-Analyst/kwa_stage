@@ -1,0 +1,393 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Emergency Case - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-exclamation-triangle"></i> Report Emergency Case</h1>
+        <p>Report an emergency situation requiring community support</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cases
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-file-medical"></i> Emergency Case Report Form</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <!-- Case Type Section -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-tag"></i> Case Information</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Emergency Type <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="emergency_type" required>
+                                        <option value="">Select Emergency Type</option>
+                                        <option value="death">Death/Funeral</option>
+                                        <option value="medical">Medical Emergency</option>
+                                        <option value="accident">Accident</option>
+                                        <option value="fire">Fire Incident</option>
+                                        <option value="theft">Theft/Robbery</option>
+                                        <option value="family_crisis">Family Crisis</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Priority Level <span class="text-danger">*</span></label>
+                                    <select class="form-select" name="priority" required>
+                                        <option value="">Select Priority</option>
+                                        <option value="critical">Critical - Immediate Response</option>
+                                        <option value="high">High - Within 24 Hours</option>
+                                        <option value="medium">Medium - Within 3 Days</option>
+                                        <option value="low">Low - Within a Week</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Affected Person Section -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-user"></i> Affected Person Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                                    <input type="text" class="form-control" name="affected_person_name" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Relationship to Member</label>
+                                    <select class="form-select" name="relationship">
+                                        <option value="">Select Relationship</option>
+                                        <option value="self">Self (Member)</option>
+                                        <option value="spouse">Spouse</option>
+                                        <option value="child">Child</option>
+                                        <option value="parent">Parent</option>
+                                        <option value="sibling">Sibling</option>
+                                        <option value="relative">Other Relative</option>
+                                        <option value="friend">Friend</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number</label>
+                                    <input type="tel" class="form-control" name="phone_number">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">ID Number</label>
+                                    <input type="text" class="form-control" name="id_number">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Location Section -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-map-marker-alt"></i> Location Details</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">County</label>
+                                    <input type="text" class="form-control" name="county">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Sub-County/Town</label>
+                                    <input type="text" class="form-control" name="sub_county">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Specific Location/Address</label>
+                            <textarea class="form-control" name="location" rows="2" placeholder="Please provide specific location details"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Case Description -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-clipboard"></i> Case Description</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Describe the Emergency <span class="text-danger">*</span></label>
+                            <textarea class="form-control" name="description" rows="4" 
+                                      placeholder="Please provide detailed information about the emergency situation, what happened, when it occurred, and what assistance is needed." required></textarea>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Date of Incident</label>
+                                    <input type="date" class="form-control" name="incident_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Time of Incident</label>
+                                    <input type="time" class="form-control" name="incident_time">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Support Requested -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-hand-holding-heart"></i> Support Requested</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Type of Support Needed</label>
+                            <div class="row">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="financial" id="financial">
+                                        <label class="form-check-label" for="financial">
+                                            Financial Support
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="transport" id="transport">
+                                        <label class="form-check-label" for="transport">
+                                            Transportation
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="medical" id="medical">
+                                        <label class="form-check-label" for="medical">
+                                            Medical Assistance
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="row mt-2">
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="food" id="food">
+                                        <label class="form-check-label" for="food">
+                                            Food & Supplies
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="shelter" id="shelter">
+                                        <label class="form-check-label" for="shelter">
+                                            Shelter/Accommodation
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="support_type" value="emotional" id="emotional">
+                                        <label class="form-check-label" for="emotional">
+                                            Emotional Support
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Estimated Amount Needed (KSh)</label>
+                            <input type="number" class="form-control" name="amount_requested" min="0">
+                        </div>
+                    </div>
+
+                    <!-- Contact Person -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-phone"></i> Emergency Contact</h6>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Person Name</label>
+                                    <input type="text" class="form-control" name="contact_person">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Phone Number</label>
+                                    <input type="tel" class="form-control" name="contact_phone">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- File Upload -->
+                    <div class="form-section mt-4">
+                        <h6><i class="fas fa-paperclip"></i> Supporting Documents</h6>
+                        <div class="mb-3">
+                            <label class="form-label">Upload Supporting Documents</label>
+                            <input type="file" class="form-control" name="documents" multiple accept=".jpg,.jpeg,.png,.pdf,.doc,.docx">
+                            <small class="text-muted">You can upload multiple files. Supported formats: JPG, PNG, PDF, DOC, DOCX (Max 5MB each)</small>
+                        </div>
+                    </div>
+
+                    <!-- Submission -->
+                    <div class="form-actions mt-4">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-paper-plane"></i> Submit Emergency Report
+                        </button>
+                        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <!-- Guidelines Card -->
+        <div class="card mb-4">
+            <div class="card-header bg-warning text-dark">
+                <h5><i class="fas fa-info-circle"></i> Reporting Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="guideline-item">
+                    <i class="fas fa-clock text-warning"></i>
+                    <strong>Report Immediately</strong>
+                    <p>Submit emergency cases as soon as possible for faster response</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-file-alt text-info"></i>
+                    <strong>Provide Details</strong>
+                    <p>Include all relevant information and supporting documents</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-shield-alt text-success"></i>
+                    <strong>Verify Information</strong>
+                    <p>Ensure all information provided is accurate and truthful</p>
+                </div>
+                <div class="guideline-item">
+                    <i class="fas fa-users text-primary"></i>
+                    <strong>Community Support</strong>
+                    <p>Remember: Boda Boda is Family - We support each other</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Emergency Contacts Card -->
+        <div class="card">
+            <div class="card-header bg-danger text-white">
+                <h5><i class="fas fa-phone-alt"></i> Emergency Contacts</h5>
+            </div>
+            <div class="card-body">
+                <div class="emergency-contact">
+                    <strong>Police Emergency</strong>
+                    <span class="float-end">999</span>
+                </div>
+                <div class="emergency-contact">
+                    <strong>Medical Emergency</strong>
+                    <span class="float-end">911</span>
+                </div>
+                <div class="emergency-contact">
+                    <strong>Fire Brigade</strong>
+                    <span class="float-end">999</span>
+                </div>
+                <hr>
+                <div class="emergency-contact">
+                    <strong>KwaStage Emergency Line</strong>
+                    <span class="float-end">+254-XXX-XXXX</span>
+                </div>
+                <div class="emergency-contact">
+                    <strong>Chairman Emergency</strong>
+                    <span class="float-end">+254-XXX-XXXX</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.form-section {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 20px;
+    background: #f8f9fa;
+}
+
+.form-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.guideline-item {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+    border-left: 3px solid #ffc107;
+}
+
+.guideline-item i {
+    margin-right: 10px;
+    margin-top: 2px;
+    width: 20px;
+}
+
+.guideline-item strong {
+    display: block;
+    margin-bottom: 5px;
+}
+
+.guideline-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.emergency-contact {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.emergency-contact:last-child {
+    border-bottom: none;
+}
+
+.emergency-contact span {
+    font-weight: bold;
+    color: #dc3545;
+}
+</style>
+
+<script>
+// Auto-fill current date
+document.addEventListener('DOMContentLoaded', function() {
+    const incidentDate = document.querySelector('input[name="incident_date"]');
+    const today = new Date().toISOString().split('T')[0];
+    incidentDate.value = today;
+});
+</script>
+{% endblock %}

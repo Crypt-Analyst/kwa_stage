@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Two-Factor Verification{% endblock %}
+
+{% block extra_css %}
+<style>
+.auth-container {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 20px;
+}
+
+.auth-card {
+    background: white;
+    border-radius: 15px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    max-width: 450px;
+    width: 100%;
+    padding: 40px;
+    text-align: center;
+}
+
+.verification-icon {
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    color: white;
+    font-size: 2rem;
+}
+
+.code-input {
+    font-size: 1.5rem;
+    text-align: center;
+    letter-spacing: 0.5rem;
+    padding: 15px;
+    border: 2px solid #dee2e6;
+    border-radius: 10px;
+    margin-bottom: 20px;
+}
+
+.code-input:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+}
+
+.btn-verify {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    color: white;
+    font-weight: 600;
+    width: 100%;
+    transition: transform 0.2s;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    color: white;
+}
+
+.backup-token-link {
+    color: #667eea;
+    text-decoration: none;
+    font-size: 0.875rem;
+}
+
+.backup-token-link:hover {
+    color: #5a6fd8;
+    text-decoration: underline;
+}
+
+.security-notice {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px;
+    border-radius: 5px;
+    margin-top: 20px;
+    text-align: left;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="auth-container">
+    <div class="auth-card">
+        <div class="verification-icon">
+            <i class="fas fa-mobile-alt"></i>
+        </div>
+        
+        <h2 class="h4 mb-2">Two-Factor Authentication</h2>
+        <p class="text-muted mb-4">
+            Hi {{ user.first_name|default:user.username }}, please enter the 6-digit code from your authenticator app
+        </p>
+        
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+        
+        <form method="post" class="mt-4">
+            {% csrf_token %}
+            
+            <div class="mb-3">
+                <input 
+                    type="text" 
+                    class="form-control code-input" 
+                    id="token" 
+                    name="token" 
+                    placeholder="000000"
+                    maxlength="6"
+                    pattern="[0-9]{6}"
+                    autocomplete="one-time-code"
+                    required>
+            </div>
+            
+            <button type="submit" class="btn btn-verify mb-3">
+                <i class="fas fa-check me-2"></i>Verify Code
+            </button>
+        </form>
+        
+        <div class="divider my-3">
+            <hr class="my-3">
+            <small class="text-muted">Having trouble?</small>
+        </div>
+        
+        <div class="backup-options">
+            <a href="#" class="backup-token-link" onclick="showBackupForm()">
+                <i class="fas fa-key me-2"></i>Use backup recovery code
+            </a>
+        </div>
+        
+        <!-- Backup Token Form (Hidden by default) -->
+        <div id="backupForm" style="display: none;" class="mt-4">
+            <form method="post">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="backup_token" class="form-label">Recovery Code</label>
+                    <input 
+                        type="text" 
+                        class="form-control" 
+                        id="backup_token" 
+                        name="token" 
+                        placeholder="Enter 8-digit recovery code"
+                        maxlength="8">
+                </div>
+                <button type="submit" class="btn btn-outline-success">
+                    <i class="fas fa-unlock me-2"></i>Use Recovery Code
+                </button>
+                <button type="button" class="btn btn-outline-secondary ms-2" onclick="hideBackupForm()">
+                    Cancel
+                </button>
+            </form>
+        </div>
+        
+        <div class="security-notice">
+            <h6><i class="fas fa-info-circle me-2"></i>Security Notice</h6>
+            <small>
+                This code expires in 30 seconds. If you don't have access to your authenticator app, 
+                you can use one of your backup recovery codes.
+            </small>
+        </div>
+        
+        <div class="mt-4 pt-3 border-top">
+            <a href="{% url 'authentication:login' %}" class="text-decoration-none">
+                <i class="fas fa-arrow-left me-2"></i>Back to Login
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenInput = document.getElementById('token');
+    
+    // Auto-submit when 6 digits are entered
+    tokenInput.addEventListener('input', function() {
+        // Remove any non-digit characters
+        this.value = this.value.replace(/\D/g, '');
+        
+        // Auto-submit when 6 digits are entered
+        if (this.value.length === 6) {
+            setTimeout(() => {
+                this.form.submit();
+            }, 500);
+        }
+    });
+    
+    // Focus on input when page loads
+    tokenInput.focus();
+});
+
+function showBackupForm() {
+    document.getElementById('backupForm').style.display = 'block';
+    document.getElementById('backup_token').focus();
+}
+
+function hideBackupForm() {
+    document.getElementById('backupForm').style.display = 'none';
+    document.getElementById('token').focus();
+}
+</script>
+{% endblock %}

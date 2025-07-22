@@ -1,0 +1,324 @@
+<!-- Modal Feed Content -->
+<div class="modal-feed-container">
+    <!-- Post Creation Form -->
+    <div class="post-creation-card mb-4">
+        <div class="card">
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="modalPostForm">
+                    {% csrf_token %}
+                    <div class="d-flex align-items-start">
+                        {% if member.profile_photo %}
+                            <img src="{{ member.profile_photo.url }}" alt="{{ member.user.get_full_name }}" class="post-author-avatar me-3">
+                        {% else %}
+                            <div class="post-author-avatar me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <textarea name="content" class="form-control mb-3" placeholder="What's on your mind, {{ member.user.first_name }}?" rows="3" required></textarea>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="post-options">
+                                    <input type="file" name="image" id="modalPostImage" accept="image/*" style="display: none;">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" onclick="document.getElementById('modalPostImage').click()">
+                                        <i class="fas fa-image"></i> Photo
+                                    </button>
+                                    <select name="post_type" class="form-select form-select-sm d-inline-block w-auto ms-2">
+                                        <option value="general">General</option>
+                                        <option value="announcement">Announcement</option>
+                                        <option value="help_request">Help Request</option>
+                                    </select>
+                                </div>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-share"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Posts Feed -->
+    <div class="posts-container">
+        {% for post in posts %}
+        <div class="post-card mb-4" data-post-id="{{ post.id }}">
+            <div class="card">
+                <div class="card-body">
+                    <!-- Post Header -->
+                    <div class="post-header d-flex align-items-center mb-3">
+                        {% if post.author.profile_photo %}
+                            <img src="{{ post.author.profile_photo.url }}" alt="{{ post.author.user.get_full_name }}" class="post-author-avatar me-3">
+                        {% else %}
+                            <div class="post-author-avatar me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ post.author.user.get_full_name }}</h6>
+                            <small class="text-muted">
+                                {{ post.created_at|timesince }} ago
+                                {% if post.stage %}
+                                    • {{ post.stage.name }}
+                                {% endif %}
+                            </small>
+                        </div>
+                        <div class="post-type-badge">
+                            {% if post.post_type == 'announcement' %}
+                                <span class="badge bg-warning"><i class="fas fa-bullhorn"></i> Announcement</span>
+                            {% elif post.post_type == 'help_request' %}
+                                <span class="badge bg-info"><i class="fas fa-hand-holding-heart"></i> Help Request</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Post Content -->
+                    <div class="post-content">
+                        <p>{{ post.content|linebreaks }}</p>
+                        {% if post.image %}
+                        <div class="post-image mb-3">
+                            <img src="{{ post.image.url }}" alt="Post image" class="img-fluid rounded">
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions d-flex justify-content-between align-items-center pt-3 border-top">
+                        <div class="post-stats">
+                            <small class="text-muted">
+                                <i class="fas fa-heart"></i> {{ post.likes_count }} likes
+                                <i class="fas fa-comment ms-3"></i> {{ post.comments_count }} comments
+                            </small>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-outline-primary btn-sm like-btn" data-post-id="{{ post.id }}">
+                                <i class="fas fa-heart"></i> Like
+                            </button>
+                            <button class="btn btn-outline-secondary btn-sm comment-btn" data-post-id="{{ post.id }}">
+                                <i class="fas fa-comment"></i> Comment
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comments-section mt-3" id="comments-{{ post.id }}" style="display: none;">
+                        <div class="comments-list">
+                            {% for comment in post.comments.all|slice:":3" %}
+                            <div class="comment-item d-flex align-items-start mb-2">
+                                {% if comment.author.profile_photo %}
+                                    <img src="{{ comment.author.profile_photo.url }}" alt="{{ comment.author.user.get_full_name }}" class="comment-avatar me-2">
+                                {% else %}
+                                    <div class="comment-avatar me-2">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <div class="comment-content">
+                                    <strong>{{ comment.author.user.get_full_name }}</strong>
+                                    <p class="mb-1">{{ comment.content }}</p>
+                                    <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        
+                        <!-- Add Comment Form -->
+                        <form class="add-comment-form mt-3" data-post-id="{{ post.id }}">
+                            {% csrf_token %}
+                            <div class="d-flex align-items-center">
+                                {% if member.profile_photo %}
+                                    <img src="{{ member.profile_photo.url }}" alt="{{ member.user.get_full_name }}" class="comment-avatar me-2">
+                                {% else %}
+                                    <div class="comment-avatar me-2">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <input type="text" name="content" class="form-control form-control-sm" placeholder="Write a comment..." required>
+                                <button type="submit" class="btn btn-primary btn-sm ms-2">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="empty-state text-center py-5">
+            <i class="fas fa-comment-alt fa-3x text-muted mb-3"></i>
+            <h5>No posts yet</h5>
+            <p class="text-muted">Be the first to share something with your stage!</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if posts.has_other_pages %}
+    <div class="pagination-container text-center mt-4">
+        <nav aria-label="Posts pagination">
+            <ul class="pagination justify-content-center">
+                {% if posts.has_previous %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadPage({{ posts.previous_page_number }})">Previous</a>
+                    </li>
+                {% endif %}
+                
+                <li class="page-item active">
+                    <span class="page-link">Page {{ posts.number }} of {{ posts.paginator.num_pages }}</span>
+                </li>
+                
+                {% if posts.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="#" onclick="loadPage({{ posts.next_page_number }})">Next</a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.modal-feed-container {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.post-author-avatar, .comment-avatar {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+}
+
+.comment-avatar {
+    width: 30px;
+    height: 30px;
+}
+
+.post-card {
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.post-image img {
+    max-height: 300px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.action-buttons .btn {
+    margin-left: 0.5rem;
+}
+
+.comment-item {
+    padding: 0.5rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+</style>
+
+<script>
+// Modal-specific JavaScript
+function loadPage(pageNumber) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('page', pageNumber);
+    url.searchParams.set('modal', '1');
+    
+    fetch(url.toString())
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('feedModalBody').innerHTML = html;
+            initializeFeed();
+        });
+}
+
+// Toggle comments visibility
+document.addEventListener('click', function(e) {
+    if (e.target.classList.contains('comment-btn')) {
+        const postId = e.target.dataset.postId;
+        const commentsSection = document.getElementById(`comments-${postId}`);
+        commentsSection.style.display = commentsSection.style.display === 'none' ? 'block' : 'none';
+    }
+});
+
+// Handle comment form submission
+document.addEventListener('submit', function(e) {
+    if (e.target.classList.contains('add-comment-form')) {
+        e.preventDefault();
+        const form = e.target;
+        const postId = form.dataset.postId;
+        const formData = new FormData(form);
+        
+        fetch(`/social/post/${postId}/comment/`, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Add the new comment to the list
+                const commentsList = form.parentElement.querySelector('.comments-list');
+                const newComment = document.createElement('div');
+                newComment.className = 'comment-item d-flex align-items-start mb-2';
+                newComment.innerHTML = `
+                    <div class="comment-avatar me-2">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="comment-content">
+                        <strong>${data.comment.author}</strong>
+                        <p class="mb-1">${data.comment.content}</p>
+                        <small class="text-muted">Just now</small>
+                    </div>
+                `;
+                commentsList.appendChild(newComment);
+                form.reset();
+                
+                // Update comment count
+                const commentCount = document.querySelector(`[data-post-id="${postId}"] .post-stats i.fa-comment`).nextSibling;
+                commentCount.textContent = ` ${data.comments_count} comments`;
+            }
+        });
+    }
+});
+
+// Handle post form submission
+document.getElementById('modalPostForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    
+    fetch('{% url "social:feed" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the feed
+            loadModalContent('feedModal', '{% url "social:feed" %}');
+        }
+    });
+});
+</script>

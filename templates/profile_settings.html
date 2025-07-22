@@ -1,0 +1,428 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Profile Settings - Boda Boda Welfare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-settings-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .profile-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid white;
+        margin: 0 auto 1rem;
+        display: block;
+        object-fit: cover;
+    }
+    
+    .settings-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .form-label {
+        font-weight: 500;
+        color: #555;
+        margin-bottom: 0.5rem;
+    }
+    
+    .form-control {
+        border-radius: 8px;
+        border: 1px solid #ddd;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+    
+    .btn-update {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-update:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+    
+    .btn-danger {
+        background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 500;
+    }
+    
+    .alert {
+        border-radius: 8px;
+        border: none;
+        padding: 1rem;
+        margin-bottom: 1rem;
+    }
+    
+    .notification-toggle {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0.75rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .notification-toggle:last-child {
+        border-bottom: none;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="profile-settings-container">
+    <div class="profile-header">
+        <img src="{% static 'images/default-avatar.png' %}" alt="Profile Picture" class="profile-avatar" id="profileAvatar">
+        <h2>{{ user.first_name }} {{ user.last_name }}</h2>
+        <p class="mb-0">{{ user.email }}</p>
+        <small>Member since {{ user.date_joined|date:"F Y" }}</small>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- Personal Information Section -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-user"></i>
+            Personal Information
+        </h4>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">First Name</label>
+                        <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Last Name</label>
+                        <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}" required>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" name="phone" value="{{ user.member.phone_number|default:'' }}" placeholder="+254712345678">
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="form-label">Profile Picture</label>
+                <input type="file" class="form-control" name="profile_picture" accept="image/*">
+                <small class="text-muted">Upload a new profile picture (JPG, PNG, max 2MB)</small>
+            </div>
+            <button type="submit" name="update_profile" class="btn btn-update">
+                <i class="fas fa-save"></i> Update Profile
+            </button>
+        </form>
+    </div>
+
+    <!-- Security Settings Section -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-shield-alt"></i>
+            Security Settings
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label class="form-label">Current Password</label>
+                <input type="password" class="form-control" name="current_password" required>
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">New Password</label>
+                        <input type="password" class="form-control" name="new_password" required>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label class="form-label">Confirm New Password</label>
+                        <input type="password" class="form-control" name="confirm_password" required>
+                    </div>
+                </div>
+            </div>
+            <button type="submit" name="change_password" class="btn btn-update">
+                <i class="fas fa-key"></i> Change Password
+            </button>
+        </form>
+    </div>
+
+    <!-- Notification Preferences Section -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-bell"></i>
+            Notification Preferences
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            <div class="notification-toggle">
+                <div>
+                    <strong>SMS Notifications</strong>
+                    <br><small class="text-muted">Receive SMS alerts for emergencies and important updates</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="sms_notifications" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="notification-toggle">
+                <div>
+                    <strong>Email Notifications</strong>
+                    <br><small class="text-muted">Get email updates about contributions and welfare activities</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="email_notifications" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="notification-toggle">
+                <div>
+                    <strong>Emergency Alerts</strong>
+                    <br><small class="text-muted">Immediate notifications for emergency situations</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="emergency_alerts" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="notification-toggle">
+                <div>
+                    <strong>Payment Reminders</strong>
+                    <br><small class="text-muted">Reminders for contribution payments and dues</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="payment_reminders" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            <div class="mt-3">
+                <button type="submit" name="update_notifications" class="btn btn-update">
+                    <i class="fas fa-save"></i> Save Preferences
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Account Actions Section -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-cog"></i>
+            Account Actions
+        </h4>
+        <div class="d-flex gap-3 flex-wrap">
+            <a href="{% url 'members:profile' %}" class="btn btn-outline-primary">
+                <i class="fas fa-eye"></i> View Public Profile
+            </a>
+            <a href="{% url 'contributions:my_history' %}" class="btn btn-outline-info">
+                <i class="fas fa-history"></i> Payment History
+            </a>
+            <a href="{% url 'bikes:my_bikes' %}" class="btn btn-outline-success">
+                <i class="fas fa-motorcycle"></i> My Bikes
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteAccountModal">
+                <i class="fas fa-trash"></i> Delete Account
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Account Modal -->
+<div class="modal fade" id="deleteAccountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Account</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Warning!</strong> This action cannot be undone.
+                </div>
+                <p>Are you sure you want to delete your account? This will:</p>
+                <ul>
+                    <li>Permanently delete your profile and personal information</li>
+                    <li>Remove you from all welfare contributions</li>
+                    <li>Delete your bike ownership records</li>
+                    <li>Remove you from your stage/chama membership</li>
+                </ul>
+                <p><strong>Note:</strong> Your contribution history will be preserved for welfare fund transparency.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" name="delete_account" class="btn btn-danger">
+                        <i class="fas fa-trash"></i> Delete My Account
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Profile picture preview
+    const profileInput = document.querySelector('input[name="profile_picture"]');
+    const profileAvatar = document.getElementById('profileAvatar');
+    
+    if (profileInput) {
+        profileInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    profileAvatar.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    // Password strength indicator
+    const newPasswordInput = document.querySelector('input[name="new_password"]');
+    if (newPasswordInput) {
+        newPasswordInput.addEventListener('input', function() {
+            const password = this.value;
+            const strength = calculatePasswordStrength(password);
+            // You can add a password strength indicator here
+        });
+    }
+    
+    // Confirm password validation
+    const confirmPasswordInput = document.querySelector('input[name="confirm_password"]');
+    if (confirmPasswordInput && newPasswordInput) {
+        confirmPasswordInput.addEventListener('input', function() {
+            if (this.value !== newPasswordInput.value) {
+                this.setCustomValidity('Passwords do not match');
+            } else {
+                this.setCustomValidity('');
+            }
+        });
+    }
+});
+
+function calculatePasswordStrength(password) {
+    let strength = 0;
+    if (password.length >= 8) strength++;
+    if (password.match(/[a-z]/)) strength++;
+    if (password.match(/[A-Z]/)) strength++;
+    if (password.match(/[0-9]/)) strength++;
+    if (password.match(/[^a-zA-Z0-9]/)) strength++;
+    return strength;
+}
+</script>
+{% endblock %}

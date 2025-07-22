@@ -1,0 +1,375 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Group Chats - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.chat-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.chat-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.chat-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.chat-item {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.chat-item:hover {
+    background: #f8f9fa;
+}
+
+.chat-item:last-child {
+    border-bottom: none;
+}
+
+.group-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: linear-gradient(45deg, #007bff, #6610f2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.message-preview {
+    color: #6c757d;
+    font-size: 14px;
+}
+
+.time-stamp {
+    color: #adb5bd;
+    font-size: 12px;
+}
+
+.unread-badge {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-weight: bold;
+}
+
+.online-indicator {
+    width: 12px;
+    height: 12px;
+    background: #28a745;
+    border-radius: 50%;
+    border: 2px solid white;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+}
+
+.create-group-btn {
+    background: linear-gradient(45deg, #28a745, #20c997);
+    border: none;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.create-group-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+}
+
+@media (max-width: 768px) {
+    .chat-card {
+        margin-bottom: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="chat-card">
+                <div class="chat-header p-4">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-0">
+                                <i class="fas fa-comments me-3"></i>
+                                Group Chats
+                            </h4>
+                            <p class="mb-0 opacity-75">Connect and communicate with your stage community</p>
+                        </div>
+                        <button class="create-group-btn" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                            <i class="fas fa-plus me-2"></i>New Group
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Stage Main Group -->
+                {% if stage_group %}
+                <div class="chat-item" onclick="location.href='{% url 'social:chat_detail' stage_group.id %}'">
+                    <div class="d-flex align-items-center">
+                        <div class="position-relative me-3">
+                            <div class="group-avatar">
+                                <i class="fas fa-users"></i>
+                            </div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="flex-grow-1">
+                            <h6 class="mb-1">{{ stage_group.name }}</h6>
+                            <p class="message-preview mb-0">
+                                <i class="fas fa-map-marker-alt me-1"></i>{{ stage_group.stage.name }}
+                                • {{ stage_group.members.count }} members
+                            </p>
+                            <small class="text-muted">Main stage communication channel</small>
+                        </div>
+                        <div class="text-end">
+                            <span class="unread-badge">3</span>
+                            <div class="time-stamp mt-1">2 min ago</div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Other Group Chats -->
+                {% for group in member_groups %}
+                    {% if group != stage_group %}
+                    <div class="chat-item" onclick="location.href='{% url 'social:chat_detail' group.id %}'">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative me-3">
+                                <div class="group-avatar">
+                                    {{ group.name|first|upper }}
+                                </div>
+                                {% if forloop.counter|divisibleby:3 %}
+                                <div class="online-indicator"></div>
+                                {% endif %}
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="mb-1">{{ group.name }}</h6>
+                                <p class="message-preview mb-0">
+                                    {% if group.description %}
+                                        {{ group.description|truncatechars:50 }}
+                                    {% else %}
+                                        <i class="fas fa-lock me-1"></i>
+                                        {% if group.is_private %}Private{% else %}Open{% endif %} group
+                                        • {{ group.members.count }} members
+                                    {% endif %}
+                                </p>
+                            </div>
+                            <div class="text-end">
+                                {% if forloop.counter|divisibleby:2 %}
+                                <span class="unread-badge">{{ forloop.counter }}</span>
+                                {% endif %}
+                                <div class="time-stamp mt-1">
+                                    {{ group.created_at|timesince }} ago
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                {% endfor %}
+
+                <!-- No Additional Groups Message -->
+                {% if member_groups.count == 1 %}
+                <div class="text-center py-5">
+                    <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No additional groups</h5>
+                    <p class="text-muted">Create or join more groups to expand your network!</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                        <i class="fas fa-plus me-2"></i>Create New Group
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="chat-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-primary me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'social:feed' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>Social Feed
+                        </a>
+                        <a href="{% url 'social:friends' %}" class="btn btn-outline-success">
+                            <i class="fas fa-users me-2"></i>Friends
+                        </a>
+                        <a href="{% url 'social:notifications' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </a>
+                        <a href="{% url 'emergency:create' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Emergency Alert
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stage Info -->
+            {% if member.stage %}
+            <div class="chat-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-map-marker-alt text-info me-2"></i>
+                        {{ member.stage.name }}
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <p class="text-muted small mb-3">{{ member.stage.location }}</p>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong class="d-block text-primary">{{ member.stage.member_set.count }}</strong>
+                            <small class="text-muted">Members</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block text-success">8</strong>
+                            <small class="text-muted">Online</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block text-warning">{{ member_groups.count }}</strong>
+                            <small class="text-muted">Groups</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Recent Activity -->
+            <div class="chat-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-clock text-warning me-2"></i>
+                        Recent Activity
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="group-avatar me-3" style="width: 35px; height: 35px; font-size: 14px;">
+                            <i class="fas fa-user"></i>
+                        </div>
+                        <div>
+                            <small class="fw-bold">John Doe joined Main Chat</small>
+                            <br>
+                            <small class="text-muted">5 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center mb-3">
+                        <div class="group-avatar me-3" style="width: 35px; height: 35px; font-size: 14px;">
+                            <i class="fas fa-comment"></i>
+                        </div>
+                        <div>
+                            <small class="fw-bold">New message in Emergency Group</small>
+                            <br>
+                            <small class="text-muted">12 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <div class="group-avatar me-3" style="width: 35px; height: 35px; font-size: 14px;">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div>
+                            <small class="fw-bold">Safety Tips group created</small>
+                            <br>
+                            <small class="text-muted">1 hour ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Create Group Modal -->
+<div class="modal fade" id="createGroupModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    <i class="fas fa-plus-circle me-2"></i>Create New Group
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" id="createGroupForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="groupName" class="form-label">Group Name</label>
+                        <input type="text" class="form-control" id="groupName" name="name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="groupDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="groupDescription" name="description" rows="3"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="isPrivate" name="is_private">
+                            <label class="form-check-label" for="isPrivate">
+                                Private Group
+                            </label>
+                            <small class="form-text text-muted">Only invited members can join</small>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="createGroupForm" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Group
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Auto-refresh group list every 30 seconds
+    setInterval(function() {
+        // You can implement AJAX refresh here
+        // location.reload(); // Simple refresh (uncomment if needed)
+    }, 30000);
+    
+    // Handle create group form submission
+    $('#createGroupForm').submit(function(e) {
+        e.preventDefault();
+        
+        // Here you would implement group creation
+        alert('Group creation functionality will be implemented in the next update!');
+        $('#createGroupModal').modal('hide');
+    });
+    
+    // Add click sound effect (optional)
+    $('.chat-item').click(function() {
+        // Optional: Add subtle click sound or haptic feedback
+    });
+});
+</script>
+{% endblock %}

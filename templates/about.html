@@ -1,0 +1,430 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+    .about-hero {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        color: white;
+        padding: 100px 0 60px;
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 700;
+        margin-bottom: 2rem;
+    }
+    
+    .timeline {
+        position: relative;
+        padding: 2rem 0;
+    }
+    
+    .timeline::before {
+        content: '';
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        background: var(--primary-color);
+    }
+    
+    .timeline-item {
+        position: relative;
+        margin-bottom: 3rem;
+    }
+    
+    .timeline-item:nth-child(odd) .timeline-content {
+        margin-right: calc(50% + 30px);
+        text-align: right;
+    }
+    
+    .timeline-item:nth-child(even) .timeline-content {
+        margin-left: calc(50% + 30px);
+    }
+    
+    .timeline-marker {
+        position: absolute;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 20px;
+        height: 20px;
+        background: var(--primary-color);
+        border: 4px solid white;
+        border-radius: 50%;
+        box-shadow: 0 0 0 4px var(--primary-color);
+    }
+    
+    .timeline-content {
+        background: white;
+        padding: 2rem;
+        border-radius: 10px;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    
+    .feature-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 2rem;
+        margin: 3rem 0;
+    }
+    
+    .feature-item {
+        background: white;
+        padding: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        text-align: center;
+        transition: transform 0.3s;
+    }
+    
+    .feature-item:hover {
+        transform: translateY(-5px);
+    }
+    
+    .feature-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        margin-bottom: 1rem;
+    }
+    
+    .developer-card {
+        background: white;
+        border-radius: 20px;
+        padding: 3rem;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        text-align: center;
+        margin: 2rem 0;
+    }
+    
+    .developer-avatar {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 4rem;
+        color: white;
+        margin: 0 auto 2rem;
+        font-weight: bold;
+    }
+    
+    .social-links a {
+        display: inline-block;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background: var(--primary-color);
+        color: white;
+        line-height: 50px;
+        text-align: center;
+        margin: 0 10px;
+        transition: all 0.3s;
+    }
+    
+    .social-links a:hover {
+        background: var(--secondary-color);
+        transform: translateY(-2px);
+    }
+    
+    @media (max-width: 768px) {
+        .timeline::before {
+            left: 20px;
+        }
+        
+        .timeline-item:nth-child(odd) .timeline-content,
+        .timeline-item:nth-child(even) .timeline-content {
+            margin-left: 50px;
+            margin-right: 0;
+            text-align: left;
+        }
+        
+        .timeline-marker {
+            left: 20px;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="about-hero">
+    <div class="container text-center">
+        <h1 class="display-3 fw-bold mb-4">About KwaStage</h1>
+        <p class="lead fs-4">Revolutionizing Boda Boda Community Welfare Through Technology</p>
+        <p class="fs-5 text-warning">"Boda Boda is Family - Don't Forget That"</p>
+    </div>
+</section>
+
+<!-- What is KwaStage -->
+<section class="py-5">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h2 class="section-title">What is KwaStage?</h2>
+                <p class="lead">KwaStage is Kenya's premier digital platform designed specifically for the boda boda community. We provide comprehensive welfare, emergency support, and financial services that strengthen the bonds within the boda boda family.</p>
+                
+                <p>Our platform integrates modern technology with traditional community values, ensuring that every rider has access to:</p>
+                <ul class="list-unstyled">
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Emergency financial support</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Comprehensive welfare services</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Community-based loans and savings</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Digital bike registration and tracking</li>
+                    <li class="mb-2"><i class="fas fa-check text-success me-2"></i> Real-time communication and alerts</li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="fas fa-motorcycle" style="font-size: 15rem; color: var(--primary-color); opacity: 0.1;"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- How it All Started -->
+<section class="py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">How It All Started</h2>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <h4 class="text-primary">The Vision (2024)</h4>
+                    <p>Bilford Bwire, a passionate software developer and motorcycle enthusiast, witnessed firsthand the challenges faced by boda boda riders in Kenya. From emergency situations where riders had no financial support to accidents where families were left stranded, he saw the need for a digital solution.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <h4 class="text-primary">Community Research (Early 2024)</h4>
+                    <p>Extensive research was conducted across various boda boda stages in Nairobi, Mombasa, and Kisumu. The feedback was clear: riders needed a trusted, secure platform that could handle welfare contributions, emergency funds, and community communications.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <h4 class="text-primary">Development Phase (Mid 2024)</h4>
+                    <p>Using cutting-edge technology including Django, PostgreSQL, and modern security protocols, KwaStage was built with community input at every stage. The platform was designed to be mobile-first, secure, and easy to use for riders of all technical backgrounds.</p>
+                </div>
+            </div>
+            
+            <div class="timeline-item">
+                <div class="timeline-marker"></div>
+                <div class="timeline-content">
+                    <h4 class="text-primary">Launch & Impact (2025)</h4>
+                    <p>KwaStage officially launched with over 1,250 registered members across 45 stages. The platform has since facilitated emergency support for 89 families and managed over KSh 2.5 million in welfare funds, proving its value to the community.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Why Choose KwaStage -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Why Choose Our System?</h2>
+        
+        <div class="feature-grid">
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h4>Bank-Level Security</h4>
+                <p>Two-factor authentication, encrypted data transmission, and secure payment processing ensure your money and information are always protected.</p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h4>Community-Driven</h4>
+                <p>Built by the boda boda community, for the community. Every feature is designed based on real rider needs and feedback.</p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-mobile-alt"></i>
+                </div>
+                <h4>Mobile-First Design</h4>
+                <p>Access all features from your smartphone, whether you're at the stage, on the road, or at home. Designed for riders on the go.</p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <h4>24/7 Availability</h4>
+                <p>Emergency support doesn't wait for business hours. Our platform is available 24/7 for when you need it most.</p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <h4>Transparent Reporting</h4>
+                <p>Real-time tracking of contributions, expenses, and emergency fund usage. Complete transparency in all financial operations.</p>
+            </div>
+            
+            <div class="feature-item">
+                <div class="feature-icon">
+                    <i class="fas fa-handshake"></i>
+                </div>
+                <h4>Proven Reliability</h4>
+                <p>With over 1,250 active members and KSh 2.5M+ in managed funds, KwaStage has proven its reliability and trustworthiness.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- System Reliability -->
+<section class="py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">System Reliability & Trust</h2>
+        
+        <div class="row">
+            <div class="col-lg-6">
+                <h4 class="text-primary mb-3">Technical Excellence</h4>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-server text-success me-2"></i> <strong>99.9% Uptime:</strong> Hosted on enterprise-grade infrastructure</li>
+                    <li class="mb-3"><i class="fas fa-database text-success me-2"></i> <strong>Secure Database:</strong> PostgreSQL with daily automated backups</li>
+                    <li class="mb-3"><i class="fas fa-lock text-success me-2"></i> <strong>SSL Encryption:</strong> All data transmitted securely</li>
+                    <li class="mb-3"><i class="fas fa-mobile-alt text-success me-2"></i> <strong>Mobile Optimized:</strong> Works on all devices and browsers</li>
+                </ul>
+            </div>
+            <div class="col-lg-6">
+                <h4 class="text-primary mb-3">Community Trust</h4>
+                <ul class="list-unstyled">
+                    <li class="mb-3"><i class="fas fa-users text-success me-2"></i> <strong>1,250+ Members:</strong> Trusted by riders across Kenya</li>
+                    <li class="mb-3"><i class="fas fa-money-bill-wave text-success me-2"></i> <strong>KSh 2.5M+ Managed:</strong> Proven financial management</li>
+                    <li class="mb-3"><i class="fas fa-heart text-success me-2"></i> <strong>89 Families Helped:</strong> Real impact in emergencies</li>
+                    <li class="mb-3"><i class="fas fa-map-marker-alt text-success me-2"></i> <strong>45 Active Stages:</strong> Wide community reach</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- About the Developer -->
+<section class="py-5">
+    <div class="container">
+        <h2 class="section-title text-center mb-5">Meet the Developer</h2>
+        
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="developer-card">
+                    <div class="developer-avatar">
+                        BB
+                    </div>
+                    <h3 class="text-primary mb-3">Bilford Bwire</h3>
+                    <h5 class="text-muted mb-4">Founder & Lead Developer</h5>
+                    
+                    <p class="lead mb-4">
+                        "I believe technology should serve the community, not the other way around. KwaStage is my contribution to the boda boda family that has always been there for each other."
+                    </p>
+                    
+                    <div class="row text-start mb-4">
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Background</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fas fa-graduation-cap me-2"></i> Software Engineering Graduate</li>
+                                <li><i class="fas fa-code me-2"></i> 5+ Years Development Experience</li>
+                                <li><i class="fas fa-motorcycle me-2"></i> Motorcycle Enthusiast</li>
+                                <li><i class="fas fa-heart me-2"></i> Community Advocate</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-primary">Expertise</h6>
+                            <ul class="list-unstyled">
+                                <li><i class="fab fa-python me-2"></i> Python & Django</li>
+                                <li><i class="fas fa-database me-2"></i> Database Design</li>
+                                <li><i class="fas fa-shield-alt me-2"></i> Cybersecurity</li>
+                                <li><i class="fas fa-mobile-alt me-2"></i> Mobile Development</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="social-links">
+                        <a href="mailto:bilford.bwire@kwastage.co.ke" title="Email">
+                            <i class="fas fa-envelope"></i>
+                        </a>
+                        <a href="https://linkedin.com/in/bilford-bwire" title="LinkedIn" target="_blank">
+                            <i class="fab fa-linkedin-in"></i>
+                        </a>
+                        <a href="https://github.com/bilford-bwire" title="GitHub" target="_blank">
+                            <i class="fab fa-github"></i>
+                        </a>
+                        <a href="tel:+254700000000" title="Phone">
+                            <i class="fas fa-phone"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%); color: white;">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Join the KwaStage Family Today</h2>
+        <p class="lead mb-4">
+            Experience the future of boda boda community welfare. Secure, reliable, and built for riders.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'register' %}" class="btn btn-warning btn-lg px-4">
+                <i class="fas fa-user-plus me-2"></i>Register Now
+            </a>
+            <a href="{% url 'authentication:login' %}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-sign-in-alt me-2"></i>Login
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate timeline items on scroll
+    const observerOptions = {
+        threshold: 0.2,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.opacity = '1';
+                entry.target.style.transform = 'translateY(0)';
+            }
+        });
+    }, observerOptions);
+    
+    // Initially hide timeline items
+    document.querySelectorAll('.timeline-item').forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'all 0.6s ease';
+        observer.observe(item);
+    });
+    
+    // Animate feature items
+    document.querySelectorAll('.feature-item').forEach(item => {
+        item.style.opacity = '0';
+        item.style.transform = 'translateY(30px)';
+        item.style.transition = 'all 0.6s ease';
+        observer.observe(item);
+    });
+});
+</script>
+{% endblock %}

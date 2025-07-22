@@ -1,0 +1,634 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Complete Your Profile - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-user-plus"></i> Complete Your Profile</h1>
+        <p>Please provide your details to complete your member registration</p>
+    </div>
+    <div class="header-actions">
+        <div class="progress-indicator">
+            <span class="step active">1</span>
+            <span class="step-label">Profile Setup</span>
+        </div>
+    </div>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-id-card"></i> Member Registration Details</h5>
+                <p class="mb-0 text-muted">Complete your profile to access all KwaStage services</p>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data" id="profileSetupForm">
+                    {% csrf_token %}
+                    
+                    <!-- Profile Photo Section -->
+                    <div class="profile-photo-section text-center mb-4">
+                        <div class="photo-upload-area" id="photoUploadArea">
+                            <div id="photoPreview" class="profile-photo-preview default-avatar">
+                                <i class="fas fa-user"></i>
+                            </div>
+                            <div class="upload-overlay">
+                                <i class="fas fa-camera"></i>
+                                <p>Click to upload photo</p>
+                            </div>
+                            <input type="file" id="profilePhoto" name="profile_photo" accept="image/*" style="display: none;">
+                        </div>
+                        <small class="text-muted">Upload a clear photo for your member ID (max 5MB)</small>
+                    </div>
+
+                    <!-- Personal Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-user"></i> Personal Information</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">First Name *</label>
+                                    <input type="text" class="form-control" name="first_name" required 
+                                           value="{{ form_data.first_name|default:user.first_name }}" placeholder="Enter your first name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Last Name *</label>
+                                    <input type="text" class="form-control" name="last_name" required
+                                           value="{{ form_data.last_name|default:user.last_name }}" placeholder="Enter your last name">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">National ID Number *</label>
+                                    <input type="text" class="form-control" name="national_id" required
+                                           value="{{ form_data.national_id }}" placeholder="Enter your National ID" pattern="[0-9]{8}" maxlength="8">
+                                    <small class="text-muted">8-digit National ID number</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Date of Birth *</label>
+                                    <input type="date" class="form-control" name="date_of_birth" required
+                                           value="{{ form_data.date_of_birth }}">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" name="phone_number" required
+                                           value="{{ form_data.phone_number }}" placeholder="+254700000000" pattern="^\+?254\d{9}$">
+                                    <small class="text-muted">Format: +254700000000</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Email Address</label>
+                                    <input type="email" class="form-control" name="email" 
+                                           value="{{ user.email }}" readonly>
+                                    <small class="text-muted">This is your login email</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Residential Address *</label>
+                            <textarea class="form-control" name="address" rows="3" required
+                                      placeholder="Enter your full residential address">{{ form_data.address }}</textarea>
+                        </div>
+                    </div>
+
+                    <!-- Stage and Work Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-map-marker-alt"></i> Stage & Work Information</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Stage/Station *</label>
+                                    <select class="form-select" name="stage" required id="stageSelect">
+                                        <option value="">Select your stage</option>
+                                        {% for stage in stages %}
+                                        <option value="{{ stage.id }}" data-location="{{ stage.location }}"
+                                                data-county="{{ stage.county }}"
+                                                {% if form_data.stage == stage.id|stringformat:"s" %}selected{% endif %}>
+                                            {{ stage.name }} - {{ stage.location }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Zone/Area within Stage *</label>
+                                    <input type="text" class="form-control" name="zone" required
+                                           value="{{ form_data.zone }}" placeholder="e.g., Main Gate, Hospital, School">
+                                    <small class="text-muted">Specific area where you operate within the stage</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">SACCO Affiliation (Optional)</label>
+                                    <input type="text" class="form-control" name="sacco"
+                                           value="{{ form_data.sacco }}" placeholder="e.g., Kikuyu SACCO, Matatu SACCO">
+                                    <small class="text-muted">If you belong to any SACCO</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Number of Dependents</label>
+                                    <input type="number" class="form-control" name="dependents_count" 
+                                           min="0" max="20" value="{{ form_data.dependents_count|default:0 }}">
+                                    <small class="text-muted">Children and other dependents you support</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Next of Kin Information -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-users"></i> Next of Kin Information</h6>
+                        <p class="text-muted small">This person will be contacted in case of emergency or for welfare benefits</p>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Next of Kin Full Name *</label>
+                                    <input type="text" class="form-control" name="next_of_kin_name" required
+                                           value="{{ form_data.next_of_kin_name }}" placeholder="Enter full name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Relationship *</label>
+                                    <select class="form-select" name="next_of_kin_relationship" required>
+                                        <option value="">Select relationship</option>
+                                        <option value="spouse" {% if form_data.next_of_kin_relationship == "spouse" %}selected{% endif %}>Spouse</option>
+                                        <option value="parent" {% if form_data.next_of_kin_relationship == "parent" %}selected{% endif %}>Parent</option>
+                                        <option value="child" {% if form_data.next_of_kin_relationship == "child" %}selected{% endif %}>Child</option>
+                                        <option value="sibling" {% if form_data.next_of_kin_relationship == "sibling" %}selected{% endif %}>Sibling</option>
+                                        <option value="relative" {% if form_data.next_of_kin_relationship == "relative" %}selected{% endif %}>Other Relative</option>
+                                        <option value="friend" {% if form_data.next_of_kin_relationship == "friend" %}selected{% endif %}>Friend</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Next of Kin Phone Number *</label>
+                                    <input type="tel" class="form-control" name="next_of_kin_phone" required
+                                           value="{{ form_data.next_of_kin_phone }}" placeholder="+254700000000" pattern="^\+?254\d{9}$">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Next of Kin National ID *</label>
+                                    <input type="text" class="form-control" name="next_of_kin_id" required
+                                           value="{{ form_data.next_of_kin_id }}" placeholder="National ID number" pattern="[0-9]{8}" maxlength="8">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="form-section">
+                        <h6><i class="fas fa-file-contract"></i> Terms & Conditions</h6>
+                        
+                        <div class="terms-section">
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsWelfare" name="accept_welfare_terms" required>
+                                <label class="form-check-label" for="termsWelfare">
+                                    I agree to contribute to the welfare fund as per stage requirements
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsEmergency" name="accept_emergency_terms" required>
+                                <label class="form-check-label" for="termsEmergency">
+                                    I understand that emergency fund benefits are subject to verification and committee approval
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="termsData" name="accept_data_terms" required>
+                                <label class="form-check-label" for="termsData">
+                                    I consent to the collection and processing of my data for welfare and emergency purposes
+                                </label>
+                            </div>
+                            
+                            <div class="form-check mb-4">
+                                <input class="form-check-input" type="checkbox" id="termsCommunication" name="accept_communication_terms">
+                                <label class="form-check-label" for="termsCommunication">
+                                    I agree to receive SMS and email notifications for important updates
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="form-actions text-center">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            <i class="fas fa-check"></i> Complete Registration
+                        </button>
+                        <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-lg ms-2">
+                            <i class="fas fa-times"></i> Skip for Now
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Sidebar -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-question-circle"></i> Need Help?</h5>
+            </div>
+            <div class="card-body">
+                <div class="help-item">
+                    <h6><i class="fas fa-id-card text-primary"></i> National ID</h6>
+                    <p>Enter your 8-digit National ID number as it appears on your ID card.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h6><i class="fas fa-map-marker-alt text-success"></i> Stage Selection</h6>
+                    <p>Choose the stage where you primarily operate your boda boda business.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h6><i class="fas fa-users text-info"></i> Next of Kin</h6>
+                    <p>This person will be contacted for welfare benefits and in case of emergencies.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h6><i class="fas fa-shield-alt text-warning"></i> Data Security</h6>
+                    <p>Your information is encrypted and only used for welfare and emergency purposes.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-heart"></i> Why Complete Your Profile?</h5>
+            </div>
+            <div class="card-body">
+                <ul class="benefits-list">
+                    <li><i class="fas fa-check text-success"></i> Access welfare fund benefits</li>
+                    <li><i class="fas fa-check text-success"></i> Emergency support for your family</li>
+                    <li><i class="fas fa-check text-success"></i> Loan and kitty participation</li>
+                    <li><i class="fas fa-check text-success"></i> Accident insurance coverage</li>
+                    <li><i class="fas fa-check text-success"></i> Community notifications and alerts</li>
+                    <li><i class="fas fa-check text-success"></i> Digital member ID card</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.profile-photo-section {
+    padding: 20px 0;
+}
+
+.photo-upload-area {
+    position: relative;
+    display: inline-block;
+    cursor: pointer;
+    margin-bottom: 10px;
+}
+
+.profile-photo-preview {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    border: 4px solid #e9ecef;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.profile-photo-preview img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-photo-preview.default-avatar {
+    background: #f8f9fa;
+    color: #6c757d;
+    font-size: 40px;
+}
+
+.upload-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    color: white;
+}
+
+.photo-upload-area:hover .upload-overlay {
+    opacity: 1;
+}
+
+.upload-overlay i {
+    font-size: 24px;
+    margin-bottom: 5px;
+}
+
+.upload-overlay p {
+    margin: 0;
+    font-size: 12px;
+}
+
+.form-section {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    margin-bottom: 25px;
+}
+
+.form-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+.form-section h6 i {
+    margin-right: 8px;
+    color: var(--primary-color);
+}
+
+.terms-section {
+    background: white;
+    padding: 20px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.form-actions {
+    padding: 30px 0;
+    border-top: 1px solid #dee2e6;
+    margin-top: 20px;
+}
+
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.step {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #e9ecef;
+    color: #6c757d;
+    font-weight: bold;
+}
+
+.step.active {
+    background: var(--primary-color);
+    color: white;
+}
+
+.step-label {
+    color: #495057;
+    font-weight: 500;
+}
+
+.help-item {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.help-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.help-item h6 {
+    margin-bottom: 8px;
+    font-size: 0.9rem;
+}
+
+.help-item p {
+    margin: 0;
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.benefits-list {
+    list-style: none;
+    padding: 0;
+}
+
+.benefits-list li {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.benefits-list i {
+    margin-right: 10px;
+}
+
+@media (max-width: 768px) {
+    .profile-photo-preview {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .form-section {
+        padding: 15px;
+    }
+    
+    .header-actions {
+        margin-top: 15px;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Profile photo upload handler
+    const photoUploadArea = document.getElementById('photoUploadArea');
+    const photoInput = document.getElementById('profilePhoto');
+    const photoPreview = document.getElementById('photoPreview');
+    
+    photoUploadArea.addEventListener('click', function() {
+        photoInput.click();
+    });
+    
+    photoInput.addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                photoPreview.className = 'profile-photo-preview';
+                photoPreview.innerHTML = '<img src="' + e.target.result + '" alt="Profile Photo">';
+            }
+            reader.readAsDataURL(file);
+        }
+    });
+    
+    // Stage selection handler
+    const stageSelect = document.getElementById('stageSelect');
+    stageSelect.addEventListener('change', function() {
+        const selectedOption = this.options[this.selectedIndex];
+        const location = selectedOption.getAttribute('data-location');
+        const county = selectedOption.getAttribute('data-county');
+        
+        if (location && county) {
+            console.log('Selected stage:', this.value, 'Location:', location, 'County:', county);
+        }
+    });
+    
+    // Form validation
+    const form = document.getElementById('profileSetupForm');
+    form.addEventListener('submit', function(e) {
+        const requiredCheckboxes = document.querySelectorAll('input[type="checkbox"][required]');
+        let allChecked = true;
+        
+        requiredCheckboxes.forEach(function(checkbox) {
+            if (!checkbox.checked) {
+                allChecked = false;
+            }
+        });
+        
+        if (!allChecked) {
+            e.preventDefault();
+            alert('Please accept all required terms and conditions to continue.');
+            return false;
+        }
+        
+        // Validate phone numbers
+        const phoneFields = document.querySelectorAll('input[type="tel"]');
+        let phoneValid = true;
+        phoneFields.forEach(function(field) {
+            if (field.required && field.value) {
+                const phonePattern = /^\+254\d{9}$/;
+                if (!phonePattern.test(field.value)) {
+                    phoneValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            }
+        });
+        
+        if (!phoneValid) {
+            e.preventDefault();
+            alert('Please enter valid phone numbers in the format +254XXXXXXXXX');
+            return false;
+        }
+        
+        // Validate National IDs
+        const idFields = document.querySelectorAll('input[name$="_id"]');
+        let idValid = true;
+        idFields.forEach(function(field) {
+            if (field.required && field.value) {
+                if (!/^\d{8}$/.test(field.value)) {
+                    idValid = false;
+                    field.classList.add('is-invalid');
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            }
+        });
+        
+        if (!idValid) {
+            e.preventDefault();
+            alert('National ID numbers must be exactly 8 digits.');
+            return false;
+        }
+        
+        // Show loading state
+        const submitBtn = form.querySelector('button[type="submit"]');
+        const originalText = submitBtn.innerHTML;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Completing Registration...';
+        submitBtn.disabled = true;
+        
+        // Re-enable button after 10 seconds in case of errors
+        setTimeout(function() {
+            submitBtn.innerHTML = originalText;
+            submitBtn.disabled = false;
+        }, 10000);
+    });
+    
+    // Phone number formatting
+    const phoneInputs = document.querySelectorAll('input[type="tel"]');
+    phoneInputs.forEach(function(input) {
+        input.addEventListener('input', function() {
+            let value = this.value.replace(/[^\d]/g, ''); // Remove non-digits
+            
+            // Handle different input formats
+            if (value.startsWith('0')) {
+                value = '254' + value.substring(1);
+            } else if (!value.startsWith('254')) {
+                if (value.length >= 9) {
+                    value = '254' + value;
+                }
+            }
+            
+            // Format with +254 prefix
+            if (value.startsWith('254') && value.length >= 12) {
+                this.value = '+' + value;
+            } else if (value.length > 0 && !value.startsWith('254')) {
+                this.value = value;
+            }
+        });
+        
+        // Format on blur to ensure correct format
+        input.addEventListener('blur', function() {
+            let value = this.value.replace(/[^\d]/g, '');
+            if (value.length === 10 && value.startsWith('0')) {
+                this.value = '+254' + value.substring(1);
+            } else if (value.length === 9) {
+                this.value = '+254' + value;
+            } else if (value.length === 12 && value.startsWith('254')) {
+                this.value = '+' + value;
+            }
+        });
+    });
+    
+    // National ID validation
+    const nationalIdInputs = document.querySelectorAll('input[name$="_id"]');
+    nationalIdInputs.forEach(function(input) {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, '');
+        });
+    });
+});
+</script>
+{% endblock %}

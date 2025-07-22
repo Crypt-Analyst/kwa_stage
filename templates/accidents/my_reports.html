@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Accident Reports - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-user-shield"></i> My Accident Reports</h1>
+        <p>View and manage your accident reports</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'accidents:report' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Report New Accident
+        </a>
+        <a href="{% url 'accidents:list' %}" class="btn btn-secondary">
+            <i class="fas fa-list"></i> All Reports
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-file-alt"></i> Your Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Type</th>
+                                <th>Location</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td colspan="6" class="text-center text-muted py-4">
+                                    <i class="fas fa-shield-alt fa-3x mb-3"></i>
+                                    <p>No accident reports found. Stay safe on the roads!</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Your Statistics</h5>
+            </div>
+            <div class="card-body text-center">
+                <div class="stat-item">
+                    <h3 class="text-success">0</h3>
+                    <p>Total Reports</p>
+                </div>
+                <div class="stat-item">
+                    <h3 class="text-warning">0</h3>
+                    <p>Pending</p>
+                </div>
+                <div class="stat-item">
+                    <h3 class="text-info">0</h3>
+                    <p>Resolved</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Safety Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="tip-item">
+                    <i class="fas fa-helmet-safety text-primary"></i>
+                    <p>Always wear a helmet when riding</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-mobile-alt text-success"></i>
+                    <p>Keep emergency contacts accessible</p>
+                </div>
+                <div class="tip-item">
+                    <i class="fas fa-first-aid text-danger"></i>
+                    <p>Carry a basic first aid kit</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-item {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.tip-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.tip-item:last-child {
+    margin-bottom: 0;
+}
+
+.tip-item p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Payment Method - KwaStage{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-plus-circle"></i> Add Payment Method</h5>
+                    <p class="mb-0 text-muted">Add a new payment method for quick transactions</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="addMethodForm">
+                        {% csrf_token %}
+                        
+                        <!-- Method Type -->
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method Type *</label>
+                            <div class="method-type-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="method_type" value="mobile_money" id="mobileMoney" required>
+                                    <label class="form-check-label" for="mobileMoney">
+                                        <i class="fas fa-mobile-alt text-success me-2"></i>
+                                        <strong>Mobile Money</strong>
+                                        <small class="d-block text-muted">M-Pesa, Airtel Money, etc.</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="method_type" value="bank_card" id="bankCard">
+                                    <label class="form-check-label" for="bankCard">
+                                        <i class="fas fa-credit-card text-primary me-2"></i>
+                                        <strong>Bank Card</strong>
+                                        <small class="d-block text-muted">Debit or Credit Card</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="method_type" value="bank_account" id="bankAccount">
+                                    <label class="form-check-label" for="bankAccount">
+                                        <i class="fas fa-university text-info me-2"></i>
+                                        <strong>Bank Account</strong>
+                                        <small class="d-block text-muted">Direct bank transfer</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Provider (for mobile money) -->
+                        <div class="mb-3" id="providerSection" style="display: none;">
+                            <label class="form-label">Provider *</label>
+                            <select class="form-select" name="provider">
+                                <option value="">Select provider</option>
+                                <option value="1">Safaricom (M-Pesa)</option>
+                                <option value="2">Airtel Money</option>
+                                <option value="3">T-Kash</option>
+                            </select>
+                        </div>
+                        
+                        <!-- Account Number/Phone -->
+                        <div class="mb-3">
+                            <label class="form-label" id="accountLabel">Account Number/Phone *</label>
+                            <input type="text" class="form-control" name="account_number" required 
+                                   placeholder="Enter account number or phone number">
+                            <small class="text-muted" id="accountHint">Enter your account details</small>
+                        </div>
+                        
+                        <!-- Account Name -->
+                        <div class="mb-3">
+                            <label class="form-label">Account Name *</label>
+                            <input type="text" class="form-control" name="account_name" required 
+                                   placeholder="Name as it appears on the account">
+                        </div>
+                        
+                        <!-- Nickname -->
+                        <div class="mb-3">
+                            <label class="form-label">Nickname (Optional)</label>
+                            <input type="text" class="form-control" name="nickname" 
+                                   placeholder="e.g., My M-Pesa, Work Card">
+                            <small class="text-muted">Give this payment method a memorable name</small>
+                        </div>
+                        
+                        <!-- Options -->
+                        <div class="mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="is_default" id="setDefault">
+                                <label class="form-check-label" for="setDefault">
+                                    Set as default payment method
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <!-- Security Notice -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-shield-alt"></i>
+                            <strong>Security Notice:</strong> Your payment information is encrypted and stored securely. We never store sensitive card details.
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add Payment Method
+                            </button>
+                            <a href="{% url 'payments:payment_methods' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const methodTypeRadios = document.querySelectorAll('input[name="method_type"]');
+    const providerSection = document.getElementById('providerSection');
+    const accountLabel = document.getElementById('accountLabel');
+    const accountHint = document.getElementById('accountHint');
+    const accountInput = document.querySelector('input[name="account_number"]');
+    const providerSelect = document.querySelector('select[name="provider"]');
+    
+    methodTypeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const selectedType = this.value;
+            
+            switch(selectedType) {
+                case 'mobile_money':
+                    providerSection.style.display = 'block';
+                    accountLabel.textContent = 'Phone Number *';
+                    accountHint.textContent = 'Enter your mobile money phone number (e.g., +254712345678)';
+                    accountInput.placeholder = '+254712345678';
+                    providerSelect.required = true;
+                    break;
+                    
+                case 'bank_card':
+                    providerSection.style.display = 'none';
+                    accountLabel.textContent = 'Card Number *';
+                    accountHint.textContent = 'Enter your debit or credit card number';
+                    accountInput.placeholder = '1234 5678 9012 3456';
+                    providerSelect.required = false;
+                    break;
+                    
+                case 'bank_account':
+                    providerSection.style.display = 'none';
+                    accountLabel.textContent = 'Account Number *';
+                    accountHint.textContent = 'Enter your bank account number';
+                    accountInput.placeholder = 'Account number';
+                    providerSelect.required = false;
+                    break;
+            }
+        });
+    });
+    
+    // Format phone number for mobile money
+    accountInput.addEventListener('input', function() {
+        const selectedType = document.querySelector('input[name="method_type"]:checked');
+        if (selectedType && selectedType.value === 'mobile_money') {
+            let value = this.value.replace(/\D/g, ''); // Remove non-digits
+            if (value.startsWith('0')) {
+                value = '254' + value.substring(1);
+            }
+            if (value.startsWith('254')) {
+                this.value = '+' + value;
+            }
+        }
+    });
+});
+</script>
+
+<style>
+.method-type-options .form-check {
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    transition: all 0.3s ease;
+}
+
+.method-type-options .form-check:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+
+.method-type-options .form-check-input:checked + .form-check-label {
+    color: #007bff;
+}
+</style>
+{% endblock %}

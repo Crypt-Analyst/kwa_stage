@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Insurance - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-shield-alt"></i> Insurance Policies</h1>
+        <p>Manage your insurance coverage</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">
+            <i class="fas fa-plus"></i> Add Insurance
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Active Insurance Policies -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-shield-alt"></i> Your Insurance Policies</h5>
+            </div>
+            <div class="card-body">
+                {% if insurances %}
+                    <div class="row">
+                        {% for insurance in insurances %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-start border-4 {% if insurance.is_expired %}border-danger{% elif insurance.is_expiring_soon %}border-warning{% else %}border-success{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ insurance.get_insurance_type_display }}</h6>
+                                    <p class="card-text">
+                                        <strong>Policy:</strong> {{ insurance.policy_number }}<br>
+                                        <strong>Company:</strong> {{ insurance.insurance_company }}<br>
+                                        <strong>Coverage:</strong> KES {{ insurance.coverage_amount|floatformat:2 }}<br>
+                                        <strong>Premium:</strong> KES {{ insurance.premium_amount|floatformat:2 }}<br>
+                                        <strong>Expires:</strong> {{ insurance.end_date }}
+                                    </p>
+                                    
+                                    {% if insurance.is_expired %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% elif insurance.is_expiring_soon %}
+                                        <span class="badge bg-warning">Expiring Soon</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% endif %}
+                                    
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                        <button class="btn btn-sm btn-outline-success">Renew</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                        <h5>No Insurance Policies</h5>
+                        <p class="text-muted">You don't have any insurance policies yet. Add one to protect your bike and yourself.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">
+                            <i class="fas fa-plus"></i> Add Your First Insurance
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Insurance Info -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Insurance Benefits</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Comprehensive coverage for your bike
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Personal accident protection
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Third party liability coverage
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Medical expense coverage
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        24/7 claims support
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-phone"></i> Emergency Contacts</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Claims Hotline:</strong><br>+254 700 000 000</p>
+                <p><strong>Emergency Services:</strong><br>+254 700 000 111</p>
+                <p><strong>KwaStage Support:</strong><br>+254 700 000 222</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Insurance Modal -->
+<div class="modal fade" id="addInsuranceModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Insurance Policy</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Insurance Type *</label>
+                        <select class="form-select" name="insurance_type" required>
+                            <option value="">Select insurance type</option>
+                            <option value="bike_comprehensive">Bike Comprehensive</option>
+                            <option value="bike_third_party">Bike Third Party</option>
+                            <option value="personal_accident">Personal Accident</option>
+                            <option value="medical">Medical Insurance</option>
+                            <option value="life">Life Insurance</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Policy Number *</label>
+                        <input type="text" class="form-control" name="policy_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Insurance Company *</label>
+                        <input type="text" class="form-control" name="insurance_company" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Coverage Amount (KES) *</label>
+                                <input type="number" class="form-control" name="coverage_amount" required min="0" step="0.01">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Premium Amount (KES) *</label>
+                                <input type="number" class="form-control" name="premium_amount" required min="0" step="0.01">
+                            </div>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Start Date *</label>
+                                <input type="date" class="form-control" name="start_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">End Date *</label>
+                                <input type="date" class="form-control" name="end_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Policy Document (Optional)</label>
+                        <input type="file" class="form-control" name="policy_document" accept=".pdf,.jpg,.jpeg,.png">
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Insurance Policy</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,506 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SMS Alerts - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-sms"></i> SMS Alerts</h1>
+        <p>Manage your SMS notifications and alerts</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendSMSModal">
+            <i class="fas fa-paper-plane"></i> Send SMS
+        </button>
+        <button class="btn btn-outline-primary" onclick="refreshAlerts()">
+            <i class="fas fa-sync"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cog"></i> SMS Settings</h5>
+            </div>
+            <div class="card-body">
+                <form id="smsSettingsForm">
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" value="+254712345678" readonly>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Alert Preferences</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="emergency" checked>
+                            <label class="form-check-label" for="emergency">Emergency Alerts</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="contributions" checked>
+                            <label class="form-check-label" for="contributions">Contribution Reminders</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="loans" checked>
+                            <label class="form-check-label" for="loans">Loan Updates</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="meetings">
+                            <label class="form-check-label" for="meetings">Meeting Reminders</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="bikes" checked>
+                            <label class="form-check-label" for="bikes">Lost Bike Alerts</label>
+                        </div>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-bar"></i> SMS Statistics</h5>
+            </div>
+            <div class="card-body">
+                <div class="stat-item">
+                    <div class="stat-label">This Month</div>
+                    <div class="stat-value text-primary">47 SMS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Total Sent</div>
+                    <div class="stat-value text-success">324 SMS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Failed</div>
+                    <div class="stat-value text-danger">3 SMS</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Success Rate</div>
+                    <div class="stat-value text-info">99.1%</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-inbox"></i> Recent SMS Alerts</h5>
+                    <select class="form-select w-auto" onchange="filterSMS(this.value)">
+                        <option value="all">All Messages</option>
+                        <option value="sent">Sent</option>
+                        <option value="received">Received</option>
+                        <option value="failed">Failed</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="sms-list">
+                    <!-- Emergency SMS -->
+                    <div class="sms-item sent emergency">
+                        <div class="sms-icon bg-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="sms-content">
+                            <div class="sms-header">
+                                <span class="sms-type">Emergency Alert</span>
+                                <span class="sms-time">2 hours ago</span>
+                                <span class="status-badge bg-success">Sent</span>
+                            </div>
+                            <div class="sms-message">
+                                EMERGENCY: Medical emergency case #EM001 approved for John Kamau. Amount: KSh 150,000. Contact: +254712345678
+                            </div>
+                            <div class="sms-footer">
+                                <small class="text-muted">To: +254712345678</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contribution SMS -->
+                    <div class="sms-item received contribution">
+                        <div class="sms-icon bg-success">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="sms-content">
+                            <div class="sms-header">
+                                <span class="sms-type">Contribution Reminder</span>
+                                <span class="sms-time">1 day ago</span>
+                                <span class="status-badge bg-info">Received</span>
+                            </div>
+                            <div class="sms-message">
+                                REMINDER: Your monthly contribution of KSh 2,000 is due on July 30, 2025. Pay via M-Pesa: *544*5# or visit the office.
+                            </div>
+                            <div class="sms-footer">
+                                <small class="text-muted">From: KwaStage System</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lost Bike SMS -->
+                    <div class="sms-item sent bike">
+                        <div class="sms-icon bg-warning">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="sms-content">
+                            <div class="sms-header">
+                                <span class="sms-type">Lost Bike Alert</span>
+                                <span class="sms-time">2 days ago</span>
+                                <span class="status-badge bg-success">Sent</span>
+                            </div>
+                            <div class="sms-message">
+                                ALERT: Honda CB 150R, Reg: KCA 123A, Red/Black color lost in Kiambu area. Contact John Kamau: +254712345678 if sighted.
+                            </div>
+                            <div class="sms-footer">
+                                <small class="text-muted">Broadcast to 150 members</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loan SMS -->
+                    <div class="sms-item received loan">
+                        <div class="sms-icon bg-info">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="sms-content">
+                            <div class="sms-header">
+                                <span class="sms-type">Loan Update</span>
+                                <span class="sms-time">3 days ago</span>
+                                <span class="status-badge bg-info">Received</span>
+                            </div>
+                            <div class="sms-message">
+                                UPDATE: Your loan application #LN002 for KSh 50,000 is under review. Decision expected within 5 working days.
+                            </div>
+                            <div class="sms-footer">
+                                <small class="text-muted">From: Loans Department</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Failed SMS -->
+                    <div class="sms-item failed">
+                        <div class="sms-icon bg-secondary">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="sms-content">
+                            <div class="sms-header">
+                                <span class="sms-type">Meeting Reminder</span>
+                                <span class="sms-time">1 week ago</span>
+                                <span class="status-badge bg-danger">Failed</span>
+                            </div>
+                            <div class="sms-message">
+                                REMINDER: Monthly stage meeting on July 25, 2025 at 6:00 PM. Venue: Kikuyu Main Stage. Attendance is mandatory.
+                            </div>
+                            <div class="sms-footer">
+                                <small class="text-muted text-danger">To: +254712345678 (Number not reachable)</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Pagination -->
+                <nav aria-label="SMS pagination" class="mt-4">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item disabled">
+                            <a class="page-link" href="#" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                        <li class="page-item"><a class="page-link" href="#">2</a></li>
+                        <li class="page-item"><a class="page-link" href="#">3</a></li>
+                        <li class="page-item">
+                            <a class="page-link" href="#" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Send SMS Modal -->
+<div class="modal fade" id="sendSMSModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Send SMS Alert</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="sendSMSForm">
+                    <div class="mb-3">
+                        <label class="form-label">Message Type</label>
+                        <select class="form-select" name="message_type" required onchange="updateMessageTemplate(this.value)">
+                            <option value="">Select Message Type</option>
+                            <option value="emergency">Emergency Alert</option>
+                            <option value="contribution">Contribution Reminder</option>
+                            <option value="meeting">Meeting Reminder</option>
+                            <option value="general">General Announcement</option>
+                            <option value="custom">Custom Message</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Recipients</label>
+                        <select class="form-select" name="recipients" required>
+                            <option value="">Select Recipients</option>
+                            <option value="all">All Members</option>
+                            <option value="stage">My Stage Members</option>
+                            <option value="leaders">Stage Leaders Only</option>
+                            <option value="emergency_contacts">Emergency Contacts</option>
+                            <option value="custom">Custom List</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Message Content</label>
+                        <textarea class="form-control" name="message" rows="5" maxlength="160" required 
+                                  placeholder="Type your message here (max 160 characters)..."></textarea>
+                        <div class="d-flex justify-content-between">
+                            <small class="text-muted">Character count: <span id="charCount">0</span>/160</small>
+                            <small class="text-info">Cost: KSh <span id="smsCost">2.00</span></small>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Schedule</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule" value="now" id="sendNow" checked>
+                            <label class="form-check-label" for="sendNow">Send Now</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="schedule" value="later" id="sendLater">
+                            <label class="form-check-label" for="sendLater">Schedule for Later</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="scheduleTime" style="display: none;">
+                        <label class="form-label">Schedule Date & Time</label>
+                        <input type="datetime-local" class="form-control" name="schedule_datetime">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" onclick="sendSMS()">
+                    <i class="fas fa-paper-plane"></i> Send SMS
+                </button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.sms-list {
+    max-height: 600px;
+    overflow-y: auto;
+}
+
+.sms-item {
+    display: flex;
+    padding: 15px;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 15px;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.sms-item:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+.sms-item.failed {
+    border-left: 4px solid #dc3545;
+    background: #fff5f5;
+}
+
+.sms-icon {
+    flex: 0 0 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.sms-content {
+    flex: 1;
+}
+
+.sms-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.sms-type {
+    font-weight: 600;
+    color: #333;
+}
+
+.sms-time {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.status-badge {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+.sms-message {
+    margin-bottom: 8px;
+    line-height: 1.5;
+    color: #444;
+}
+
+.sms-footer {
+    font-size: 0.8rem;
+}
+
+.stat-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-label {
+    font-weight: 500;
+}
+
+.stat-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+    .sms-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .sms-icon {
+        margin: 0 auto 15px auto;
+    }
+    
+    .sms-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+}
+</style>
+
+<script>
+function refreshAlerts() {
+    // Simulate refresh
+    location.reload();
+}
+
+function filterSMS(type) {
+    const smsItems = document.querySelectorAll('.sms-item');
+    
+    smsItems.forEach(item => {
+        if (type === 'all') {
+            item.style.display = 'flex';
+        } else {
+            item.style.display = item.classList.contains(type) ? 'flex' : 'none';
+        }
+    });
+}
+
+function updateMessageTemplate(type) {
+    const messageField = document.querySelector('textarea[name="message"]');
+    const templates = {
+        emergency: 'EMERGENCY: [Emergency details]. Contact: [Phone number] for assistance.',
+        contribution: 'REMINDER: Your monthly contribution of KSh [Amount] is due on [Date]. Pay via M-Pesa.',
+        meeting: 'REMINDER: [Meeting type] on [Date] at [Time]. Venue: [Location]. Attendance is mandatory.',
+        general: 'ANNOUNCEMENT: [Your announcement here]',
+        custom: ''
+    };
+    
+    if (templates[type]) {
+        messageField.value = templates[type];
+        updateCharCount();
+    }
+}
+
+function updateCharCount() {
+    const messageField = document.querySelector('textarea[name="message"]');
+    const charCount = document.getElementById('charCount');
+    const smsCost = document.getElementById('smsCost');
+    
+    const length = messageField.value.length;
+    charCount.textContent = length;
+    
+    // Calculate SMS cost (KSh 2 per SMS, 160 chars each)
+    const smsCount = Math.ceil(length / 160) || 1;
+    smsCost.textContent = (smsCount * 2).toFixed(2);
+}
+
+function sendSMS() {
+    const form = document.getElementById('sendSMSForm');
+    const formData = new FormData(form);
+    
+    // Validate form
+    if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+    }
+    
+    // Simulate sending
+    alert('SMS sent successfully!');
+    bootstrap.Modal.getInstance(document.getElementById('sendSMSModal')).hide();
+    
+    // Refresh the SMS list
+    setTimeout(() => {
+        location.reload();
+    }, 1000);
+}
+
+// Event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const messageField = document.querySelector('textarea[name="message"]');
+    messageField.addEventListener('input', updateCharCount);
+    
+    const scheduleRadios = document.querySelectorAll('input[name="schedule"]');
+    const scheduleTimeDiv = document.getElementById('scheduleTime');
+    
+    scheduleRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            scheduleTimeDiv.style.display = this.value === 'later' ? 'block' : 'none';
+        });
+    });
+    
+    // Settings form
+    document.getElementById('smsSettingsForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        alert('SMS settings saved successfully!');
+    });
+});
+</script>
+{% endblock %}

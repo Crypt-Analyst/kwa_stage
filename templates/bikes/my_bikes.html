@@ -1,0 +1,521 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Bikes - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.bike-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.bike-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.bike-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+}
+
+.bike-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-maintenance {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-lost {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.bike-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.bike-details {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 15px;
+    margin: 15px 0;
+}
+
+.detail-item {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+}
+
+.detail-item:last-child {
+    margin-bottom: 0;
+}
+
+.action-card {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.client-alert {
+    background: linear-gradient(45deg, #ff6b6b, #ee5a24);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.client-alert:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px rgba(255, 107, 107, 0.3);
+}
+
+.client-alert.taken {
+    background: linear-gradient(45deg, #6c757d, #495057);
+    opacity: 0.8;
+}
+
+.alert-actions {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+}
+
+.take-job-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.take-job-btn:hover {
+    background: rgba(255,255,255,0.3);
+    transform: scale(1.05);
+}
+
+.location-pin {
+    background: rgba(255,255,255,0.9);
+    color: #333;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    display: inline-block;
+    margin-top: 10px;
+}
+
+@media (max-width: 768px) {
+    .bike-card {
+        margin-bottom: 15px;
+    }
+    
+    .bike-header {
+        padding: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Client Alerts Section -->
+            <div class="action-card">
+                <h5 class="mb-3">
+                    <i class="fas fa-users text-primary me-2"></i>
+                    Client Alerts - Available Jobs
+                </h5>
+                
+                <div class="client-alert" onclick="showJobDetails(this)">
+                    <div class="alert-actions">
+                        <button class="take-job-btn" onclick="takeJob(this, event)">
+                            Take Job
+                        </button>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-map-marker-alt me-2"></i>Pickup from Westlands</h6>
+                        <p class="mb-2">Need transport to JKIA Airport - 2 passengers with luggage</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="location-pin">
+                                <i class="fas fa-clock me-1"></i>Posted 5 minutes ago
+                            </span>
+                            <span class="fw-bold">Estimated: KSh 800-1200</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="client-alert" onclick="showJobDetails(this)">
+                    <div class="alert-actions">
+                        <button class="take-job-btn" onclick="takeJob(this, event)">
+                            Take Job
+                        </button>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-map-marker-alt me-2"></i>Pick up from CBD</h6>
+                        <p class="mb-2">Short trip to Karen - 1 passenger</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="location-pin">
+                                <i class="fas fa-clock me-1"></i>Posted 12 minutes ago
+                            </span>
+                            <span class="fw-bold">Estimated: KSh 600-800</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="client-alert taken">
+                    <div class="alert-actions">
+                        <span class="take-job-btn">
+                            <i class="fas fa-check me-1"></i>Taken by John Doe
+                        </span>
+                    </div>
+                    <div>
+                        <h6><i class="fas fa-map-marker-alt me-2"></i>Pickup from Kilimani</h6>
+                        <p class="mb-2">Trip to Thika Road Mall - Family of 3</p>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <span class="location-pin">
+                                <i class="fas fa-user me-1"></i>Completed 20 minutes ago
+                            </span>
+                            <span class="fw-bold text-decoration-line-through">Estimated: KSh 400-600</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- My Bikes -->
+            <div class="bike-card">
+                <div class="bike-header">
+                    <h4 class="mb-0">My Registered Bikes</h4>
+                    <p class="mb-0 opacity-75">Manage your motorcycle fleet</p>
+                </div>
+
+                <div class="p-4">
+                    <!-- Sample Bike 1 -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/bike-placeholder.jpg' %}" alt="Motorcycle" class="bike-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTRweCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vdG9yY3ljbGU8L3RleHQ+PC9zdmc+'">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1">Honda CB150R</h5>
+                                    <p class="text-muted mb-2">Registration: KCA 123A</p>
+                                    <span class="bike-status status-active">
+                                        <i class="fas fa-check-circle me-1"></i>Active
+                                    </span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-exchange-alt me-2"></i>Transfer</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-exclamation-triangle me-2"></i>Report Lost</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="bike-details">
+                                <div class="detail-item">
+                                    <span class="text-muted">Engine Number:</span>
+                                    <span>CB150R2025001</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Chassis Number:</span>
+                                    <span>CH150R2025001</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Year:</span>
+                                    <span>2025</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Color:</span>
+                                    <span>Red</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Insurance Expiry:</span>
+                                    <span class="text-warning">March 15, 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <hr>
+
+                    <!-- Sample Bike 2 -->
+                    <div class="row mb-4">
+                        <div class="col-md-4">
+                            <img src="{% static 'images/bike-placeholder.jpg' %}" alt="Motorcycle" class="bike-image" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMzAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y4ZjlmYSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTRweCIgZmlsbD0iIzZjNzU3ZCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPk1vdG9yY3ljbGU8L3RleHQ+PC9zdmc+'">
+                        </div>
+                        <div class="col-md-8">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div>
+                                    <h5 class="mb-1">Yamaha YBR 125</h5>
+                                    <p class="text-muted mb-2">Registration: KCB 456B</p>
+                                    <span class="bike-status status-maintenance">
+                                        <i class="fas fa-wrench me-1"></i>Under Maintenance
+                                    </span>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-eye me-2"></i>View Details</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                        <li><a class="dropdown-item" href="#"><i class="fas fa-check me-2"></i>Mark as Active</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-exclamation-triangle me-2"></i>Report Lost</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            
+                            <div class="bike-details">
+                                <div class="detail-item">
+                                    <span class="text-muted">Engine Number:</span>
+                                    <span>YBR125R2024001</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Chassis Number:</span>
+                                    <span>CH125R2024001</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Year:</span>
+                                    <span>2024</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Color:</span>
+                                    <span>Blue</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="text-muted">Insurance Expiry:</span>
+                                    <span class="text-success">August 22, 2025</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Quick Actions -->
+            <div class="action-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-bolt text-primary me-2"></i>
+                    Quick Actions
+                </h6>
+                <div class="d-grid gap-2">
+                    <a href="{% url 'bikes:register' %}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>Register New Bike
+                    </a>
+                    <a href="{% url 'bikes:transfer' %}" class="btn btn-outline-success">
+                        <i class="fas fa-exchange-alt me-2"></i>Transfer Ownership
+                    </a>
+                    <a href="{% url 'bikes:lost_tracking' %}" class="btn btn-outline-warning">
+                        <i class="fas fa-search me-2"></i>Report Lost/Stolen
+                    </a>
+                    <button class="btn btn-outline-info" onclick="checkInsurance()">
+                        <i class="fas fa-shield-alt me-2"></i>Check Insurance
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bike Statistics -->
+            <div class="action-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-chart-bar text-success me-2"></i>
+                    My Statistics
+                </h6>
+                <div class="row text-center">
+                    <div class="col-6 mb-3">
+                        <h4 class="text-primary mb-0">2</h4>
+                        <small class="text-muted">Total Bikes</small>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <h4 class="text-success mb-0">1</h4>
+                        <small class="text-muted">Active</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-warning mb-0">1</h4>
+                        <small class="text-muted">Maintenance</small>
+                    </div>
+                    <div class="col-6">
+                        <h4 class="text-danger mb-0">0</h4>
+                        <small class="text-muted">Lost/Stolen</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance Reminders -->
+            <div class="action-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-bell text-warning me-2"></i>
+                    Insurance Reminders
+                </h6>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <strong>Honda CB150R</strong> insurance expires in 52 days
+                </div>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <strong>Yamaha YBR 125</strong> insurance valid until Aug 2025
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="action-card">
+                <h6 class="mb-3">
+                    <i class="fas fa-history text-info me-2"></i>
+                    Recent Activity
+                </h6>
+                <div class="small">
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-wrench text-warning me-2"></i>
+                        <span>Yamaha YBR 125 marked for maintenance</span>
+                    </div>
+                    <div class="d-flex align-items-center mb-2">
+                        <i class="fas fa-plus text-success me-2"></i>
+                        <span>Honda CB150R registered successfully</span>
+                    </div>
+                    <div class="d-flex align-items-center">
+                        <i class="fas fa-shield-alt text-info me-2"></i>
+                        <span>Insurance updated for Honda CB150R</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Job Details Modal -->
+<div class="modal fade" id="jobModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Job Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="jobDetails">
+                <!-- Job details will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="confirmTakeJob()">Take This Job</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentJobAlert = null;
+
+function showJobDetails(element) {
+    if (element.classList.contains('taken')) {
+        return; // Don't show details for taken jobs
+    }
+    
+    currentJobAlert = element;
+    const title = element.querySelector('h6').textContent;
+    const description = element.querySelector('p').textContent;
+    const timePosted = element.querySelector('.location-pin').textContent;
+    const estimate = element.querySelector('.fw-bold').textContent;
+    
+    document.getElementById('jobDetails').innerHTML = `
+        <div class="job-detail">
+            <h6>${title}</h6>
+            <p class="mb-3">${description}</p>
+            <div class="row">
+                <div class="col-6">
+                    <strong>Posted:</strong><br>
+                    <span class="text-muted">${timePosted}</span>
+                </div>
+                <div class="col-6">
+                    <strong>Estimated Fare:</strong><br>
+                    <span class="text-success">${estimate}</span>
+                </div>
+            </div>
+            <hr>
+            <div class="alert alert-info">
+                <i class="fas fa-info-circle me-2"></i>
+                Taking this job will notify the client and other riders that you are responding.
+            </div>
+        </div>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('jobModal')).show();
+}
+
+function takeJob(button, event) {
+    event.stopPropagation();
+    const alert = button.closest('.client-alert');
+    
+    // Mark as taken
+    alert.classList.add('taken');
+    button.innerHTML = '<i class="fas fa-check me-1"></i>Taken by You';
+    button.onclick = null;
+    
+    // Show success message
+    if (typeof toastr !== 'undefined') {
+        toastr.success('Job taken successfully! Client will be notified.');
+    } else {
+        alert('Job taken successfully! Client will be notified.');
+    }
+    
+    // Here you would make an AJAX call to update the database
+    console.log('Job taken:', alert);
+}
+
+function confirmTakeJob() {
+    if (currentJobAlert) {
+        const button = currentJobAlert.querySelector('.take-job-btn');
+        takeJob(button, {stopPropagation: () => {}});
+    }
+    bootstrap.Modal.getInstance(document.getElementById('jobModal')).hide();
+}
+
+function checkInsurance() {
+    alert('Insurance checking feature will be implemented in the next update!');
+}
+
+// Auto-refresh job alerts every 30 seconds
+setInterval(function() {
+    // You can implement AJAX refresh here
+    console.log('Checking for new job alerts...');
+}, 30000);
+</script>
+{% endblock %}

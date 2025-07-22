@@ -1,0 +1,223 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Loan Reports - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-chart-bar"></i> Loan Reports</h1>
+        <p>Comprehensive loan analytics and reports</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'loans:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Loans
+        </a>
+        <button class="btn btn-primary">
+            <i class="fas fa-download"></i> Export Reports
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="stat-card bg-primary">
+            <div class="stat-icon">
+                <i class="fas fa-money-bill-wave"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh 2,500,000</h3>
+                <p>Total Loans Disbursed</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-success">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh 1,800,000</h3>
+                <p>Total Repaid</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-warning">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh 700,000</h3>
+                <p>Outstanding Balance</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card bg-danger">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>5</h3>
+                <p>Overdue Loans</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Loan Performance Trends</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 300px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                    <p class="text-muted">Chart will be displayed here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-users"></i> Top Borrowers</h5>
+            </div>
+            <div class="card-body">
+                <div class="borrower-item">
+                    <div class="borrower-info">
+                        <strong>John Doe</strong>
+                        <span class="text-muted">3 loans</span>
+                    </div>
+                    <div class="borrower-amount">KSh 150,000</div>
+                </div>
+                <div class="borrower-item">
+                    <div class="borrower-info">
+                        <strong>Jane Smith</strong>
+                        <span class="text-muted">2 loans</span>
+                    </div>
+                    <div class="borrower-amount">KSh 100,000</div>
+                </div>
+                <div class="borrower-item">
+                    <div class="borrower-info">
+                        <strong>Peter Ochieng</strong>
+                        <span class="text-muted">2 loans</span>
+                    </div>
+                    <div class="borrower-amount">KSh 95,000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Detailed Loan Report</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Loan ID</th>
+                                <th>Borrower</th>
+                                <th>Amount</th>
+                                <th>Interest Rate</th>
+                                <th>Term</th>
+                                <th>Disbursed Date</th>
+                                <th>Status</th>
+                                <th>Repaid Amount</th>
+                                <th>Balance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>LN001</td>
+                                <td>John Doe</td>
+                                <td>KSh 50,000</td>
+                                <td>10%</td>
+                                <td>12 months</td>
+                                <td>2025-01-15</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>KSh 25,000</td>
+                                <td>KSh 30,000</td>
+                            </tr>
+                            <tr>
+                                <td>LN002</td>
+                                <td>Jane Smith</td>
+                                <td>KSh 30,000</td>
+                                <td>10%</td>
+                                <td>6 months</td>
+                                <td>2025-02-01</td>
+                                <td><span class="badge bg-warning">Overdue</span></td>
+                                <td>KSh 15,000</td>
+                                <td>KSh 18,000</td>
+                            </tr>
+                            <tr>
+                                <td>LN003</td>
+                                <td>Peter Ochieng</td>
+                                <td>KSh 75,000</td>
+                                <td>12%</td>
+                                <td>18 months</td>
+                                <td>2024-12-01</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td>KSh 45,000</td>
+                                <td>KSh 39,000</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.stat-icon {
+    font-size: 2.5rem;
+    margin-right: 15px;
+    opacity: 0.8;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+}
+
+.stat-content p {
+    margin: 0;
+    opacity: 0.9;
+}
+
+.borrower-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.borrower-item:last-child {
+    border-bottom: none;
+}
+
+.borrower-amount {
+    font-weight: bold;
+    color: #28a745;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,486 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Family Support - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-heart"></i> Add Family Support</h1>
+        <p>Emergency Case: #EM001 - John Kamau</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:family_support' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Family Support
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-plus-circle"></i> Create Support Package</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    
+                    <div class="support-section">
+                        <h6><i class="fas fa-users"></i> Family Information</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Primary Contact *</label>
+                                    <input type="text" class="form-control" name="primary_contact" 
+                                           value="Mary Kamau (Wife)" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Contact Phone *</label>
+                                    <input type="tel" class="form-control" name="contact_phone" 
+                                           value="+254722334455" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Number of Dependents</label>
+                                    <input type="number" class="form-control" name="dependents" 
+                                           value="3" min="0">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Family Location</label>
+                                    <input type="text" class="form-control" name="family_location" 
+                                           value="Kiambu, Kikuyu">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="support-section">
+                        <h6><i class="fas fa-gift"></i> Support Type & Details</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Support Category *</label>
+                            <select class="form-select" name="support_category" required onchange="updateSupportOptions(this.value)">
+                                <option value="">Select Support Type</option>
+                                <option value="financial">Financial Support</option>
+                                <option value="food">Food & Essentials</option>
+                                <option value="medical">Medical Support</option>
+                                <option value="educational">Educational Support</option>
+                                <option value="housing">Housing Assistance</option>
+                                <option value="emergency">Emergency Relief</option>
+                                <option value="combination">Combination Package</option>
+                            </select>
+                        </div>
+
+                        <div id="financial-options" class="support-options" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Monthly Allowance</label>
+                                        <input type="number" class="form-control" name="monthly_allowance" 
+                                               placeholder="e.g., 15000">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Duration (months)</label>
+                                        <input type="number" class="form-control" name="duration_months" 
+                                               placeholder="e.g., 6" min="1">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="food-options" class="support-options" style="display: none;">
+                            <div class="mb-3">
+                                <label class="form-label">Food Package Contents</label>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_items" value="rice" id="rice">
+                                    <label class="form-check-label" for="rice">Rice (5kg)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_items" value="beans" id="beans">
+                                    <label class="form-check-label" for="beans">Beans (2kg)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_items" value="flour" id="flour">
+                                    <label class="form-check-label" for="flour">Flour (2kg)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_items" value="oil" id="oil">
+                                    <label class="form-check-label" for="oil">Cooking Oil (1L)</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" name="food_items" value="sugar" id="sugar">
+                                    <label class="form-check-label" for="sugar">Sugar (1kg)</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="medical-options" class="support-options" style="display: none;">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Medical Facility</label>
+                                        <input type="text" class="form-control" name="medical_facility" 
+                                               placeholder="Hospital/Clinic name">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="mb-3">
+                                        <label class="form-label">Treatment Type</label>
+                                        <input type="text" class="form-control" name="treatment_type" 
+                                               placeholder="e.g., Physiotherapy, Surgery">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Estimated Value (KSh) *</label>
+                            <input type="number" class="form-control" name="estimated_value" 
+                                   placeholder="Total estimated value of support" required>
+                        </div>
+                    </div>
+
+                    <div class="support-section">
+                        <h6><i class="fas fa-calendar-alt"></i> Support Schedule</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Start Date *</label>
+                                    <input type="date" class="form-control" name="start_date" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Delivery Frequency</label>
+                                    <select class="form-select" name="delivery_frequency">
+                                        <option value="one_time">One-time delivery</option>
+                                        <option value="weekly">Weekly</option>
+                                        <option value="biweekly">Bi-weekly</option>
+                                        <option value="monthly" selected>Monthly</option>
+                                        <option value="quarterly">Quarterly</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Method</label>
+                            <select class="form-select" name="delivery_method">
+                                <option value="home_delivery">Home Delivery</option>
+                                <option value="pickup">Family Pickup</option>
+                                <option value="mobile_money">Mobile Money Transfer</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="voucher">Voucher System</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="support-section">
+                        <h6><i class="fas fa-users-cog"></i> Assigned Support Team</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Primary Coordinator</label>
+                                    <select class="form-select" name="coordinator">
+                                        <option value="">Select Coordinator</option>
+                                        <option value="mary_wanjiku">Mary Wanjiku</option>
+                                        <option value="peter_kimani">Peter Kimani</option>
+                                        <option value="grace_akinyi">Grace Akinyi</option>
+                                        <option value="david_mwangi">David Mwangi</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Support Volunteers</label>
+                                    <select class="form-select" name="volunteers" multiple>
+                                        <option value="john_kiprotich">John Kiprotich</option>
+                                        <option value="susan_njeri">Susan Njeri</option>
+                                        <option value="robert_otieno">Robert Otieno</option>
+                                        <option value="faith_muthoni">Faith Muthoni</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="support-section">
+                        <h6><i class="fas fa-tasks"></i> Special Requirements & Notes</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Special Requirements</label>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="requirements" value="dietary" id="dietary">
+                                <label class="form-check-label" for="dietary">Dietary restrictions</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="requirements" value="accessibility" id="accessibility">
+                                <label class="form-check-label" for="accessibility">Accessibility needs</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="requirements" value="religious" id="religious">
+                                <label class="form-check-label" for="religious">Religious considerations</label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="requirements" value="transport" id="transport">
+                                <label class="form-check-label" for="transport">Transportation assistance needed</label>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Additional Notes</label>
+                            <textarea class="form-control" name="additional_notes" rows="4" 
+                                      placeholder="Any special instructions, family circumstances, or additional information..."></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Supporting Documents</label>
+                            <input type="file" class="form-control" name="documents" multiple 
+                                   accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                            <small class="text-muted">Upload any relevant documents (medical reports, family certificates, etc.)</small>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-plus-circle"></i> Create Support Package
+                        </button>
+                        <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#previewModal">
+                            <i class="fas fa-eye"></i> Preview Package
+                        </button>
+                        <a href="{% url 'emergency:family_support' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Case Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="case-detail">
+                    <strong>Member:</strong>
+                    <span>John Kamau</span>
+                </div>
+                <div class="case-detail">
+                    <strong>Emergency Type:</strong>
+                    <span>Medical Emergency</span>
+                </div>
+                <div class="case-detail">
+                    <strong>Date Occurred:</strong>
+                    <span>July 22, 2025</span>
+                </div>
+                <div class="case-detail">
+                    <strong>Current Status:</strong>
+                    <span class="badge bg-success">Approved</span>
+                </div>
+                <div class="case-detail">
+                    <strong>Funds Disbursed:</strong>
+                    <span>KSh 150,000</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Support Budget</h5>
+            </div>
+            <div class="card-body">
+                <div class="budget-item">
+                    <strong>Available Support Fund:</strong>
+                    <span class="text-success">KSh 500,000</span>
+                </div>
+                <div class="budget-item">
+                    <strong>Monthly Allocation:</strong>
+                    <span class="text-info">KSh 100,000</span>
+                </div>
+                <div class="budget-item">
+                    <strong>This Month Used:</strong>
+                    <span class="text-warning">KSh 35,000</span>
+                </div>
+                <div class="budget-item">
+                    <strong>Remaining Budget:</strong>
+                    <span class="text-primary">KSh 65,000</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Support Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="guideline">
+                    <i class="fas fa-heart text-danger"></i>
+                    <p>Prioritize families with children and elderly dependents</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-balance-scale text-primary"></i>
+                    <p>Assess family's immediate vs. long-term needs</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-handshake text-success"></i>
+                    <p>Coordinate with local community and religious leaders</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-clipboard-check text-warning"></i>
+                    <p>Regular follow-up and progress monitoring required</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Preview Modal -->
+<div class="modal fade" id="previewModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Support Package Preview</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div id="previewContent">
+                    <!-- Preview content will be dynamically generated -->
+                    <p class="text-muted">Fill out the form to see preview...</p>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.support-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.support-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.support-options {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.form-check {
+    margin-bottom: 8px;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.case-detail, .budget-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.case-detail:last-child, .budget-item:last-child {
+    border-bottom: none;
+}
+
+.guideline {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.guideline i {
+    margin-right: 10px;
+    margin-top: 2px;
+    width: 20px;
+}
+
+.guideline p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+</style>
+
+<script>
+function updateSupportOptions(category) {
+    // Hide all support options
+    const options = document.querySelectorAll('.support-options');
+    options.forEach(option => option.style.display = 'none');
+    
+    // Show relevant options based on category
+    if (category) {
+        const targetOption = document.getElementById(category + '-options');
+        if (targetOption) {
+            targetOption.style.display = 'block';
+        }
+    }
+}
+
+// Form validation and preview functionality
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.querySelector('form');
+    const previewButton = document.querySelector('[data-bs-target="#previewModal"]');
+    
+    previewButton.addEventListener('click', function() {
+        generatePreview();
+    });
+    
+    function generatePreview() {
+        const formData = new FormData(form);
+        const previewContent = document.getElementById('previewContent');
+        
+        let preview = '<div class="support-preview">';
+        
+        // Basic information
+        preview += '<h6>Family Information</h6>';
+        preview += '<p><strong>Primary Contact:</strong> ' + (formData.get('primary_contact') || 'Not specified') + '</p>';
+        preview += '<p><strong>Phone:</strong> ' + (formData.get('contact_phone') || 'Not specified') + '</p>';
+        preview += '<p><strong>Dependents:</strong> ' + (formData.get('dependents') || '0') + '</p>';
+        
+        // Support details
+        preview += '<h6>Support Details</h6>';
+        preview += '<p><strong>Category:</strong> ' + (formData.get('support_category') || 'Not selected') + '</p>';
+        preview += '<p><strong>Estimated Value:</strong> KSh ' + (formData.get('estimated_value') || '0') + '</p>';
+        preview += '<p><strong>Start Date:</strong> ' + (formData.get('start_date') || 'Not set') + '</p>';
+        preview += '<p><strong>Frequency:</strong> ' + (formData.get('delivery_frequency') || 'Not specified') + '</p>';
+        
+        preview += '</div>';
+        
+        previewContent.innerHTML = preview;
+    }
+});
+</script>
+{% endblock %}

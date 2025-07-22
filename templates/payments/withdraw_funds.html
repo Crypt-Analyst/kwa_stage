@@ -1,0 +1,199 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Withdraw Funds - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.withdraw-modal {
+    max-width: 500px;
+    margin: 0 auto;
+}
+.method-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.method-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+.method-card.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card withdraw-modal">
+                <div class="card-header">
+                    <h5><i class="fas fa-money-bill-wave"></i> Withdraw Funds</h5>
+                    <p class="mb-0 text-muted">Withdraw money from your e-wallet</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="withdrawForm">
+                        {% csrf_token %}
+                        
+                        <!-- Current Balance -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-wallet"></i> Available Balance: <strong>KES {{ wallet.balance|floatformat:2 }}</strong>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label class="form-label">Amount to Withdraw *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">KES</span>
+                                <input type="number" class="form-control" name="amount" required 
+                                       min="50" max="{{ wallet.balance }}" step="0.01" placeholder="0.00">
+                            </div>
+                            <small class="text-muted">Minimum: KES 50, Maximum: KES {{ wallet.balance|floatformat:2 }}</small>
+                        </div>
+                        
+                        <!-- Withdrawal Method -->
+                        <div class="mb-3">
+                            <label class="form-label">Withdrawal Method *</label>
+                            <div class="method-options">
+                                <div class="method-card" data-method="mpesa">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-mobile-alt text-success me-2"></i>
+                                        <div>
+                                            <strong>M-Pesa</strong>
+                                            <small class="d-block text-muted">Receive money via M-Pesa</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="method-card" data-method="airtel">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-mobile-alt text-danger me-2"></i>
+                                        <div>
+                                            <strong>Airtel Money</strong>
+                                            <small class="d-block text-muted">Receive money via Airtel Money</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="method-card" data-method="bank">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-university text-primary me-2"></i>
+                                        <div>
+                                            <strong>Bank Transfer</strong>
+                                            <small class="d-block text-muted">Transfer to your bank account</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="withdrawal_method" id="selectedMethod" required>
+                        </div>
+                        
+                        <!-- Phone Number / Account Details -->
+                        <div class="mb-3" id="mobileSection">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" name="phone_number" 
+                                   value="{{ user.member.phone_number }}" pattern="^\+?254\d{9}$"
+                                   placeholder="+254700000000">
+                            <small class="text-muted">The phone number to receive withdrawal</small>
+                        </div>
+                        
+                        <div class="mb-3" id="bankSection" style="display: none;">
+                            <label class="form-label">Bank Account Number *</label>
+                            <input type="text" class="form-control" name="account_number" 
+                                   placeholder="Enter your bank account number">
+                            <small class="text-muted">Your registered bank account number</small>
+                        </div>
+                        
+                        <!-- Reason -->
+                        <div class="mb-3">
+                            <label class="form-label">Reason for Withdrawal (Optional)</label>
+                            <select class="form-select" name="reason">
+                                <option value="">Select reason</option>
+                                <option value="personal_expense">Personal Expense</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="investment">Investment</option>
+                                <option value="business">Business</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <!-- PIN Verification -->
+                        <div class="mb-3">
+                            <label class="form-label">Wallet PIN *</label>
+                            <input type="password" class="form-control" name="pin" required 
+                                   maxlength="4" placeholder="Enter your 4-digit wallet PIN">
+                            <small class="text-muted">Enter your wallet PIN to authorize this withdrawal</small>
+                        </div>
+                        
+                        <!-- Withdrawal Fee Info -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Withdrawal Fees:</strong>
+                            <ul class="mb-0 mt-2">
+                                <li>M-Pesa/Airtel Money: 1% + KES 5</li>
+                                <li>Bank Transfer: KES 25 (flat rate)</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-money-bill-wave"></i> Request Withdrawal
+                            </button>
+                            <a href="{% url 'payments:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Method selection
+    const methodCards = document.querySelectorAll('.method-card');
+    const selectedMethodInput = document.getElementById('selectedMethod');
+    const mobileSection = document.getElementById('mobileSection');
+    const bankSection = document.getElementById('bankSection');
+    
+    methodCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            methodCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Set hidden input value
+            const method = this.dataset.method;
+            selectedMethodInput.value = method;
+            
+            // Show/hide sections based on method
+            if (method === 'bank') {
+                mobileSection.style.display = 'none';
+                bankSection.style.display = 'block';
+                bankSection.querySelector('input').required = true;
+                mobileSection.querySelector('input').required = false;
+            } else {
+                mobileSection.style.display = 'block';
+                bankSection.style.display = 'none';
+                mobileSection.querySelector('input').required = true;
+                bankSection.querySelector('input').required = false;
+            }
+        });
+    });
+    
+    // Form validation
+    document.getElementById('withdrawForm').addEventListener('submit', function(e) {
+        if (!selectedMethodInput.value) {
+            e.preventDefault();
+            alert('Please select a withdrawal method');
+        }
+    });
+});
+</script>
+{% endblock %}

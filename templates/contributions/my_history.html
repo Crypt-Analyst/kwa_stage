@@ -1,0 +1,431 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}My Contribution History - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.contribution-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.contribution-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.payment-status {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-paid {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-overdue {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.amount-display {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #28a745;
+}
+
+.notification-settings {
+    background: #f8f9fa;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.notification-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #e9ecef;
+}
+
+.notification-item:last-child {
+    border-bottom: none;
+}
+
+.notification-preview {
+    background: #007bff;
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 10px 0;
+    position: relative;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.notification-preview:hover {
+    background: #0056b3;
+    transform: translateY(-2px);
+}
+
+.notification-preview.read {
+    background: #6c757d;
+    opacity: 0.8;
+}
+
+.notification-actions {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+.mark-read-btn {
+    background: rgba(255,255,255,0.2);
+    border: none;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 15px;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mark-read-btn:hover {
+    background: rgba(255,255,255,0.3);
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="contribution-card">
+                <div class="p-4 border-bottom">
+                    <h4 class="mb-0">
+                        <i class="fas fa-history text-primary me-3"></i>
+                        My Contribution History
+                    </h4>
+                    <p class="mb-0 text-muted">Track your monthly contributions and payment history</p>
+                </div>
+
+                <div class="p-4">
+                    <!-- Sample contribution history -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="amount-display">KSh 2,500</h5>
+                                <small class="text-muted">January 2025</small>
+                                <br>
+                                <span class="payment-status status-paid">
+                                    <i class="fas fa-check me-1"></i>Paid
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="amount-display">KSh 2,500</h5>
+                                <small class="text-muted">December 2024</small>
+                                <br>
+                                <span class="payment-status status-paid">
+                                    <i class="fas fa-check me-1"></i>Paid
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="amount-display">KSh 2,500</h5>
+                                <small class="text-muted">November 2024</small>
+                                <br>
+                                <span class="payment-status status-paid">
+                                    <i class="fas fa-check me-1"></i>Paid
+                                </span>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="text-center">
+                                <h5 class="amount-display">KSh 2,500</h5>
+                                <small class="text-muted">October 2024</small>
+                                <br>
+                                <span class="payment-status status-pending">
+                                    <i class="fas fa-clock me-1"></i>Pending
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Status</th>
+                                    <th>Receipt</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Jan 15, 2025</td>
+                                    <td>KSh 2,500</td>
+                                    <td>M-PESA</td>
+                                    <td>QA20250115001</td>
+                                    <td><span class="payment-status status-paid">Paid</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">Download</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Dec 15, 2024</td>
+                                    <td>KSh 2,500</td>
+                                    <td>M-PESA</td>
+                                    <td>QA20241215001</td>
+                                    <td><span class="payment-status status-paid">Paid</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">Download</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Nov 15, 2024</td>
+                                    <td>KSh 2,500</td>
+                                    <td>Bank Transfer</td>
+                                    <td>BT20241115001</td>
+                                    <td><span class="payment-status status-paid">Paid</span></td>
+                                    <td><a href="#" class="btn btn-sm btn-outline-primary">Download</a></td>
+                                </tr>
+                                <tr>
+                                    <td>Oct 15, 2024</td>
+                                    <td>KSh 2,500</td>
+                                    <td>Cash</td>
+                                    <td>CSH20241015001</td>
+                                    <td><span class="payment-status status-pending">Pending</span></td>
+                                    <td><span class="text-muted">Processing</span></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Notifications Settings -->
+            <div class="contribution-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bell text-warning me-2"></i>
+                        Notification Settings
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="notification-item">
+                        <div>
+                            <strong>Payment Reminders</strong>
+                            <br>
+                            <small class="text-muted">Get notified before due date</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="paymentReminders" checked>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div>
+                            <strong>Payment Confirmations</strong>
+                            <br>
+                            <small class="text-muted">Confirm successful payments</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="paymentConfirmations" checked>
+                        </div>
+                    </div>
+                    <div class="notification-item">
+                        <div>
+                            <strong>Overdue Alerts</strong>
+                            <br>
+                            <small class="text-muted">Alert for missed payments</small>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input" type="checkbox" id="overdueAlerts" checked>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sample Notifications -->
+            <div class="contribution-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-inbox text-info me-2"></i>
+                        Recent Notifications
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="notification-preview" onclick="showNotificationFull(this)">
+                        <div class="notification-actions">
+                            <button class="mark-read-btn" onclick="markAsRead(this, event)">
+                                Mark as Read
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-check-circle me-3 mt-1"></i>
+                            <div>
+                                <strong>Payment Confirmed</strong>
+                                <p class="mb-1">Your January 2025 contribution of KSh 2,500 has been successfully processed.</p>
+                                <small>2 hours ago</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notification-preview" onclick="showNotificationFull(this)">
+                        <div class="notification-actions">
+                            <button class="mark-read-btn" onclick="markAsRead(this, event)">
+                                Mark as Read
+                            </button>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-clock me-3 mt-1"></i>
+                            <div>
+                                <strong>Payment Reminder</strong>
+                                <p class="mb-1">Your February 2025 contribution is due in 3 days. Amount: KSh 2,500</p>
+                                <small>1 day ago</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="notification-preview read" onclick="showNotificationFull(this)">
+                        <div class="notification-actions">
+                            <span class="mark-read-btn">
+                                <i class="fas fa-check"></i> Read
+                            </span>
+                        </div>
+                        <div class="d-flex align-items-start">
+                            <i class="fas fa-info-circle me-3 mt-1"></i>
+                            <div>
+                                <strong>System Update</strong>
+                                <p class="mb-1">New features added to the contribution system. Check them out!</p>
+                                <small>3 days ago</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="contribution-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-success me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'contributions:make_payment' %}" class="btn btn-primary">
+                            <i class="fas fa-plus me-2"></i>Make Payment
+                        </a>
+                        <a href="{% url 'contributions:list' %}" class="btn btn-outline-secondary">
+                            <i class="fas fa-list me-2"></i>All Contributions
+                        </a>
+                        <button class="btn btn-outline-info" onclick="downloadStatement()">
+                            <i class="fas fa-download me-2"></i>Download Statement
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Notification Modal -->
+<div class="modal fade" id="notificationModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="notificationTitle">Notification</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="notificationBody">
+                <!-- Notification content will be loaded here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" onclick="markCurrentAsRead()">Mark as Read</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let currentNotification = null;
+
+function showNotificationFull(element) {
+    currentNotification = element;
+    const title = element.querySelector('strong').textContent;
+    const body = element.querySelector('p').textContent;
+    const time = element.querySelector('small').textContent;
+    
+    document.getElementById('notificationTitle').textContent = title;
+    document.getElementById('notificationBody').innerHTML = `
+        <p>${body}</p>
+        <small class="text-muted">${time}</small>
+    `;
+    
+    new bootstrap.Modal(document.getElementById('notificationModal')).show();
+}
+
+function markAsRead(button, event) {
+    event.stopPropagation();
+    const notification = button.closest('.notification-preview');
+    notification.classList.add('read');
+    button.innerHTML = '<i class="fas fa-check"></i> Read';
+    button.onclick = null;
+    
+    // Here you would make an AJAX call to mark as read in the database
+    console.log('Marking notification as read');
+}
+
+function markCurrentAsRead() {
+    if (currentNotification) {
+        const button = currentNotification.querySelector('.mark-read-btn');
+        if (button && !currentNotification.classList.contains('read')) {
+            markAsRead(button, {stopPropagation: () => {}});
+        }
+    }
+    bootstrap.Modal.getInstance(document.getElementById('notificationModal')).hide();
+}
+
+function downloadStatement() {
+    // Implement statement download
+    alert('Statement download will be implemented in the next update!');
+}
+
+// Notification settings toggle handlers
+document.getElementById('paymentReminders').addEventListener('change', function() {
+    console.log('Payment reminders:', this.checked);
+    // Save preference to database
+});
+
+document.getElementById('paymentConfirmations').addEventListener('change', function() {
+    console.log('Payment confirmations:', this.checked);
+    // Save preference to database
+});
+
+document.getElementById('overdueAlerts').addEventListener('change', function() {
+    console.log('Overdue alerts:', this.checked);
+    // Save preference to database
+});
+</script>
+{% endblock %}

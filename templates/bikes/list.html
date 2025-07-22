@@ -1,0 +1,132 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Bikes{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-motorcycle"></i> Bikes Management</h1>
+        <div>
+            <a href="{% url 'bikes:register' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Register New Bike
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_bikes|default:0 }}</h3>
+                    <p>Total Bikes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ active_bikes|default:0 }}</h3>
+                    <p>Active Bikes</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ lost_bikes|default:0 }}</h3>
+                    <p>Lost/Stolen</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exchange-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ transfers_count|default:0 }}</h3>
+                    <p>Transfers</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>All Bikes</h3>
+                <div class="table-actions">
+                    <a href="{% url 'bikes:my_bikes' %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i> My Bikes
+                    </a>
+                    <a href="{% url 'bikes:lost_tracking' %}" class="btn btn-warning">
+                        <i class="fas fa-search"></i> Lost Bike Tracking
+                    </a>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Registration No.</th>
+                        <th>Owner</th>
+                        <th>Make/Model</th>
+                        <th>Engine No.</th>
+                        <th>Chassis No.</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for bike in bikes %}
+                    <tr>
+                        <td><strong>{{ bike.registration_number }}</strong></td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ bike.owner.first_name }} {{ bike.owner.last_name }}</strong>
+                                <small>{{ bike.owner.member_id }}</small>
+                            </div>
+                        </td>
+                        <td>{{ bike.make }} {{ bike.model }}</td>
+                        <td>{{ bike.engine_number }}</td>
+                        <td>{{ bike.chassis_number }}</td>
+                        <td>
+                            {% if bike.status == 'active' %}
+                                <span class="status-badge status-success">Active</span>
+                            {% elif bike.status == 'lost' %}
+                                <span class="status-badge status-danger">Lost</span>
+                            {% elif bike.status == 'stolen' %}
+                                <span class="status-badge status-danger">Stolen</span>
+                            {% elif bike.status == 'sold' %}
+                                <span class="status-badge status-warning">Sold</span>
+                            {% else %}
+                                <span class="status-badge status-secondary">{{ bike.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'bikes:detail' bike.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'bikes:edit' bike.id %}" class="btn btn-sm btn-outline" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="{% url 'bikes:transfer' bike.id %}" class="btn btn-sm btn-primary" title="Transfer">
+                                    <i class="fas fa-exchange-alt"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No bikes found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

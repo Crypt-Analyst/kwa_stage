@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Create Stage{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-plus"></i> Register New Stage</h1>
+        <a href="{% url 'stages:list' %}" class="btn btn-outline">
+            <i class="fas fa-list"></i> Back to List
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Registration Options</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <div class="registration-option border rounded p-4 h-100">
+                                    <div class="text-center">
+                                        <i class="fas fa-map-marked-alt fa-3x text-primary mb-3"></i>
+                                        <h5>Map Registration</h5>
+                                        <p class="text-muted">Use interactive map to pinpoint exact location with GPS coordinates</p>
+                                        <a href="{% url 'stages:map_view' %}" class="btn btn-primary">
+                                            <i class="fas fa-map"></i> Use Map
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <div class="registration-option border rounded p-4 h-100">
+                                    <div class="text-center">
+                                        <i class="fas fa-edit fa-3x text-success mb-3"></i>
+                                        <h5>Manual Entry</h5>
+                                        <p class="text-muted">Fill in stage details manually without GPS coordinates</p>
+                                        <button class="btn btn-success" onclick="showManualForm()">
+                                            <i class="fas fa-keyboard"></i> Manual Form
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Manual Form (Hidden by default) -->
+                        <div id="manualForm" style="display: none;" class="mt-4">
+                            <hr>
+                            <h6 class="text-primary mb-3">Manual Stage Registration</h6>
+                            <form method="post">
+                                {% csrf_token %}
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Stage Name *</label>
+                                            <input type="text" class="form-control" name="stage_name" required>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Location/Area *</label>
+                                            <input type="text" class="form-control" name="location" required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Description</label>
+                                    <textarea class="form-control" name="description" rows="3"></textarea>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">County</label>
+                                            <input type="text" class="form-control" name="county">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Sub-County</label>
+                                            <input type="text" class="form-control" name="sub_county">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="mb-3">
+                                            <label class="form-label">Ward</label>
+                                            <input type="text" class="form-control" name="ward">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Phone Number</label>
+                                            <input type="tel" class="form-control" name="phone_number">
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Email</label>
+                                            <input type="email" class="form-control" name="email">
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Registration Date</label>
+                                    <input type="date" class="form-control" name="registration_date" value="{% now 'Y-m-d' %}">
+                                </div>
+                                
+                                <div class="d-flex gap-2">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-save"></i> Register Stage
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="hideManualForm()">
+                                        <i class="fas fa-times"></i> Cancel
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Registration Guide</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <h6 class="text-primary">Map Registration Benefits:</h6>
+                            <ul class="small">
+                                <li>Exact GPS coordinates</li>
+                                <li>Visual location verification</li>
+                                <li>Easy navigation for members</li>
+                                <li>Integration with mapping services</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <h6 class="text-success">Manual Registration Benefits:</h6>
+                            <ul class="small">
+                                <li>Quick data entry</li>
+                                <li>No GPS required</li>
+                                <li>Detailed address information</li>
+                                <li>Administrative details</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="alert alert-info">
+                            <i class="fas fa-lightbulb me-2"></i>
+                            <strong>Tip:</strong> Use map registration for precise location tracking and manual entry for administrative setup.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Recent Stages</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="list-group list-group-flush">
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Kencom Stage</h6>
+                                    <small class="text-muted">Nairobi CBD</small>
+                                </div>
+                                <span class="badge bg-success">45 members</span>
+                            </div>
+                            <div class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-1">Kawangware Stage</h6>
+                                    <small class="text-muted">Dagoretti</small>
+                                </div>
+                                <span class="badge bg-success">32 members</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showManualForm() {
+    document.getElementById('manualForm').style.display = 'block';
+    document.getElementById('manualForm').scrollIntoView({behavior: 'smooth'});
+}
+
+function hideManualForm() {
+    document.getElementById('manualForm').style.display = 'none';
+}
+</script>
+{% endblock %}

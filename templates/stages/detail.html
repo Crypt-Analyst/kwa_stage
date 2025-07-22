@@ -1,0 +1,230 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ stage.name }} - Stage Details{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-map-marker-alt"></i> {{ stage.name }}</h1>
+        <div class="header-actions">
+            <a href="{% url 'stages:list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left"></i> Back to List
+            </a>
+            {% if stage.latitude and stage.longitude %}
+                <button onclick="showOnMap()" class="btn btn-primary">
+                    <i class="fas fa-map"></i> View on Map
+                </button>
+            {% endif %}
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Stage Information -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Information</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="text-muted small">Stage Name</label>
+                                    <h6>{{ stage.name }}</h6>
+                                </div>
+                                {% if stage.location %}
+                                <div class="mb-3">
+                                    <label class="text-muted small">Location</label>
+                                    <p class="mb-0">{{ stage.location }}</p>
+                                </div>
+                                {% endif %}
+                                {% if stage.description %}
+                                <div class="mb-3">
+                                    <label class="text-muted small">Description</label>
+                                    <p class="mb-0">{{ stage.description }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="col-md-6">
+                                {% if stage.county or stage.sub_county or stage.ward %}
+                                <div class="mb-3">
+                                    <label class="text-muted small">Administrative Location</label>
+                                    <div>
+                                        {% if stage.county %}<span class="badge bg-light text-dark me-1">{{ stage.county }}</span>{% endif %}
+                                        {% if stage.sub_county %}<span class="badge bg-light text-dark me-1">{{ stage.sub_county }}</span>{% endif %}
+                                        {% if stage.ward %}<span class="badge bg-light text-dark">{{ stage.ward }}</span>{% endif %}
+                                    </div>
+                                </div>
+                                {% endif %}
+                                
+                                {% if stage.phone_number %}
+                                <div class="mb-3">
+                                    <label class="text-muted small">Phone Number</label>
+                                    <p class="mb-0">{{ stage.phone_number }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                {% if stage.email %}
+                                <div class="mb-3">
+                                    <label class="text-muted small">Email</label>
+                                    <p class="mb-0">{{ stage.email }}</p>
+                                </div>
+                                {% endif %}
+                                
+                                <div class="mb-3">
+                                    <label class="text-muted small">Registration Date</label>
+                                    <p class="mb-0">{{ stage.registration_date|date:"F d, Y" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if stage.latitude and stage.longitude %}
+                        <div class="row mt-4">
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <i class="fas fa-map-marker-alt me-2"></i>
+                                    <strong>GPS Coordinates:</strong> {{ stage.latitude }}, {{ stage.longitude }}
+                                    <button onclick="copyCoordinates()" class="btn btn-sm btn-outline-info ms-2">
+                                        <i class="fas fa-copy"></i> Copy
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Members Section -->
+                <div class="card mt-4">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Stage Members</h5>
+                        <a href="{% url 'stages:add_member' stage.id %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus"></i> Add Member
+                        </a>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center py-4">
+                            <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                            <h6 class="text-muted">No members registered yet</h6>
+                            <p class="text-muted small">Start by adding your first stage member.</p>
+                            <a href="{% url 'stages:add_member' stage.id %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Add First Member
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Statistics -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stat-card">
+                                    <h3 class="text-primary">0</h3>
+                                    <small class="text-muted">Members</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stat-card">
+                                    <h3 class="text-success">0</h3>
+                                    <small class="text-muted">Active Bikes</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <h3 class="text-warning">0</h3>
+                                    <small class="text-muted">Contributions</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <h3 class="text-info">{{ stage.created_at|timesince }}</h3>
+                                    <small class="text-muted">Age</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'stages:add_member' stage.id %}" class="btn btn-primary">
+                                <i class="fas fa-user-plus"></i> Add Member
+                            </a>
+                            <a href="{% url 'stages:manage_leadership' stage.id %}" class="btn btn-outline-primary">
+                                <i class="fas fa-crown"></i> Manage Leadership
+                            </a>
+                            {% if stage.latitude and stage.longitude %}
+                                <button onclick="showOnMap()" class="btn btn-outline-success">
+                                    <i class="fas fa-map"></i> View on Map
+                                </button>
+                            {% endif %}
+                            <a href="#" class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar"></i> View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status Info -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Status</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Status</span>
+                                <span class="badge bg-success">Active</span>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Type</span>
+                                {% if stage.latitude and stage.longitude %}
+                                    <span class="badge bg-info">GPS Enabled</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Manual Entry</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="mb-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Created</span>
+                                <span class="text-muted">{{ stage.created_at|date:"M d, Y" }}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showOnMap() {
+    {% if stage.latitude and stage.longitude %}
+        window.open(`{% url 'stages:map_view' %}?lat={{ stage.latitude }}&lng={{ stage.longitude }}`, '_blank');
+    {% endif %}
+}
+
+function copyCoordinates() {
+    const coords = "{{ stage.latitude }}, {{ stage.longitude }}";
+    navigator.clipboard.writeText(coords).then(function() {
+        alert('Coordinates copied to clipboard!');
+    });
+}
+</script>
+{% endblock %}

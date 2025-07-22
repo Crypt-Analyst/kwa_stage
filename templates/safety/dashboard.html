@@ -1,0 +1,380 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Safety & Compliance - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-shield-alt"></i> Safety & Compliance</h1>
+        <p>Manage your insurance, licenses, training, and safety records</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">
+            <i class="fas fa-plus"></i> Add Insurance
+        </button>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#uploadLicenseModal">
+            <i class="fas fa-upload"></i> Upload License
+        </button>
+    </div>
+</div>
+
+<!-- Compliance Status Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="compliance-card {% if insurance_status.is_valid %}valid{% else %}expired{% endif %}">
+            <div class="compliance-icon">
+                <i class="fas fa-shield-alt"></i>
+            </div>
+            <div class="compliance-content">
+                <h6>Insurance</h6>
+                <p class="status">{{ insurance_status.status }}</p>
+                {% if insurance_status.expires_at %}
+                <small>Expires: {{ insurance_status.expires_at|date:"M d, Y" }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="compliance-card {% if license_status.is_valid %}valid{% else %}expired{% endif %}">
+            <div class="compliance-icon">
+                <i class="fas fa-id-card"></i>
+            </div>
+            <div class="compliance-content">
+                <h6>Driving License</h6>
+                <p class="status">{{ license_status.status }}</p>
+                {% if license_status.expires_at %}
+                <small>Expires: {{ license_status.expires_at|date:"M d, Y" }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="compliance-card {% if training_status.is_complete %}valid{% else %}pending{% endif %}">
+            <div class="compliance-icon">
+                <i class="fas fa-graduation-cap"></i>
+            </div>
+            <div class="compliance-content">
+                <h6>Safety Training</h6>
+                <p class="status">{{ training_status.completion_percentage }}% Complete</p>
+                <small>{{ training_status.completed_modules }}/{{ training_status.total_modules }} modules</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="compliance-card {% if psv_status.is_valid %}valid{% else %}expired{% endif %}">
+            <div class="compliance-icon">
+                <i class="fas fa-certificate"></i>
+            </div>
+            <div class="compliance-content">
+                <h6>PSV Badge</h6>
+                <p class="status">{{ psv_status.status }}</p>
+                {% if psv_status.expires_at %}
+                <small>Expires: {{ psv_status.expires_at|date:"M d, Y" }}</small>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- Insurance Section -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-shield-alt"></i> Insurance Coverage</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">
+                    <i class="fas fa-plus"></i> Add
+                </button>
+            </div>
+            <div class="card-body">
+                {% if insurance_policies %}
+                <div class="insurance-list">
+                    {% for policy in insurance_policies %}
+                    <div class="insurance-item">
+                        <div class="insurance-details">
+                            <h6>{{ policy.policy_type|title }} Insurance</h6>
+                            <p class="mb-1">
+                                <strong>Provider:</strong> {{ policy.provider }}<br>
+                                <strong>Policy Number:</strong> {{ policy.policy_number }}<br>
+                                <strong>Coverage:</strong> KSh {{ policy.coverage_amount|floatformat:0 }}
+                            </p>
+                            <div class="insurance-status">
+                                <span class="badge bg-{% if policy.is_active %}success{% else %}danger{% endif %}">
+                                    {% if policy.is_active %}Active{% else %}Expired{% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    Valid until {{ policy.expiry_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="insurance-actions">
+                            {% if policy.certificate %}
+                            <a href="{{ policy.certificate.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-file-pdf"></i> View
+                            </a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-secondary" onclick="renewInsurance({{ policy.id }})">
+                                <i class="fas fa-redo"></i> Renew
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-shield-alt fa-3x text-muted mb-3"></i>
+                    <h6>No Insurance Policies</h6>
+                    <p class="text-muted">Add your insurance policies to track coverage and expiry dates</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addInsuranceModal">
+                        <i class="fas fa-plus"></i> Add Insurance Policy
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Licenses Section -->
+    <div class="col-lg-6 mb-4">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-id-card"></i> Licenses & Permits</h5>
+                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#uploadLicenseModal">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+            </div>
+            <div class="card-body">
+                {% if licenses %}
+                <div class="licenses-list">
+                    {% for license in licenses %}
+                    <div class="license-item">
+                        <div class="license-details">
+                            <h6>{{ license.get_license_type_display }}</h6>
+                            <p class="mb-1">
+                                <strong>License Number:</strong> {{ license.license_number }}<br>
+                                <strong>Issued:</strong> {{ license.issue_date|date:"M d, Y" }}
+                            </p>
+                            <div class="license-status">
+                                <span class="badge bg-{% if license.is_valid %}success{% else %}danger{% endif %}">
+                                    {% if license.is_valid %}Valid{% else %}Expired{% endif %}
+                                </span>
+                                <small class="text-muted">
+                                    Expires {{ license.expiry_date|date:"M d, Y" }}
+                                </small>
+                            </div>
+                        </div>
+                        <div class="license-actions">
+                            {% if license.document %}
+                            <a href="{{ license.document.url }}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fas fa-file-pdf"></i> View
+                            </a>
+                            {% endif %}
+                            <button class="btn btn-sm btn-outline-secondary" onclick="renewLicense({{ license.id }})">
+                                <i class="fas fa-redo"></i> Renew
+                            </button>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-id-card fa-3x text-muted mb-3"></i>
+                    <h6>No Licenses Uploaded</h6>
+                    <p class="text-muted">Upload your driving license and other permits</p>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#uploadLicenseModal">
+                        <i class="fas fa-upload"></i> Upload License
+                    </button>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Training Section -->
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-graduation-cap"></i> Safety Training & Certifications</h5>
+            </div>
+            <div class="card-body">
+                {% if training_modules %}
+                <div class="training-modules">
+                    {% for module in training_modules %}
+                    <div class="training-module">
+                        <div class="module-info">
+                            <h6>{{ module.title }}</h6>
+                            <p class="text-muted">{{ module.description }}</p>
+                            <div class="module-progress">
+                                <div class="progress">
+                                    <div class="progress-bar" style="width: {{ module.completion_percentage }}%"></div>
+                                </div>
+                                <small>{{ module.completion_percentage }}% Complete</small>
+                            </div>
+                        </div>
+                        <div class="module-actions">
+                            {% if module.is_completed %}
+                            <span class="badge bg-success">
+                                <i class="fas fa-check"></i> Completed
+                            </span>
+                            {% if module.certificate %}
+                            <a href="{{ module.certificate.url }}" class="btn btn-sm btn-outline-primary ms-2" target="_blank">
+                                <i class="fas fa-certificate"></i> Certificate
+                            </a>
+                            {% endif %}
+                            {% else %}
+                            <button class="btn btn-sm btn-primary" onclick="startTraining({{ module.id }})">
+                                {% if module.completion_percentage > 0 %}
+                                <i class="fas fa-play"></i> Continue
+                                {% else %}
+                                <i class="fas fa-play"></i> Start
+                                {% endif %}
+                            </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-graduation-cap fa-3x text-muted mb-3"></i>
+                    <h6>No Training Modules Available</h6>
+                    <p class="text-muted">Safety training modules will appear here when available</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'safety/modals/add_insurance_modal.html' %}
+{% include 'safety/modals/upload_license_modal.html' %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.compliance-card {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    border-radius: 12px;
+    background: white;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.compliance-card.valid {
+    border-left: 4px solid #28a745;
+}
+
+.compliance-card.expired {
+    border-left: 4px solid #dc3545;
+}
+
+.compliance-card.pending {
+    border-left: 4px solid #ffc107;
+}
+
+.compliance-icon {
+    width: 50px;
+    height: 50px;
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.5rem;
+}
+
+.compliance-card.valid .compliance-icon {
+    background: #28a745;
+    color: white;
+}
+
+.compliance-card.expired .compliance-icon {
+    background: #dc3545;
+    color: white;
+}
+
+.compliance-card.pending .compliance-icon {
+    background: #ffc107;
+    color: white;
+}
+
+.compliance-content h6 {
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+.status {
+    margin-bottom: 0.25rem;
+    font-weight: 500;
+}
+
+.insurance-item, .license-item, .training-module {
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+.insurance-item:last-child, .license-item:last-child, .training-module:last-child {
+    margin-bottom: 0;
+}
+
+.insurance-details, .license-details, .module-info {
+    flex-grow: 1;
+}
+
+.insurance-details h6, .license-details h6, .module-info h6 {
+    margin-bottom: 0.5rem;
+    color: var(--primary-color);
+}
+
+.insurance-status, .license-status {
+    margin-top: 0.75rem;
+}
+
+.module-progress {
+    margin-top: 1rem;
+}
+
+.progress {
+    height: 8px;
+    margin-bottom: 0.5rem;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function renewInsurance(policyId) {
+    // Implement insurance renewal logic
+    alert('Insurance renewal feature coming soon!');
+}
+
+function renewLicense(licenseId) {
+    // Implement license renewal logic
+    alert('License renewal feature coming soon!');
+}
+
+function startTraining(moduleId) {
+    // Implement training module start logic
+    window.open(`/safety/training/${moduleId}/`, '_blank');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,624 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Social Feed - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.social-feed {
+    background: #f8f9fa;
+}
+
+.post-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.post-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.post-header {
+    padding: 15px 20px 10px;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.user-avatar {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.post-content {
+    padding: 15px 20px;
+}
+
+.post-image {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+
+.post-actions {
+    padding: 10px 20px;
+    border-top: 1px solid #f0f0f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.action-btn {
+    background: none;
+    border: none;
+    color: #6c757d;
+    cursor: pointer;
+    padding: 8px 15px;
+    border-radius: 20px;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.action-btn:hover {
+    background: #f8f9fa;
+    color: #007bff;
+}
+
+.action-btn.liked {
+    color: #dc3545;
+}
+
+.story-container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.story-item {
+    display: inline-block;
+    margin-right: 15px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.story-avatar {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    border: 3px solid #007bff;
+    padding: 2px;
+    object-fit: cover;
+}
+
+.new-post-form {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.comment-section {
+    padding: 15px 20px;
+    border-top: 1px solid #f0f0f0;
+    background: #f8f9fa;
+}
+
+.comment-item {
+    background: white;
+    border-radius: 10px;
+    padding: 10px 15px;
+    margin-bottom: 10px;
+}
+
+.friend-suggestions {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.notification-badge {
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    padding: 2px 6px;
+    font-size: 12px;
+    position: absolute;
+    top: -5px;
+    right: -5px;
+}
+
+.emergency-post {
+    border-left: 4px solid #dc3545;
+}
+
+.announcement-post {
+    border-left: 4px solid #28a745;
+}
+
+@media (max-width: 768px) {
+    .social-feed {
+        padding: 10px;
+    }
+    
+    .post-card {
+        margin-bottom: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="social-feed">
+    <div class="container-fluid py-4">
+        <div class="row">
+            <!-- Main Feed -->
+            <div class="col-lg-8">
+                <!-- Active Stories -->
+                {% if stories %}
+                <div class="story-container">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-clock text-primary me-2"></i>
+                        Stage Stories
+                    </h6>
+                    <div class="d-flex overflow-auto">
+                        {% for story in stories %}
+                        <div class="story-item">
+                            {% if story.author.profile_photo %}
+                            <img src="{{ story.author.profile_photo.url }}" alt="{{ story.author.user.get_full_name }}" class="story-avatar">
+                            {% else %}
+                            <div class="story-avatar bg-primary text-white d-flex align-items-center justify-content-center">
+                                {{ story.author.user.first_name|first }}{{ story.author.user.last_name|first }}
+                            </div>
+                            {% endif %}
+                            <small class="d-block mt-1">{{ story.author.user.first_name }}</small>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- New Post Form -->
+                <div class="new-post-form">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-edit text-primary me-2"></i>
+                        Share with your Stage
+                    </h6>
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            {{ form.content }}
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                {{ form.post_type }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.stage }}
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                {{ form.location }}
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">
+                                <i class="fas fa-image me-2"></i>Add Photo
+                            </label>
+                            {{ form.image }}
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <button type="button" class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fas fa-map-marker-alt me-1"></i>Location
+                                </button>
+                                <button type="button" class="btn btn-outline-warning btn-sm">
+                                    <i class="fas fa-exclamation-triangle me-1"></i>Emergency
+                                </button>
+                            </div>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-share me-2"></i>Share Post
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Posts Feed -->
+                {% for post in posts %}
+                <div class="post-card {% if post.post_type == 'emergency' %}emergency-post{% elif post.post_type == 'announcement' %}announcement-post{% endif %}">
+                    <!-- Post Header -->
+                    <div class="post-header">
+                        <div class="d-flex align-items-center">
+                            {% if post.author.profile_photo %}
+                            <img src="{{ post.author.profile_photo.url }}" alt="{{ post.author.user.get_full_name }}" class="user-avatar me-3">
+                            {% else %}
+                            <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                                {{ post.author.user.first_name|first }}{{ post.author.user.last_name|first }}
+                            </div>
+                            {% endif %}
+                            <div class="flex-grow-1">
+                                <h6 class="mb-0">{{ post.author.user.get_full_name }}</h6>
+                                <small class="text-muted">
+                                    {% if post.stage %}
+                                        {{ post.stage.name }} •
+                                    {% endif %}
+                                    {{ post.created_at|timesince }} ago
+                                    {% if post.location %}
+                                        • <i class="fas fa-map-marker-alt"></i> {{ post.location }}
+                                    {% endif %}
+                                </small>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v text-muted"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-bookmark me-2"></i>Save Post</a></li>
+                                    <li><a class="dropdown-item" href="#"><i class="fas fa-flag me-2"></i>Report</a></li>
+                                </ul>
+                            </div>
+                        </div>
+                        {% if post.post_type != 'text' %}
+                        <div class="mt-2">
+                            <span class="badge 
+                                {% if post.post_type == 'emergency' %}bg-danger
+                                {% elif post.post_type == 'announcement' %}bg-success
+                                {% elif post.post_type == 'safety_tip' %}bg-warning
+                                {% else %}bg-primary{% endif %}">
+                                <i class="fas 
+                                    {% if post.post_type == 'emergency' %}fa-exclamation-triangle
+                                    {% elif post.post_type == 'announcement' %}fa-bullhorn
+                                    {% elif post.post_type == 'safety_tip' %}fa-shield-alt
+                                    {% else %}fa-image{% endif %} me-1"></i>
+                                {{ post.get_post_type_display }}
+                            </span>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Content -->
+                    <div class="post-content">
+                        <p class="mb-2">{{ post.content|linebreaks }}</p>
+                        {% if post.image %}
+                        <img src="{{ post.image.url }}" alt="Post image" class="post-image">
+                        {% endif %}
+                    </div>
+
+                    <!-- Post Actions -->
+                    <div class="post-actions">
+                        <div class="d-flex">
+                            <button class="action-btn like-btn" data-post-id="{{ post.id }}">
+                                <i class="far fa-heart"></i>
+                                <span class="like-count">{{ post.likes_count }}</span>
+                            </button>
+                            <button class="action-btn comment-toggle" data-target="#comments-{{ post.id }}">
+                                <i class="far fa-comment"></i>
+                                <span>{{ post.comments_count }}</span>
+                            </button>
+                            <button class="action-btn">
+                                <i class="far fa-share-square"></i>
+                                <span>Share</span>
+                            </button>
+                        </div>
+                        {% if post.is_pinned %}
+                        <div>
+                            <i class="fas fa-thumbtack text-warning" title="Pinned Post"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Comments Section -->
+                    <div class="comment-section collapse" id="comments-{{ post.id }}">
+                        <form class="comment-form mb-3" data-post-id="{{ post.id }}">
+                            {% csrf_token %}
+                            <div class="input-group">
+                                <input type="text" class="form-control" name="content" placeholder="Write a comment..." required>
+                                <button class="btn btn-primary" type="submit">
+                                    <i class="fas fa-paper-plane"></i>
+                                </button>
+                            </div>
+                        </form>
+                        
+                        <div class="comments-list" id="comments-list-{{ post.id }}">
+                            {% for comment in post.comments.all|slice:":3" %}
+                            <div class="comment-item">
+                                <div class="d-flex">
+                                    {% if comment.author.profile_photo %}
+                                    <img src="{{ comment.author.profile_photo.url }}" alt="{{ comment.author.user.get_full_name }}" class="user-avatar me-2" style="width: 30px; height: 30px;">
+                                    {% else %}
+                                    <div class="user-avatar bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; font-size: 12px;">
+                                        {{ comment.author.user.first_name|first }}{{ comment.author.user.last_name|first }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <strong>{{ comment.author.user.get_full_name }}</strong>
+                                        <p class="mb-1">{{ comment.content }}</p>
+                                        <small class="text-muted">{{ comment.created_at|timesince }} ago</small>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% empty %}
+                <div class="text-center py-5">
+                    <i class="fas fa-users fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">No posts yet</h5>
+                    <p class="text-muted">Be the first to share something with your stage!</p>
+                </div>
+                {% endfor %}
+
+                <!-- Pagination -->
+                {% if posts.has_other_pages %}
+                <div class="d-flex justify-content-center mt-4">
+                    <nav aria-label="Posts pagination">
+                        <ul class="pagination">
+                            {% if posts.has_previous %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ posts.previous_page_number }}">
+                                    <i class="fas fa-chevron-left"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                            
+                            {% for num in posts.paginator.page_range %}
+                            {% if posts.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                            {% elif num > posts.number|add:'-3' and num < posts.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}">{{ num }}</a>
+                            </li>
+                            {% endif %}
+                            {% endfor %}
+                            
+                            {% if posts.has_next %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ posts.next_page_number }}">
+                                    <i class="fas fa-chevron-right"></i>
+                                </a>
+                            </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Friend Suggestions -->
+                <div class="friend-suggestions mb-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-user-plus text-primary me-2"></i>
+                        Friend Suggestions
+                    </h6>
+                    {% for suggestion in friend_suggestions %}
+                    <div class="d-flex align-items-center mb-3">
+                        {% if suggestion.profile_photo %}
+                        <img src="{{ suggestion.profile_photo.url }}" alt="{{ suggestion.user.get_full_name }}" class="user-avatar me-3" style="width: 40px; height: 40px;">
+                        {% else %}
+                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3" style="width: 40px; height: 40px;">
+                            {{ suggestion.user.first_name|first }}{{ suggestion.user.last_name|first }}
+                        </div>
+                        {% endif %}
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0">{{ suggestion.user.get_full_name }}</h6>
+                            <small class="text-muted">{{ suggestion.stage.name }}</small>
+                        </div>
+                        <button class="btn btn-sm btn-outline-primary send-friend-request" data-member-id="{{ suggestion.id }}">
+                            <i class="fas fa-user-plus"></i>
+                        </button>
+                    </div>
+                    {% empty %}
+                    <p class="text-muted text-center">No suggestions available</p>
+                    {% endfor %}
+                    
+                    <div class="text-center">
+                        <a href="{% url 'social:friends' %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-users me-2"></i>View All Friends
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="friend-suggestions mb-4">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-bolt text-primary me-2"></i>
+                        Quick Actions
+                    </h6>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'social:group_chats' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-comments me-2"></i>Group Chats
+                        </a>
+                        <a href="{% url 'social:stories' %}" class="btn btn-outline-success">
+                            <i class="fas fa-camera me-2"></i>Add Story
+                        </a>
+                        <a href="{% url 'social:notifications' %}" class="btn btn-outline-warning position-relative">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                            <span class="notification-badge">3</span>
+                        </a>
+                        <a href="{% url 'emergency:create' %}" class="btn btn-outline-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Emergency Alert
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Stage Info -->
+                {% if member.stage %}
+                <div class="friend-suggestions">
+                    <h6 class="fw-bold mb-3">
+                        <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                        {{ member.stage.name }}
+                    </h6>
+                    <p class="text-muted small">{{ member.stage.location }}</p>
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <strong class="d-block">{{ member.stage.member_set.count }}</strong>
+                            <small class="text-muted">Members</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block">5</strong>
+                            <small class="text-muted">Online</small>
+                        </div>
+                        <div class="col-4">
+                            <strong class="d-block">12</strong>
+                            <small class="text-muted">Active</small>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // CSRF token for AJAX requests
+    const csrftoken = $('[name=csrfmiddlewaretoken]').val();
+    
+    // Like/Unlike posts
+    $('.like-btn').click(function() {
+        const postId = $(this).data('post-id');
+        const button = $(this);
+        
+        $.ajax({
+            url: `/social/post/${postId}/like/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(data) {
+                const icon = button.find('i');
+                const count = button.find('.like-count');
+                
+                if (data.liked) {
+                    icon.removeClass('far').addClass('fas');
+                    button.addClass('liked');
+                } else {
+                    icon.removeClass('fas').addClass('far');
+                    button.removeClass('liked');
+                }
+                
+                count.text(data.likes_count);
+            },
+            error: function(xhr) {
+                console.error('Error liking post:', xhr.responseJSON);
+                alert('Error liking post. Please try again.');
+            }
+        });
+    });
+    
+    // Toggle comments
+    $('.comment-toggle').click(function() {
+        const target = $($(this).data('target'));
+        target.collapse('toggle');
+    });
+    
+    // Add comments
+    $('.comment-form').submit(function(e) {
+        e.preventDefault();
+        const form = $(this);
+        const postId = form.data('post-id');
+        const content = form.find('input[name="content"]').val().trim();
+        
+        if (!content) {
+            alert('Please enter a comment');
+            return;
+        }
+        
+        $.ajax({
+            url: `/social/post/${postId}/comment/`,
+            method: 'POST',
+            data: {
+                'content': content,
+                'csrfmiddlewaretoken': csrftoken
+            },
+            success: function(data) {
+                if (data.success) {
+                    // Add comment to list
+                    const commentHtml = `
+                        <div class="comment-item">
+                            <div class="d-flex">
+                                <div class="user-avatar bg-secondary text-white d-flex align-items-center justify-content-center me-2" style="width: 30px; height: 30px; font-size: 12px;">
+                                    ${data.comment.author.charAt(0)}
+                                </div>
+                                <div class="flex-grow-1">
+                                    <strong>${data.comment.author}</strong>
+                                    <p class="mb-1">${data.comment.content}</p>
+                                    <small class="text-muted">${data.comment.created_at}</small>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    $(`#comments-list-${postId}`).append(commentHtml);
+                    
+                    // Update comment count
+                    form.closest('.post-card').find('.comment-toggle span').text(data.comments_count);
+                    
+                    // Clear form
+                    form.find('input[name="content"]').val('');
+                }
+            },
+            error: function(xhr) {
+                console.error('Error adding comment:', xhr.responseJSON);
+                alert('Error adding comment. Please try again.');
+            }
+        });
+    });
+    
+    // Send friend requests
+    $('.send-friend-request').click(function() {
+        const button = $(this);
+        const memberId = button.data('member-id');
+        
+        $.ajax({
+            url: `/social/friends/request/${memberId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(data) {
+                if (data.success) {
+                    button.removeClass('btn-outline-primary').addClass('btn-success');
+                    button.html('<i class="fas fa-check"></i>');
+                    button.prop('disabled', true);
+                    
+                    // Show success message
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                }
+            },
+            error: function(xhr) {
+                console.error('Error sending friend request:', xhr.responseJSON);
+                alert('Error sending friend request. Please try again.');
+            }
+        });
+    });
+    
+    // Auto-refresh notifications count (every 30 seconds)
+    setInterval(function() {
+        // This would fetch unread notifications count
+        // Implementation depends on your notification system
+    }, 30000);
+});
+</script>
+{% endblock %}

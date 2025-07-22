@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Loans{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-money-check-alt"></i> Loans Management</h1>
+        <a href="{% url 'loans:apply' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Apply for Loan
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ total_loans|default:0|floatformat:0 }}</h3>
+                    <p>Total Loans</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ active_loans|default:0 }}</h3>
+                    <p>Active Loans</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ overdue_amount|default:0|floatformat:0 }}</h3>
+                    <p>Overdue Amount</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-percentage"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ recovery_rate|default:0 }}%</h3>
+                    <p>Recovery Rate</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>All Loans</h3>
+                <div class="table-actions">
+                    <a href="{% url 'loans:my_loans' %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i> My Loans
+                    </a>
+                    <a href="{% url 'loans:repayment_schedule' %}" class="btn btn-outline">
+                        <i class="fas fa-calendar-alt"></i> Repayment Schedule
+                    </a>
+                    <a href="{% url 'loans:reports' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Loan ID</th>
+                        <th>Member</th>
+                        <th>Amount</th>
+                        <th>Interest Rate</th>
+                        <th>Duration</th>
+                        <th>Outstanding</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for loan in loans %}
+                    <tr>
+                        <td><strong>#{{ loan.loan_id }}</strong></td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ loan.member.first_name }} {{ loan.member.last_name }}</strong>
+                                <small>{{ loan.member.member_id }}</small>
+                            </div>
+                        </td>
+                        <td><strong>KSh {{ loan.amount|floatformat:0 }}</strong></td>
+                        <td>{{ loan.interest_rate }}%</td>
+                        <td>{{ loan.duration_months }} months</td>
+                        <td>
+                            {% if loan.outstanding_balance %}
+                                <strong>KSh {{ loan.outstanding_balance|floatformat:0 }}</strong>
+                            {% else %}
+                                <span class="text-success">Paid</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if loan.status == 'approved' %}
+                                <span class="status-badge status-success">Approved</span>
+                            {% elif loan.status == 'pending' %}
+                                <span class="status-badge status-warning">Pending</span>
+                            {% elif loan.status == 'rejected' %}
+                                <span class="status-badge status-danger">Rejected</span>
+                            {% elif loan.status == 'active' %}
+                                <span class="status-badge status-primary">Active</span>
+                            {% elif loan.status == 'completed' %}
+                                <span class="status-badge status-success">Completed</span>
+                            {% elif loan.status == 'defaulted' %}
+                                <span class="status-badge status-danger">Defaulted</span>
+                            {% else %}
+                                <span class="status-badge status-secondary">{{ loan.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'loans:detail' loan.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if loan.status == 'active' %}
+                                <a href="{% url 'loans:make_payment' loan.id %}" class="btn btn-sm btn-success" title="Make Payment">
+                                    <i class="fas fa-credit-card"></i>
+                                </a>
+                                {% endif %}
+                                {% if loan.status == 'pending' %}
+                                <a href="{% url 'loans:review' loan.id %}" class="btn btn-sm btn-primary" title="Review">
+                                    <i class="fas fa-gavel"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center">No loans found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

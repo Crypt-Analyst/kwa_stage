@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Generate QR Code{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-qrcode"></i> QR Code Generator</h1>
+        <p class="text-muted">Generate QR codes for user registration, contact sharing, or system information</p>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Generate QR Code</h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="qrForm">
+                            {% csrf_token %}
+                            
+                            <div class="mb-3">
+                                <label for="qr_type" class="form-label fw-semibold">
+                                    <i class="fas fa-list me-2"></i>QR Code Type
+                                </label>
+                                <select class="form-select" id="qr_type" name="qr_type">
+                                    <option value="url">Website URL</option>
+                                    <option value="contact">Contact Information</option>
+                                    <option value="registration">User Registration</option>
+                                    <option value="stage">Stage Information</option>
+                                    <option value="custom">Custom Data</option>
+                                </select>
+                            </div>
+
+                            <div class="mb-3" id="data_input">
+                                <label for="data" class="form-label fw-semibold">
+                                    <i class="fas fa-keyboard me-2"></i>Data to Encode
+                                </label>
+                                <textarea class="form-control" 
+                                         id="data" 
+                                         name="data" 
+                                         rows="4" 
+                                         placeholder="Enter the data to encode in QR code"
+                                         required></textarea>
+                            </div>
+
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-qrcode me-2"></i>
+                                    Generate QR Code
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Pre-filled Examples -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">Quick Examples</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-12 mb-2">
+                                <button class="btn btn-outline-primary btn-sm w-100" onclick="fillExample('url')">
+                                    <i class="fas fa-globe me-1"></i> System Login URL
+                                </button>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <button class="btn btn-outline-success btn-sm w-100" onclick="fillExample('registration')">
+                                    <i class="fas fa-user-plus me-1"></i> Registration Link
+                                </button>
+                            </div>
+                            <div class="col-12 mb-2">
+                                <button class="btn btn-outline-info btn-sm w-100" onclick="fillExample('contact')">
+                                    <i class="fas fa-phone me-1"></i> Emergency Contact
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Generated QR Code</h5>
+                    </div>
+                    <div class="card-body text-center" id="qr_result">
+                        <div class="placeholder-content">
+                            <i class="fas fa-qrcode fa-5x text-muted mb-3"></i>
+                            <p class="text-muted">QR code will appear here after generation</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.getElementById('qrForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    
+    fetch('{% url "authentication:generate_qr" %}', {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('qr_result').innerHTML = `
+                <div class="qr-code-container">
+                    <img src="${data.qr_code}" alt="QR Code" class="img-fluid mb-3" style="max-width: 300px;">
+                    <div class="mt-3">
+                        <button class="btn btn-success btn-sm" onclick="downloadQR('${data.qr_code}')">
+                            <i class="fas fa-download me-1"></i> Download
+                        </button>
+                    </div>
+                </div>
+            `;
+        } else {
+            document.getElementById('qr_result').innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Failed to generate QR code
+                </div>
+            `;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
+});
+
+function fillExample(type) {
+    const dataInput = document.getElementById('data');
+    const typeSelect = document.getElementById('qr_type');
+    
+    typeSelect.value = type;
+    
+    switch(type) {
+        case 'url':
+            dataInput.value = window.location.origin + '{% url "authentication:login" %}';
+            break;
+        case 'registration':
+            dataInput.value = window.location.origin + '{% url "register" %}';
+            break;
+        case 'contact':
+            dataInput.value = 'Emergency Contact: +254700000000\nBoda Boda Welfare System\nQuick Response Team';
+            break;
+    }
+}
+
+function downloadQR(dataUrl) {
+    const link = document.createElement('a');
+    link.download = 'bodaboda-qr-code.png';
+    link.href = dataUrl;
+    link.click();
+}
+</script>
+
+<style>
+.placeholder-content {
+    padding: 3rem 0;
+}
+
+.qr-code-container {
+    padding: 1rem;
+}
+
+.card {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+</style>
+{% endblock %}

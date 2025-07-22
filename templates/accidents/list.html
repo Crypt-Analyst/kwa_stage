@@ -1,0 +1,181 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accident Reports{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-car-crash"></i> Accident Reports</h1>
+        <a href="{% url 'accidents:report' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Report Accident
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ total_accidents|default:0 }}</h3>
+                    <p>Total Accidents</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ this_month|default:0 }}</h3>
+                    <p>This Month</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-ambulance"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ serious_accidents|default:0 }}</h3>
+                    <p>Serious Accidents</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-heartbeat"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ injured_members|default:0 }}</h3>
+                    <p>Injured Members</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>Recent Accident Reports</h3>
+                <div class="table-actions">
+                    <a href="{% url 'accidents:my_reports' %}" class="btn btn-outline">
+                        <i class="fas fa-user"></i> My Reports
+                    </a>
+                    <a href="{% url 'accidents:analytics' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-line"></i> Analytics
+                    </a>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date & Time</th>
+                        <th>Member</th>
+                        <th>Location</th>
+                        <th>Severity</th>
+                        <th>Injury Type</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for accident in accidents %}
+                    <tr>
+                        <td>
+                            <div>
+                                <strong>{{ accident.accident_date|date:"M d, Y" }}</strong>
+                                <small>{{ accident.accident_time|time:"H:i" }}</small>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ accident.member.first_name }} {{ accident.member.last_name }}</strong>
+                                <small>{{ accident.member.member_id }}</small>
+                            </div>
+                        </td>
+                        <td>{{ accident.location }}</td>
+                        <td>
+                            {% if accident.severity == 'minor' %}
+                                <span class="severity-badge severity-minor">Minor</span>
+                            {% elif accident.severity == 'moderate' %}
+                                <span class="severity-badge severity-moderate">Moderate</span>
+                            {% elif accident.severity == 'serious' %}
+                                <span class="severity-badge severity-serious">Serious</span>
+                            {% elif accident.severity == 'critical' %}
+                                <span class="severity-badge severity-critical">Critical</span>
+                            {% else %}
+                                <span class="severity-badge severity-unknown">{{ accident.severity|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ accident.injury_type|title }}</td>
+                        <td>
+                            {% if accident.status == 'active' %}
+                                <span class="status-badge status-danger">Active</span>
+                            {% elif accident.status == 'resolved' %}
+                                <span class="status-badge status-success">Resolved</span>
+                            {% elif accident.status == 'investigating' %}
+                                <span class="status-badge status-warning">Investigating</span>
+                            {% else %}
+                                <span class="status-badge status-secondary">{{ accident.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'accidents:detail' accident.id %}" class="btn btn-sm btn-outline" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="{% url 'accidents:edit' accident.id %}" class="btn btn-sm btn-outline" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                {% if accident.status == 'active' %}
+                                <a href="{% url 'accidents:update_status' accident.id %}" class="btn btn-sm btn-success" title="Update Status">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No accident reports found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<style>
+.severity-badge {
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.severity-minor {
+    background: #d4edda;
+    color: #155724;
+}
+
+.severity-moderate {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.severity-serious {
+    background: #ffeaa7;
+    color: #d63031;
+}
+
+.severity-critical {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.severity-unknown {
+    background: #e2e3e5;
+    color: #383d41;
+}
+</style>
+{% endblock %}

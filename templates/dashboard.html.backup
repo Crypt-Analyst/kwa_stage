@@ -1,0 +1,461 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Boda Boda Welfare System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .dashboard-container {
+        margin-left: 280px;
+        padding: 2rem;
+        min-height: calc(100vh - 140px);
+        transition: margin-left 0.3s ease;
+    }
+
+    .dashboard-sidebar {
+        position: fixed;
+        top: 70px;
+        left: 0;
+        width: 280px;
+        height: calc(100vh - 70px);
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+        color: white;
+        z-index: 1000;
+        overflow-y: auto;
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .sidebar-header {
+        padding: 2rem 1.5rem 1rem;
+        text-align: center;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .sidebar-header h4 {
+        font-size: 1.3rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        color: var(--secondary-color);
+    }
+
+    .sidebar-header p {
+        font-size: 0.9rem;
+        opacity: 0.8;
+        margin: 0;
+    }
+
+    .sidebar-menu {
+        padding: 1rem 0;
+    }
+
+    .menu-section {
+        margin-bottom: 2rem;
+    }
+
+    .menu-section-title {
+        padding: 0 1.5rem 0.5rem;
+        font-size: 0.8rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        opacity: 0.7;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        margin-bottom: 1rem;
+    }
+
+    .menu-item {
+        display: block;
+        padding: 1rem 1.5rem;
+        color: white;
+        text-decoration: none;
+        transition: all 0.3s ease;
+        border-left: 3px solid transparent;
+        position: relative;
+    }
+
+    .menu-item:hover {
+        background: rgba(255, 255, 255, 0.1);
+        color: var(--secondary-color);
+        border-left-color: var(--secondary-color);
+        transform: translateX(5px);
+    }
+
+    .menu-item.active {
+        background: rgba(248, 181, 0, 0.2);
+        border-left-color: var(--secondary-color);
+        color: var(--secondary-color);
+    }
+
+    .menu-item i {
+        width: 20px;
+        margin-right: 1rem;
+        font-size: 1.1rem;
+    }
+
+    .menu-item .badge {
+        background: var(--secondary-color);
+        color: var(--primary-color);
+        font-weight: 600;
+    }
+
+    .sidebar-toggle {
+        display: none;
+        position: fixed;
+        top: 85px;
+        left: 15px;
+        z-index: 1001;
+        background: var(--primary-color);
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 45px;
+        height: 45px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .dashboard-header {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        border-left: 4px solid var(--primary-color);
+        transition: transform 0.3s ease;
+        height: 100%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+        margin-bottom: 0;
+    }
+
+    .stat-icon {
+        font-size: 3rem;
+        color: var(--primary-color);
+        opacity: 0.3;
+    }
+
+    .activity-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+        margin-bottom: 2rem;
+    }
+
+    .activity-item {
+        padding: 1rem 0;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .activity-item:last-child {
+        border-bottom: none;
+    }
+
+    @media (max-width: 768px) {
+        .dashboard-container {
+            margin-left: 0;
+            padding: 1rem;
+        }
+
+        .dashboard-sidebar {
+            transform: translateX(-100%);
+            transition: transform 0.3s ease;
+        }
+
+        .dashboard-sidebar.show {
+            transform: translateX(0);
+        }
+
+        .sidebar-toggle {
+            display: block;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Sidebar Toggle Button (Mobile) -->
+<button class="sidebar-toggle" onclick="toggleSidebar()">
+    <i class="fas fa-bars"></i>
+</button>
+
+<!-- Dashboard Sidebar -->
+<div class="dashboard-sidebar" id="dashboardSidebar">
+    <div class="sidebar-header">
+        <div class="text-center">
+            <i class="fas fa-motorcycle fa-3x mb-3" style="color: var(--secondary-color);"></i>
+            <h4>System Modules</h4>
+            <p>Boda Boda is Family</p>
+        </div>
+    </div>
+
+    <nav class="sidebar-menu">
+        <!-- Main Section -->
+        <div class="menu-section">
+            <div class="menu-section-title">Main</div>
+            <a href="{% url 'dashboard' %}" class="menu-item active">
+                <i class="fas fa-tachometer-alt"></i>
+                Dashboard
+            </a>
+            <a href="{% url 'analytics' %}" class="menu-item">
+                <i class="fas fa-chart-line"></i>
+                Analytics
+            </a>
+        </div>
+
+        <!-- Member Management -->
+        <div class="menu-section">
+            <div class="menu-section-title">Member Management</div>
+            <a href="{% url 'members:list' %}" class="menu-item">
+                <i class="fas fa-users"></i>
+                All Members
+                <span class="badge ms-auto">{{ total_members }}</span>
+            </a>
+            <a href="{% url 'members:add' %}" class="menu-item">
+                <i class="fas fa-user-plus"></i>
+                Add Member
+            </a>
+            <a href="{% url 'stages:list' %}" class="menu-item">
+                <i class="fas fa-map-marker-alt"></i>
+                Stages
+            </a>
+            <a href="{% url 'members:leadership' %}" class="menu-item">
+                <i class="fas fa-crown"></i>
+                Leadership
+            </a>
+        </div>
+
+        <!-- Financial Services -->
+        <div class="menu-section">
+            <div class="menu-section-title">Financial Services</div>
+            <a href="{% url 'contributions:list' %}" class="menu-item">
+                <i class="fas fa-piggy-bank"></i>
+                Contributions
+            </a>
+            <a href="{% url 'loans:list' %}" class="menu-item">
+                <i class="fas fa-money-bill-wave"></i>
+                Loans
+            </a>
+            <a href="{% url 'contributions:reports' %}" class="menu-item">
+                <i class="fas fa-chart-pie"></i>
+                Financial Reports
+            </a>
+        </div>
+
+        <!-- Emergency & Support -->
+        <div class="menu-section">
+            <div class="menu-section-title">Emergency Support</div>
+            <a href="{% url 'emergency:cases' %}" class="menu-item">
+                <i class="fas fa-heart"></i>
+                Emergency Cases
+            </a>
+            <a href="{% url 'accidents:list' %}" class="menu-item">
+                <i class="fas fa-exclamation-triangle"></i>
+                Accidents
+            </a>
+            <a href="{% url 'emergency:family_support' %}" class="menu-item">
+                <i class="fas fa-hands-helping"></i>
+                Family Support
+            </a>
+        </div>
+
+        <!-- Bike Management -->
+        <div class="menu-section">
+            <div class="menu-section-title">Bike Management</div>
+            <a href="{% url 'bikes:list' %}" class="menu-item">
+                <i class="fas fa-motorcycle"></i>
+                Bike Registry
+            </a>
+            <a href="{% url 'bikes:lost_tracking' %}" class="menu-item">
+                <i class="fas fa-search"></i>
+                Lost Bike Tracking
+            </a>
+            <a href="{% url 'bikes:ownership_records' %}" class="menu-item">
+                <i class="fas fa-exchange-alt"></i>
+                Ownership Transfer
+            </a>
+        </div>
+
+        <!-- Communication -->
+        <div class="menu-section">
+            <div class="menu-section-title">Communication</div>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bell"></i>
+                Notifications
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-sms"></i>
+                SMS Alerts
+            </a>
+            <a href="#" class="menu-item">
+                <i class="fas fa-bullhorn"></i>
+                Announcements
+            </a>
+        </div>
+
+        <!-- Settings -->
+        <div class="menu-section">
+            <div class="menu-section-title">Settings</div>
+            <a href="{% url 'settings' %}" class="menu-item">
+                <i class="fas fa-cog"></i>
+                System Settings
+            </a>
+            <a href="{% url 'profile_settings' %}" class="menu-item">
+                <i class="fas fa-user-cog"></i>
+                Profile Settings
+            </a>
+        </div>
+    </nav>
+</div>
+
+<!-- Main Dashboard Content -->
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <div class="row align-items-center">
+            <div class="col-md-8">
+                <h1 class="mb-2">
+                    <i class="fas fa-tachometer-alt text-primary"></i>
+                    Dashboard
+                </h1>
+                <p class="text-muted mb-0">
+                    Welcome back, <strong>{{ user.get_full_name|default:user.username }}</strong>!
+                </p>
+            </div>
+            <div class="col-md-4 text-end">
+                <div class="text-muted">
+                    <i class="fas fa-calendar"></i>
+                    {{ "now"|date:"F d, Y" }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number">{{ total_members|default:0 }}</div>
+                        <div class="stat-label">Active Members</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number">KSh {{ total_contributions|default:0|floatformat:0 }}</div>
+                        <div class="stat-label">Welfare Fund</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number">KSh {{ loan_fund_balance|default:0|floatformat:0 }}</div>
+                        <div class="stat-label">Loan Fund</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-3 col-md-6 mb-4">
+            <div class="stat-card">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <div class="stat-number">{{ pending_emergencies|default:0 }}</div>
+                        <div class="stat-label">Pending Cases</div>
+                    </div>
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activities -->
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="activity-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-clock text-primary"></i>
+                    Recent Activities
+                </h5>
+                
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-inbox fa-3x mb-3"></i>
+                    <p>No recent activities</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <div class="activity-card">
+                <h5 class="mb-4">
+                    <i class="fas fa-exclamation-triangle text-warning"></i>
+                    Emergency Alerts
+                </h5>
+                
+                <div class="text-center text-muted py-4">
+                    <i class="fas fa-check-circle fa-2x mb-2"></i>
+                    <p>No pending emergencies</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function toggleSidebar() {
+    const sidebar = document.getElementById('dashboardSidebar');
+    sidebar.classList.toggle('show');
+}
+
+// Close sidebar when clicking outside on mobile
+document.addEventListener('click', function(event) {
+    const sidebar = document.getElementById('dashboardSidebar');
+    const toggle = document.querySelector('.sidebar-toggle');
+    
+    if (window.innerWidth <= 768 && !sidebar.contains(event.target) && !toggle.contains(event.target)) {
+        sidebar.classList.remove('show');
+    }
+});
+</script>
+{% endblock %}

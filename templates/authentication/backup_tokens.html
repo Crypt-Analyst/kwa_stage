@@ -1,0 +1,338 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Backup Recovery Codes{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-key"></i> Backup Recovery Codes</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'authentication:security_settings' %}">Security</a></li>
+                <li class="breadcrumb-item active">Backup Codes</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if backup_tokens %}
+                    <!-- New Backup Tokens Generated -->
+                    <div class="card border-success">
+                        <div class="card-header bg-success text-white">
+                            <h5 class="mb-0">
+                                <i class="fas fa-check-circle me-2"></i>
+                                {% if regenerated %}
+                                    New Backup Codes Generated
+                                {% else %}
+                                    2FA Setup Complete!
+                                {% endif %}
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                <strong>Important:</strong> Save these backup codes in a secure location. 
+                                Each code can only be used once and they won't be shown again.
+                            </div>
+
+                            <h6>Your Backup Recovery Codes:</h6>
+                            <div class="row">
+                                {% for token in backup_tokens %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="backup-code">
+                                            <code class="backup-token">{{ token }}</code>
+                                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="copyToken('{{ token }}', this)">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mt-4">
+                                <button type="button" class="btn btn-primary" onclick="copyAllTokens()">
+                                    <i class="fas fa-copy me-2"></i>Copy All Codes
+                                </button>
+                                <button type="button" class="btn btn-outline-primary ms-2" onclick="printCodes()">
+                                    <i class="fas fa-print me-2"></i>Print Codes
+                                </button>
+                                <button type="button" class="btn btn-outline-success ms-2" onclick="downloadCodes()">
+                                    <i class="fas fa-download me-2"></i>Download as Text
+                                </button>
+                            </div>
+
+                            <div class="mt-4">
+                                <a href="{% url 'dashboard' %}" class="btn btn-success">
+                                    <i class="fas fa-arrow-right me-2"></i>Continue to Dashboard
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+
+                {% elif unused_tokens %}
+                    <!-- Existing Backup Tokens -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-key me-2"></i>Backup Recovery Codes
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                You have <strong>{{ unused_tokens|length }}</strong> unused backup codes remaining.
+                                Use these codes to log in if you lose access to your authenticator app.
+                            </div>
+
+                            <h6>Available Recovery Codes:</h6>
+                            <div class="row">
+                                {% for token in unused_tokens %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="backup-code">
+                                            <code class="backup-token">{{ token }}</code>
+                                            <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="copyToken('{{ token }}', this)">
+                                                <i class="fas fa-copy"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                {% endfor %}
+                            </div>
+
+                            <div class="mt-4">
+                                <form method="post" class="d-inline">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="action" value="regenerate">
+                                    <button type="submit" class="btn btn-warning" onclick="return confirm('This will invalidate all existing backup codes. Continue?')">
+                                        <i class="fas fa-sync me-2"></i>Generate New Codes
+                                    </button>
+                                </form>
+                                <button type="button" class="btn btn-outline-primary ms-2" onclick="copyAllTokens()">
+                                    <i class="fas fa-copy me-2"></i>Copy All
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                {% else %}
+                    <!-- No Backup Tokens -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-key me-2"></i>Backup Recovery Codes
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                No backup codes found. This usually means 2FA is not enabled on your account.
+                            </div>
+
+                            <p>Backup recovery codes are generated when you enable Two-Factor Authentication.</p>
+                            
+                            <a href="{% url 'authentication:two_factor_setup' %}" class="btn btn-primary">
+                                <i class="fas fa-shield-alt me-2"></i>Setup 2FA
+                            </a>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Instructions -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-info-circle me-2"></i>How to Use Backup Codes
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>When to Use:</h6>
+                                <ul>
+                                    <li>Lost access to your authenticator app</li>
+                                    <li>Phone is broken or stolen</li>
+                                    <li>Authenticator app is not working</li>
+                                    <li>Traveling without your usual device</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>Important Notes:</h6>
+                                <ul>
+                                    <li>Each code can only be used once</li>
+                                    <li>Keep codes in a secure location</li>
+                                    <li>Don't share codes with anyone</li>
+                                    <li>Generate new codes if compromised</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Print Template (Hidden) -->
+<div id="printTemplate" style="display: none;">
+    <div style="text-align: center; margin-bottom: 30px;">
+        <h2>Boda Boda Welfare System</h2>
+        <h3>Backup Recovery Codes</h3>
+        <p>Generated on: <span id="printDate"></span></p>
+        <p>Account: {{ user.username }}</p>
+    </div>
+    
+    <div style="margin-bottom: 30px;">
+        <h4>Recovery Codes:</h4>
+        <div id="printCodes" style="font-family: monospace; font-size: 14px; line-height: 2;"></div>
+    </div>
+    
+    <div style="border-top: 1px solid #ccc; padding-top: 20px; font-size: 12px;">
+        <p><strong>Important Instructions:</strong></p>
+        <ul>
+            <li>Keep these codes in a secure location</li>
+            <li>Each code can only be used once</li>
+            <li>Use these codes if you lose access to your authenticator app</li>
+            <li>Do not share these codes with anyone</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.backup-code {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 4px;
+}
+
+.backup-token {
+    font-family: 'Courier New', monospace;
+    font-size: 1.1rem;
+    font-weight: bold;
+    color: #495057;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+@media print {
+    .main-content, .sidebar, .header, .footer {
+        display: none !important;
+    }
+    
+    #printTemplate {
+        display: block !important;
+    }
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function copyToken(token, button) {
+    navigator.clipboard.writeText(token).then(function() {
+        const originalHTML = button.innerHTML;
+        button.innerHTML = '<i class="fas fa-check"></i>';
+        button.classList.add('btn-success');
+        button.classList.remove('btn-outline-primary');
+        
+        setTimeout(() => {
+            button.innerHTML = originalHTML;
+            button.classList.remove('btn-success');
+            button.classList.add('btn-outline-primary');
+        }, 2000);
+    });
+}
+
+function copyAllTokens() {
+    const tokens = [];
+    {% if backup_tokens %}
+        {% for token in backup_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% elif unused_tokens %}
+        {% for token in unused_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% endif %}
+    
+    const allTokensText = 'Boda Boda Welfare System - Backup Recovery Codes\n\n' + tokens.join('\n') + 
+                         '\n\nGenerated: ' + new Date().toLocaleString() + 
+                         '\n\nKeep these codes secure. Each can only be used once.';
+    
+    navigator.clipboard.writeText(allTokensText).then(function() {
+        alert('All backup codes copied to clipboard!');
+    });
+}
+
+function printCodes() {
+    const tokens = [];
+    {% if backup_tokens %}
+        {% for token in backup_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% elif unused_tokens %}
+        {% for token in unused_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% endif %}
+    
+    document.getElementById('printDate').textContent = new Date().toLocaleString();
+    document.getElementById('printCodes').innerHTML = tokens.map((token, index) => 
+        `${index + 1}. ${token}`).join('<br>');
+    
+    window.print();
+}
+
+function downloadCodes() {
+    const tokens = [];
+    {% if backup_tokens %}
+        {% for token in backup_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% elif unused_tokens %}
+        {% for token in unused_tokens %}
+            tokens.push('{{ token }}');
+        {% endfor %}
+    {% endif %}
+    
+    const content = 'Boda Boda Welfare System - Backup Recovery Codes\n\n' + 
+                   'Account: {{ user.username }}\n' +
+                   'Generated: ' + new Date().toLocaleString() + '\n\n' +
+                   'Recovery Codes:\n' + 
+                   tokens.map((token, index) => `${index + 1}. ${token}`).join('\n') + 
+                   '\n\nImportant:\n' +
+                   '- Keep these codes in a secure location\n' +
+                   '- Each code can only be used once\n' +
+                   '- Use if you lose access to your authenticator app\n' +
+                   '- Do not share these codes with anyone';
+    
+    const blob = new Blob([content], { type: 'text/plain' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'backup-recovery-codes.txt';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    window.URL.revokeObjectURL(url);
+}
+</script>
+{% endblock %}

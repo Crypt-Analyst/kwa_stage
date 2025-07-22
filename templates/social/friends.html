@@ -1,0 +1,551 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Friends - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.friend-card {
+    background: white;
+    border-radius: 15px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+}
+
+.friend-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+}
+
+.user-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.friend-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 15px 15px 0 0;
+}
+
+.tab-content {
+    background: white;
+    border-radius: 0 0 15px 15px;
+    padding: 20px;
+}
+
+.nav-pills .nav-link {
+    border-radius: 20px;
+    margin-right: 10px;
+}
+
+.nav-pills .nav-link.active {
+    background: rgba(255,255,255,0.2);
+}
+
+.friend-item {
+    padding: 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: all 0.3s ease;
+}
+
+.friend-item:hover {
+    background: #f8f9fa;
+}
+
+.friend-item:last-child {
+    border-bottom: none;
+}
+
+.status-badge {
+    padding: 5px 12px;
+    border-radius: 15px;
+    font-size: 12px;
+    font-weight: 500;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-accepted {
+    background: #d4edda;
+    color: #155724;
+}
+
+.status-blocked {
+    background: #f8d7da;
+    color: #721c24;
+}
+
+.suggestion-card {
+    background: white;
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    text-align: center;
+    transition: all 0.3s ease;
+}
+
+.suggestion-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0,0,0,0.15);
+}
+
+.stage-badge {
+    background: #e9ecef;
+    color: #495057;
+    padding: 3px 8px;
+    border-radius: 10px;
+    font-size: 11px;
+}
+
+@media (max-width: 768px) {
+    .friend-card {
+        margin-bottom: 15px;
+    }
+    
+    .tab-content {
+        padding: 15px;
+    }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <div class="row">
+        <div class="col-lg-8">
+            <div class="friend-card">
+                <div class="friend-header p-4">
+                    <h4 class="mb-0">
+                        <i class="fas fa-users me-3"></i>
+                        Friends Management
+                    </h4>
+                    <p class="mb-0 opacity-75">Connect with other Boda Boda riders in your network</p>
+                </div>
+
+                <!-- Navigation Tabs -->
+                <div class="p-3 border-bottom">
+                    <ul class="nav nav-pills" id="friendTabs" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link active" id="friends-tab" data-bs-toggle="pill" data-bs-target="#friends" type="button" role="tab">
+                                <i class="fas fa-users me-2"></i>My Friends
+                                <span class="badge bg-primary ms-2">{{ friends_list.count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="requests-tab" data-bs-toggle="pill" data-bs-target="#requests" type="button" role="tab">
+                                <i class="fas fa-user-clock me-2"></i>Requests
+                                <span class="badge bg-warning ms-2">{{ pending_requests.count }}</span>
+                            </button>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <button class="nav-link" id="sent-tab" data-bs-toggle="pill" data-bs-target="#sent" type="button" role="tab">
+                                <i class="fas fa-paper-plane me-2"></i>Sent
+                                <span class="badge bg-info ms-2">{{ sent_requests.count }}</span>
+                            </button>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Tab Content -->
+                <div class="tab-content" id="friendTabsContent">
+                    <!-- My Friends Tab -->
+                    <div class="tab-pane fade show active" id="friends" role="tabpanel">
+                        {% if friends_list %}
+                            {% for friendship in friends_list %}
+                                {% if friendship.requester == member %}
+                                    {% with friend=friendship.receiver %}
+                                <div class="friend-item">
+                                    <div class="d-flex align-items-center">
+                                        {% if friend.profile_photo %}
+                                        <img src="{{ friend.profile_photo.url }}" alt="{{ friend.user.get_full_name }}" class="user-avatar me-3">
+                                        {% else %}
+                                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                                            {{ friend.user.first_name|first }}{{ friend.user.last_name|first }}
+                                        </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ friend.user.get_full_name }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ friend.stage.name }}
+                                                <span class="stage-badge ms-2">{{ friend.zone }}</span>
+                                            </small>
+                                            <div class="mt-1">
+                                                <small class="text-success">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    Friends since {{ friendship.updated_at|date:"M Y" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>View Profile</a></li>
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-comment me-2"></i>Send Message</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-user-times me-2"></i>Remove Friend</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                    {% endwith %}
+                                {% else %}
+                                    {% with friend=friendship.requester %}
+                                <div class="friend-item">
+                                    <div class="d-flex align-items-center">
+                                        {% if friend.profile_photo %}
+                                        <img src="{{ friend.profile_photo.url }}" alt="{{ friend.user.get_full_name }}" class="user-avatar me-3">
+                                        {% else %}
+                                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                                            {{ friend.user.first_name|first }}{{ friend.user.last_name|first }}
+                                        </div>
+                                        {% endif %}
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1">{{ friend.user.get_full_name }}</h6>
+                                            <small class="text-muted">
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ friend.stage.name }}
+                                                <span class="stage-badge ms-2">{{ friend.zone }}</span>
+                                            </small>
+                                            <div class="mt-1">
+                                                <small class="text-success">
+                                                    <i class="fas fa-check-circle me-1"></i>
+                                                    Friends since {{ friendship.updated_at|date:"M Y" }}
+                                                </small>
+                                            </div>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-user me-2"></i>View Profile</a></li>
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-comment me-2"></i>Send Message</a></li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-user-times me-2"></i>Remove Friend</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                    {% endwith %}
+                                {% endif %}
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No friends yet</h5>
+                                <p class="text-muted">Start connecting with other Boda Boda riders in your stage!</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Friend Requests Tab -->
+                    <div class="tab-pane fade" id="requests" role="tabpanel">
+                        {% if pending_requests %}
+                            {% for request in pending_requests %}
+                            <div class="friend-item">
+                                <div class="d-flex align-items-center">
+                                    {% if request.requester.profile_photo %}
+                                    <img src="{{ request.requester.profile_photo.url }}" alt="{{ request.requester.user.get_full_name }}" class="user-avatar me-3">
+                                    {% else %}
+                                    <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                                        {{ request.requester.user.first_name|first }}{{ request.requester.user.last_name|first }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ request.requester.user.get_full_name }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ request.requester.stage.name }}
+                                            <span class="stage-badge ms-2">{{ request.requester.zone }}</span>
+                                        </small>
+                                        <div class="mt-1">
+                                            <small class="text-info">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Sent {{ request.created_at|timesince }} ago
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <button class="btn btn-sm btn-success me-2 accept-request" data-friendship-id="{{ request.id }}">
+                                            <i class="fas fa-check me-1"></i>Accept
+                                        </button>
+                                        <button class="btn btn-sm btn-outline-secondary">
+                                            <i class="fas fa-times me-1"></i>Decline
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No friend requests</h5>
+                                <p class="text-muted">You have no pending friend requests at the moment.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Sent Requests Tab -->
+                    <div class="tab-pane fade" id="sent" role="tabpanel">
+                        {% if sent_requests %}
+                            {% for request in sent_requests %}
+                            <div class="friend-item">
+                                <div class="d-flex align-items-center">
+                                    {% if request.receiver.profile_photo %}
+                                    <img src="{{ request.receiver.profile_photo.url }}" alt="{{ request.receiver.user.get_full_name }}" class="user-avatar me-3">
+                                    {% else %}
+                                    <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center me-3">
+                                        {{ request.receiver.user.first_name|first }}{{ request.receiver.user.last_name|first }}
+                                    </div>
+                                    {% endif %}
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">{{ request.receiver.user.get_full_name }}</h6>
+                                        <small class="text-muted">
+                                            <i class="fas fa-map-marker-alt me-1"></i>{{ request.receiver.stage.name }}
+                                            <span class="stage-badge ms-2">{{ request.receiver.zone }}</span>
+                                        </small>
+                                        <div class="mt-1">
+                                            <small class="text-warning">
+                                                <i class="fas fa-clock me-1"></i>
+                                                Sent {{ request.created_at|timesince }} ago
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <span class="status-badge status-pending">Pending</span>
+                                        <button class="btn btn-sm btn-outline-danger ms-2">
+                                            <i class="fas fa-times me-1"></i>Cancel
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-paper-plane fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No sent requests</h5>
+                                <p class="text-muted">You haven't sent any friend requests yet.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Friend Suggestions -->
+            <div class="friend-card">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb text-warning me-2"></i>
+                        People You May Know
+                    </h6>
+                </div>
+                <div class="p-3">
+                    {% for suggestion in suggestions %}
+                    <div class="suggestion-card">
+                        {% if suggestion.profile_photo %}
+                        <img src="{{ suggestion.profile_photo.url }}" alt="{{ suggestion.user.get_full_name }}" class="user-avatar mx-auto d-block mb-2">
+                        {% else %}
+                        <div class="user-avatar bg-primary text-white d-flex align-items-center justify-content-center mx-auto mb-2">
+                            {{ suggestion.user.first_name|first }}{{ suggestion.user.last_name|first }}
+                        </div>
+                        {% endif %}
+                        <h6 class="mb-1">{{ suggestion.user.get_full_name }}</h6>
+                        <small class="text-muted d-block mb-2">{{ suggestion.stage.name }}</small>
+                        <button class="btn btn-sm btn-primary send-friend-request" data-member-id="{{ suggestion.id }}">
+                            <i class="fas fa-user-plus me-1"></i>Add Friend
+                        </button>
+                    </div>
+                    {% empty %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-search fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No suggestions available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="friend-card mt-4">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-chart-bar text-info me-2"></i>
+                        Your Network
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="row text-center">
+                        <div class="col-4">
+                            <h4 class="text-primary mb-0">{{ friends_list.count }}</h4>
+                            <small class="text-muted">Friends</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-warning mb-0">{{ pending_requests.count }}</h4>
+                            <small class="text-muted">Requests</small>
+                        </div>
+                        <div class="col-4">
+                            <h4 class="text-info mb-0">{{ sent_requests.count }}</h4>
+                            <small class="text-muted">Sent</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="friend-card mt-4">
+                <div class="p-3 border-bottom">
+                    <h6 class="mb-0">
+                        <i class="fas fa-bolt text-success me-2"></i>
+                        Quick Actions
+                    </h6>
+                </div>
+                <div class="p-3">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'social:feed' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-home me-2"></i>Back to Feed
+                        </a>
+                        <a href="{% url 'social:group_chats' %}" class="btn btn-outline-success">
+                            <i class="fas fa-comments me-2"></i>Group Chats
+                        </a>
+                        <a href="{% url 'social:notifications' %}" class="btn btn-outline-warning">
+                            <i class="fas fa-bell me-2"></i>Notifications
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // CSRF token for AJAX requests
+    const csrftoken = $('[name=csrfmiddlewaretoken]').val();
+    
+    // Send friend requests
+    $('.send-friend-request').click(function() {
+        const button = $(this);
+        const memberId = button.data('member-id');
+        
+        // Disable button to prevent double-clicking
+        button.prop('disabled', true);
+        
+        $.ajax({
+            url: `/social/friends/request/${memberId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(data) {
+                if (data.success) {
+                    button.removeClass('btn-primary').addClass('btn-success');
+                    button.html('<i class="fas fa-check me-1"></i>Sent!');
+                    
+                    // Show success message
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                    
+                    // Remove from suggestions after 2 seconds
+                    setTimeout(function() {
+                        button.closest('.suggestion-card').fadeOut();
+                    }, 2000);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error sending friend request:', xhr.responseJSON);
+                button.prop('disabled', false);
+                
+                let errorMessage = 'Error sending friend request. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(errorMessage);
+                } else {
+                    alert(errorMessage);
+                }
+            }
+        });
+    });
+    
+    // Accept friend requests
+    $('.accept-request').click(function() {
+        const button = $(this);
+        const friendshipId = button.data('friendship-id');
+        
+        // Disable button to prevent double-clicking
+        button.prop('disabled', true);
+        
+        $.ajax({
+            url: `/social/friends/accept/${friendshipId}/`,
+            method: 'POST',
+            headers: {
+                'X-CSRFToken': csrftoken
+            },
+            success: function(data) {
+                if (data.success) {
+                    // Show success message
+                    if (typeof toastr !== 'undefined') {
+                        toastr.success(data.message);
+                    } else {
+                        alert(data.message);
+                    }
+                    
+                    // Remove the request item and refresh page after 1 second
+                    button.closest('.friend-item').fadeOut();
+                    setTimeout(function() {
+                        location.reload();
+                    }, 1000);
+                }
+            },
+            error: function(xhr) {
+                console.error('Error accepting friend request:', xhr.responseJSON);
+                button.prop('disabled', false);
+                
+                let errorMessage = 'Error accepting friend request. Please try again.';
+                if (xhr.responseJSON && xhr.responseJSON.error) {
+                    errorMessage = xhr.responseJSON.error;
+                }
+                
+                if (typeof toastr !== 'undefined') {
+                    toastr.error(errorMessage);
+                } else {
+                    alert(errorMessage);
+                }
+            }
+        });
+    });
+    
+    // Tab navigation with URL hash
+    const hash = window.location.hash;
+    if (hash) {
+        const tab = document.querySelector(`[data-bs-target="${hash}"]`);
+        if (tab) {
+            const tabInstance = new bootstrap.Tab(tab);
+            tabInstance.show();
+        }
+    }
+    
+    // Update URL hash when tab changes
+    $('button[data-bs-toggle="pill"]').on('shown.bs.tab', function (e) {
+        const target = e.target.getAttribute('data-bs-target');
+        window.location.hash = target;
+    });
+});
+</script>
+{% endblock %}

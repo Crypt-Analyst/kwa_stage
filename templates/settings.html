@@ -1,0 +1,346 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}System Settings - Boda Boda Welfare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .settings-container {
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .settings-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .settings-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid var(--primary-color);
+    }
+    
+    .section-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .setting-item {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 1rem 0;
+        border-bottom: 1px solid #eee;
+    }
+    
+    .setting-item:last-child {
+        border-bottom: none;
+    }
+    
+    .setting-info h6 {
+        margin: 0;
+        color: #333;
+    }
+    
+    .setting-info small {
+        color: #666;
+    }
+    
+    .toggle-switch {
+        position: relative;
+        display: inline-block;
+        width: 50px;
+        height: 24px;
+    }
+    
+    .toggle-switch input {
+        opacity: 0;
+        width: 0;
+        height: 0;
+    }
+    
+    .slider {
+        position: absolute;
+        cursor: pointer;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: #ccc;
+        transition: .4s;
+        border-radius: 24px;
+    }
+    
+    .slider:before {
+        position: absolute;
+        content: "";
+        height: 18px;
+        width: 18px;
+        left: 3px;
+        bottom: 3px;
+        background-color: white;
+        transition: .4s;
+        border-radius: 50%;
+    }
+    
+    input:checked + .slider {
+        background-color: var(--primary-color);
+    }
+    
+    input:checked + .slider:before {
+        transform: translateX(26px);
+    }
+    
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        border-radius: 8px;
+        padding: 0.75rem 2rem;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        color: white;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="settings-container">
+    <div class="settings-header">
+        <h2><i class="fas fa-cogs"></i> System Settings</h2>
+        <p class="mb-0">Configure system-wide preferences and options</p>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    <!-- General Settings -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-sliders-h"></i>
+            General Settings
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>System Maintenance Mode</h6>
+                    <small>Enable maintenance mode to perform system updates</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="maintenance_mode">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>Auto-backup Database</h6>
+                    <small>Automatically backup the database daily</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="auto_backup" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>Enable SMS Notifications</h6>
+                    <small>Send SMS alerts to members for important events</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="sms_enabled" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" name="update_general" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save General Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Payment Settings -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-money-bill-wave"></i>
+            Payment Settings
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group mb-3">
+                <label class="form-label">Default Contribution Amount (KES)</label>
+                <input type="number" class="form-control" name="default_contribution" value="500" min="0" step="50">
+                <small class="text-muted">Default weekly contribution amount for new members</small>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label class="form-label">Emergency Fund Percentage (%)</label>
+                <input type="number" class="form-control" name="emergency_percentage" value="20" min="0" max="100">
+                <small class="text-muted">Percentage of contributions allocated to emergency fund</small>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>Enable M-Pesa Integration</h6>
+                    <small>Allow payments through M-Pesa Daraja API</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="mpesa_enabled" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" name="update_payments" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Payment Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Security Settings -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-shield-alt"></i>
+            Security Settings
+        </h4>
+        <form method="post">
+            {% csrf_token %}
+            
+            <div class="form-group mb-3">
+                <label class="form-label">Session Timeout (minutes)</label>
+                <input type="number" class="form-control" name="session_timeout" value="30" min="5" max="480">
+                <small class="text-muted">Automatically log out users after this period of inactivity</small>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>Require Two-Factor Authentication</h6>
+                    <small>Require 2FA for admin users</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="require_2fa">
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="setting-item">
+                <div class="setting-info">
+                    <h6>Enable Login Notifications</h6>
+                    <small>Send email notifications for new login attempts</small>
+                </div>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="login_notifications" checked>
+                    <span class="slider"></span>
+                </label>
+            </div>
+            
+            <div class="mt-3">
+                <button type="submit" name="update_security" class="btn btn-primary">
+                    <i class="fas fa-save"></i> Save Security Settings
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <!-- System Information -->
+    <div class="settings-section">
+        <h4 class="section-title">
+            <i class="fas fa-info-circle"></i>
+            System Information
+        </h4>
+        <div class="row">
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>System Version:</strong></td>
+                        <td>1.0.0</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Django Version:</strong></td>
+                        <td>5.2.4</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Database:</strong></td>
+                        <td>PostgreSQL</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Last Backup:</strong></td>
+                        <td>{{ last_backup|default:"Never" }}</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="col-md-6">
+                <table class="table table-borderless">
+                    <tr>
+                        <td><strong>Total Members:</strong></td>
+                        <td>{{ total_members|default:"0" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Active Stages:</strong></td>
+                        <td>{{ total_stages|default:"0" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Total Contributions:</strong></td>
+                        <td>KES {{ total_contributions|default:"0" }}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>Emergency Fund:</strong></td>
+                        <td>KES {{ emergency_fund|default:"0" }}</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        
+        <div class="mt-3">
+            <a href="#" class="btn btn-outline-primary me-2">
+                <i class="fas fa-download"></i> Download Backup
+            </a>
+            <a href="#" class="btn btn-outline-info me-2">
+                <i class="fas fa-chart-bar"></i> System Reports
+            </a>
+            <a href="#" class="btn btn-outline-warning">
+                <i class="fas fa-tools"></i> Maintenance Tools
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add any settings-specific JavaScript here
+    console.log('Settings page loaded');
+});
+</script>
+{% endblock %}

@@ -1,0 +1,407 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Disburse Emergency Funds - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-money-bill-wave"></i> Disburse Emergency Funds</h1>
+        <p>Case ID: #EM001 - John Kamau</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cases
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5><i class="fas fa-paper-plane"></i> Fund Disbursement</h5>
+            </div>
+            <div class="card-body">
+                <div class="approval-status mb-4">
+                    <div class="status-badge">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>Case Approved - Ready for Disbursement</span>
+                        <small class="text-muted">Approved by Mary Wanjiku & Peter Kimani</small>
+                    </div>
+                </div>
+
+                <form method="POST" id="disbursementForm">
+                    {% csrf_token %}
+                    
+                    <div class="disbursement-section">
+                        <h6><i class="fas fa-info-circle"></i> Disbursement Details</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Approved Amount</label>
+                                    <input type="number" class="form-control" value="150000" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Amount to Disburse *</label>
+                                    <input type="number" class="form-control" name="disbursement_amount" 
+                                           value="150000" min="0" max="150000" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Payment Method</label>
+                                    <select class="form-select" name="payment_method" required>
+                                        <option value="mpesa">M-Pesa Transfer</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                        <option value="cash">Cash Payment</option>
+                                        <option value="direct_payment">Direct Payment to Provider</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Priority Level</label>
+                                    <select class="form-select" name="priority" required>
+                                        <option value="urgent">Urgent (Process Now)</option>
+                                        <option value="normal" selected>Normal (Within 2 hours)</option>
+                                        <option value="scheduled">Scheduled (Next business day)</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="disbursement-section">
+                        <h6><i class="fas fa-user"></i> Recipient Information</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Recipient Name *</label>
+                                    <input type="text" class="form-control" name="recipient_name" 
+                                           value="John Kamau" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="tel" class="form-control" name="recipient_phone" 
+                                           value="+254712345678" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">ID Number</label>
+                                    <input type="text" class="form-control" name="recipient_id" 
+                                           value="12345678">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Alternative Contact</label>
+                                    <input type="tel" class="form-control" name="alternative_phone" 
+                                           placeholder="+254...">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="disbursement-section">
+                        <h6><i class="fas fa-shield-alt"></i> Security & Verification</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Disbursement PIN *</label>
+                            <input type="password" class="form-control" name="disbursement_pin" 
+                                   placeholder="Enter your disbursement PIN" required>
+                            <small class="text-muted">Enter your secure PIN to authorize this disbursement</small>
+                        </div>
+
+                        <div class="verification-checks">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="identity_confirmed" id="identity_confirmed" required>
+                                <label class="form-check-label" for="identity_confirmed">
+                                    Recipient identity confirmed and verified
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="amount_verified" id="amount_verified" required>
+                                <label class="form-check-label" for="amount_verified">
+                                    Disbursement amount verified against approval
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="documentation_complete" id="documentation_complete" required>
+                                <label class="form-check-label" for="documentation_complete">
+                                    All required documentation is complete
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Disbursement Notes</label>
+                        <textarea class="form-control" name="disbursement_notes" rows="3" 
+                                  placeholder="Add any special instructions or notes for this disbursement..."></textarea>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-primary btn-lg" id="disburseBtn">
+                            <i class="fas fa-paper-plane"></i> Process Disbursement
+                        </button>
+                        <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#partialModal">
+                            <i class="fas fa-cut"></i> Partial Disbursement
+                        </button>
+                        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Important Notice</h5>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <strong>Before Processing:</strong>
+                    <ul class="mb-0">
+                        <li>Verify recipient identity</li>
+                        <li>Confirm phone number is active</li>
+                        <li>Ensure sufficient account balance</li>
+                        <li>Double-check amount against approval</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Disbursements</h5>
+            </div>
+            <div class="card-body">
+                <div class="recent-item">
+                    <div class="amount">KSh 85,000</div>
+                    <div class="details">
+                        <div class="name">Grace Akinyi</div>
+                        <div class="date">2 hours ago</div>
+                    </div>
+                    <div class="status">
+                        <span class="badge bg-success">Completed</span>
+                    </div>
+                </div>
+                <div class="recent-item">
+                    <div class="amount">KSh 120,000</div>
+                    <div class="details">
+                        <div class="name">David Mwangi</div>
+                        <div class="date">Yesterday</div>
+                    </div>
+                    <div class="status">
+                        <span class="badge bg-success">Completed</span>
+                    </div>
+                </div>
+                <div class="recent-item">
+                    <div class="amount">KSh 75,000</div>
+                    <div class="details">
+                        <div class="name">Susan Njeri</div>
+                        <div class="date">2 days ago</div>
+                    </div>
+                    <div class="status">
+                        <span class="badge bg-primary">Processing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-line"></i> Fund Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="fund-metric">
+                    <div class="metric-label">Available Balance</div>
+                    <div class="metric-value text-success">KSh 2,450,000</div>
+                </div>
+                <div class="fund-metric">
+                    <div class="metric-label">Today's Disbursements</div>
+                    <div class="metric-value text-primary">KSh 340,000</div>
+                </div>
+                <div class="fund-metric">
+                    <div class="metric-label">This Month</div>
+                    <div class="metric-value text-info">KSh 1,850,000</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Partial Disbursement Modal -->
+<div class="modal fade" id="partialModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Partial Disbursement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Partial Amount</label>
+                        <input type="number" class="form-control" max="150000" placeholder="Enter partial amount">
+                        <small class="text-muted">Maximum: KSh 150,000</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Partial Payment</label>
+                        <select class="form-select" required>
+                            <option value="">Select Reason</option>
+                            <option value="immediate_need">Immediate need only</option>
+                            <option value="budget_limit">Budget limitations</option>
+                            <option value="staged_payment">Staged payment plan</option>
+                            <option value="documentation_pending">Documentation pending</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Next Payment Schedule</label>
+                        <input type="date" class="form-control">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning">Process Partial Payment</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.disbursement-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.disbursement-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.approval-status {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.status-badge {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.verification-checks {
+    background: white;
+    border: 1px solid #dee2e6;
+    border-radius: 5px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.form-check {
+    margin-bottom: 10px;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.recent-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.recent-item:last-child {
+    border-bottom: none;
+}
+
+.amount {
+    font-weight: bold;
+    color: #007bff;
+}
+
+.details .name {
+    font-weight: 500;
+}
+
+.details .date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.fund-metric {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.fund-metric:last-child {
+    border-bottom: none;
+}
+
+.metric-label {
+    font-weight: 500;
+}
+
+.metric-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+#disburseBtn:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,123,255,0.3);
+}
+</style>
+
+<script>
+document.getElementById('disbursementForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    // Show confirmation dialog
+    if (confirm('Are you sure you want to process this disbursement? This action cannot be undone.')) {
+        // Simulate processing
+        const btn = document.getElementById('disburseBtn');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        btn.disabled = true;
+        
+        setTimeout(() => {
+            alert('Disbursement processed successfully!');
+            window.location.href = "{% url 'emergency:cases' %}";
+        }, 2000);
+    }
+});
+</script>
+{% endblock %}

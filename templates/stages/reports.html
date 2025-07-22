@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Reports - Stages{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-chart-bar"></i> Stage Reports</h1>
+        <a href="{% url 'stages:list' %}" class="btn btn-outline">
+            <i class="fas fa-list"></i> Back to List
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-primary bg-opacity-10 text-primary mx-auto mb-3">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <h3 class="mb-2">{{ total_stages|default:0 }}</h3>
+                        <p class="text-muted mb-0">Total Stages</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-success bg-opacity-10 text-success mx-auto mb-3">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <h3 class="mb-2">{{ total_members|default:0 }}</h3>
+                        <p class="text-muted mb-0">Total Members</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-warning bg-opacity-10 text-warning mx-auto mb-3">
+                            <i class="fas fa-crown"></i>
+                        </div>
+                        <h3 class="mb-2">{{ total_leaders|default:0 }}</h3>
+                        <p class="text-muted mb-0">Active Leaders</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-body text-center">
+                        <div class="stat-icon bg-info bg-opacity-10 text-info mx-auto mb-3">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <h3 class="mb-2">{{ avg_members|default:0 }}</h3>
+                        <p class="text-muted mb-0">Avg Members/Stage</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="row">
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Performance</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-chart-pie me-2"></i>
+                            Chart integration coming soon
+                        </div>
+                        <!-- Placeholder for chart -->
+                        <div style="height: 300px; background-color: #f8f9fa; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-pie fa-2x mb-2"></i>
+                                <p>Performance Chart</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-lg-6 mb-4">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Member Distribution</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="alert alert-info">
+                            <i class="fas fa-chart-bar me-2"></i>
+                            Chart integration coming soon
+                        </div>
+                        <!-- Placeholder for chart -->
+                        <div style="height: 300px; background-color: #f8f9fa; border: 2px dashed #dee2e6; display: flex; align-items: center; justify-content: center;">
+                            <div class="text-center text-muted">
+                                <i class="fas fa-chart-bar fa-2x mb-2"></i>
+                                <p>Distribution Chart</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Detailed Reports Table -->
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Detailed Stage Reports</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Stage Name</th>
+                                <th>Location</th>
+                                <th>Members</th>
+                                <th>Leaders</th>
+                                <th>Status</th>
+                                <th>Performance</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Kencom Stage</td>
+                                <td>Nairobi CBD</td>
+                                <td>45</td>
+                                <td>3</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td><span class="badge bg-primary">Excellent</span></td>
+                            </tr>
+                            <tr>
+                                <td>Kawangware Stage</td>
+                                <td>Dagoretti</td>
+                                <td>32</td>
+                                <td>2</td>
+                                <td><span class="badge bg-success">Active</span></td>
+                                <td><span class="badge bg-success">Good</span></td>
+                            </tr>
+                            <tr>
+                                <td>Kasarani Stage</td>
+                                <td>Kasarani</td>
+                                <td>28</td>
+                                <td>2</td>
+                                <td><span class="badge bg-warning">Pending</span></td>
+                                <td><span class="badge bg-warning">Average</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

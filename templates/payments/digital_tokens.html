@@ -1,0 +1,183 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Digital Tokens - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-coins"></i> Digital Tokens</h1>
+        <p>Manage your digital tokens and vouchers</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#purchaseTokenModal">
+            <i class="fas fa-plus"></i> Purchase Token
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Active Tokens -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-coins"></i> Your Digital Tokens</h5>
+            </div>
+            <div class="card-body">
+                {% if tokens %}
+                    <div class="row">
+                        {% for token in tokens %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-start border-4 {% if token.status == 'expired' %}border-danger{% elif token.status == 'used' %}border-secondary{% else %}border-success{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ token.name }}</h6>
+                                    <p class="card-text">
+                                        <strong>Type:</strong> {{ token.get_token_type_display }}<br>
+                                        <strong>Value:</strong> KES {{ token.value|floatformat:2 }}<br>
+                                        <strong>Remaining:</strong> KES {{ token.remaining_value|floatformat:2 }}<br>
+                                        <strong>Expires:</strong> {{ token.expiry_date|date:"M d, Y" }}
+                                    </p>
+                                    
+                                    {% if token.status == 'active' %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% elif token.status == 'used' %}
+                                        <span class="badge bg-secondary">Used</span>
+                                    {% elif token.status == 'expired' %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% else %}
+                                        <span class="badge bg-warning">{{ token.get_status_display }}</span>
+                                    {% endif %}
+                                    
+                                    <div class="mt-2">
+                                        {% if token.status == 'active' %}
+                                        <button class="btn btn-sm btn-outline-primary">Use Token</button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-outline-info">View QR Code</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-coins fa-3x text-muted mb-3"></i>
+                        <h5>No Digital Tokens</h5>
+                        <p class="text-muted">You don't have any digital tokens yet. Purchase tokens for various services.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#purchaseTokenModal">
+                            <i class="fas fa-plus"></i> Purchase Your First Token
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Token Info -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Available Token Types</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-parking text-primary me-2"></i>
+                            <div>
+                                <strong>Parking Tokens</strong>
+                                <small class="d-block text-muted">Prepaid parking at designated areas</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-gas-pump text-warning me-2"></i>
+                            <div>
+                                <strong>Fuel Vouchers</strong>
+                                <small class="d-block text-muted">Discounted fuel at partner stations</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-ticket-alt text-success me-2"></i>
+                            <div>
+                                <strong>Stage Pass</strong>
+                                <small class="d-block text-muted">Access passes for stages</small>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="mb-3">
+                        <div class="d-flex align-items-center">
+                            <i class="fas fa-wrench text-info me-2"></i>
+                            <div>
+                                <strong>Service Credits</strong>
+                                <small class="d-block text-muted">Maintenance and repair discounts</small>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-chart-line"></i> Token Statistics</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>Total Purchased:</strong> {{ total_tokens }}</p>
+                <p><strong>Active Tokens:</strong> {{ active_tokens }}</p>
+                <p><strong>Total Value:</strong> KES {{ total_value|floatformat:2 }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Purchase Token Modal -->
+<div class="modal fade" id="purchaseTokenModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Purchase Digital Token</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Token Type *</label>
+                        <select class="form-select" name="token_type" required>
+                            <option value="">Select token type</option>
+                            <option value="stage_pass">Stage Pass - KES 100</option>
+                            <option value="parking_token">Parking Token - KES 50</option>
+                            <option value="fuel_voucher">Fuel Voucher - KES 500</option>
+                            <option value="service_credit">Service Credit - KES 200</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Quantity *</label>
+                        <input type="number" class="form-control" name="quantity" required min="1" max="10" value="1">
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method *</label>
+                        <select class="form-select" name="payment_method" required>
+                            <option value="">Select payment method</option>
+                            <option value="wallet">E-Wallet (Balance: KES {{ wallet.balance|floatformat:2 }})</option>
+                            <option value="mpesa">M-Pesa</option>
+                            <option value="airtel">Airtel Money</option>
+                        </select>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i>
+                        Tokens are valid for 30 days from purchase date and can be used at partner locations.
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Purchase Token</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

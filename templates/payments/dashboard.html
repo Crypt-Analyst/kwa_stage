@@ -1,0 +1,396 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payments & Digital Services - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-credit-card"></i> Payments & Digital Services</h1>
+        <p>Manage your digital wallet, mobile money, and payment methods</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#topupModal">
+            <i class="fas fa-plus"></i> Top Up Wallet
+        </button>
+        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#transferModal">
+            <i class="fas fa-exchange-alt"></i> Transfer
+        </button>
+    </div>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4">
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-primary">
+                <i class="fas fa-wallet"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh {{ ewallet.balance|floatformat:2 }}</h3>
+                <p>E-Wallet Balance</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-success">
+                <i class="fas fa-arrow-down"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh {{ total_deposits|floatformat:2 }}</h3>
+                <p>Total Deposits</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning">
+                <i class="fas fa-arrow-up"></i>
+            </div>
+            <div class="stat-content">
+                <h3>KSh {{ total_withdrawals|floatformat:2 }}</h3>
+                <p>Total Withdrawals</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-6 mb-3">
+        <div class="stat-card">
+            <div class="stat-icon bg-info">
+                <i class="fas fa-coins"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ active_tokens.count }}</h3>
+                <p>Active Tokens</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Main Content -->
+<div class="row">
+    <!-- E-Wallet Section -->
+    <div class="col-lg-8">
+        <div class="card mb-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5><i class="fas fa-wallet"></i> E-Wallet</h5>
+                <span class="badge bg-primary">ID: {{ ewallet.wallet_id }}</span>
+            </div>
+            <div class="card-body">
+                <div class="wallet-overview">
+                    <div class="balance-display">
+                        <h2 class="balance-amount">KSh {{ ewallet.balance|floatformat:2 }}</h2>
+                        <p class="balance-label">Available Balance</p>
+                    </div>
+                    <div class="wallet-limits">
+                        <div class="limit-item">
+                            <span class="limit-label">Daily Limit:</span>
+                            <span class="limit-value">KSh {{ ewallet.daily_limit|floatformat:2 }}</span>
+                        </div>
+                        <div class="limit-item">
+                            <span class="limit-label">Monthly Limit:</span>
+                            <span class="limit-value">KSh {{ ewallet.monthly_limit|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="wallet-actions mt-4">
+                    <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#topupModal">
+                        <i class="fas fa-plus"></i> Top Up
+                    </button>
+                    <button class="btn btn-outline-primary me-2" data-bs-toggle="modal" data-bs-target="#transferModal">
+                        <i class="fas fa-exchange-alt"></i> Transfer
+                    </button>
+                    <button class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#withdrawModal">
+                        <i class="fas fa-minus"></i> Withdraw
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Transactions -->
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-history"></i> Recent Transactions</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_transactions %}
+                <div class="transactions-list">
+                    {% for transaction in recent_transactions %}
+                    <div class="transaction-item">
+                        <div class="transaction-icon">
+                            {% if transaction.transaction_type == 'deposit' %}
+                                <i class="fas fa-arrow-down text-success"></i>
+                            {% elif transaction.transaction_type == 'withdrawal' %}
+                                <i class="fas fa-arrow-up text-danger"></i>
+                            {% else %}
+                                <i class="fas fa-exchange-alt text-info"></i>
+                            {% endif %}
+                        </div>
+                        <div class="transaction-details">
+                            <h6>{{ transaction.get_transaction_type_display }}</h6>
+                            <p class="text-muted mb-0">{{ transaction.description }}</p>
+                            <small class="text-muted">{{ transaction.created_at|date:"M d, Y H:i" }}</small>
+                        </div>
+                        <div class="transaction-amount">
+                            <span class="amount {% if transaction.transaction_type == 'deposit' %}text-success{% else %}text-danger{% endif %}">
+                                {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}KSh {{ transaction.amount|floatformat:2 }}
+                            </span>
+                            <div class="status-badge">
+                                <span class="badge bg-{{ transaction.status == 'completed' and 'success' or transaction.status == 'pending' and 'warning' or 'danger' }}">
+                                    {{ transaction.get_status_display }}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="empty-state text-center py-4">
+                    <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                    <h6>No transactions yet</h6>
+                    <p class="text-muted">Your wallet transactions will appear here</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Sidebar -->
+    <div class="col-lg-4">
+        <!-- Payment Methods -->
+        <div class="card mb-4">
+            <div class="card-header">
+                <h6><i class="fas fa-credit-card"></i> Payment Methods</h6>
+            </div>
+            <div class="card-body">
+                {% if payment_methods %}
+                <div class="payment-methods-list">
+                    {% for method in payment_methods %}
+                    <div class="payment-method-item">
+                        <div class="method-icon">
+                            {% if method.provider.code == 'MPESA' %}
+                                <i class="fas fa-mobile-alt text-success"></i>
+                            {% elif method.provider.code == 'AIRTEL' %}
+                                <i class="fas fa-mobile-alt text-danger"></i>
+                            {% else %}
+                                <i class="fas fa-credit-card text-primary"></i>
+                            {% endif %}
+                        </div>
+                        <div class="method-details">
+                            <h6>{{ method.provider.name }}</h6>
+                            <p class="text-muted mb-0">{{ method.account_number }}</p>
+                        </div>
+                        <div class="method-actions">
+                            <span class="badge bg-{{ method.is_default and 'primary' or 'secondary' }}">
+                                {% if method.is_default %}Default{% else %}Active{% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-credit-card fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No payment methods added</p>
+                </div>
+                {% endif %}
+                <button class="btn btn-outline-primary btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#addPaymentMethodModal">
+                    <i class="fas fa-plus"></i> Add Payment Method
+                </button>
+            </div>
+        </div>
+
+        <!-- Active Tokens -->
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-coins"></i> Digital Tokens</h6>
+            </div>
+            <div class="card-body">
+                {% if active_tokens %}
+                <div class="tokens-list">
+                    {% for token in active_tokens %}
+                    <div class="token-item">
+                        <div class="token-icon">
+                            <i class="fas fa-coins text-warning"></i>
+                        </div>
+                        <div class="token-details">
+                            <h6>{{ token.get_token_type_display }}</h6>
+                            <p class="text-muted mb-0">{{ token.remaining_value|floatformat:2 }} remaining</p>
+                            <small class="text-muted">Expires: {{ token.expiry_date|date:"M d, Y" }}</small>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="text-center py-3">
+                    <i class="fas fa-coins fa-2x text-muted mb-2"></i>
+                    <p class="text-muted">No active tokens</p>
+                </div>
+                {% endif %}
+                <button class="btn btn-outline-warning btn-sm w-100 mt-3" data-bs-toggle="modal" data-bs-target="#purchaseTokenModal">
+                    <i class="fas fa-shopping-cart"></i> Purchase Tokens
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+{% include 'payments/modals/topup_modal.html' %}
+{% include 'payments/modals/transfer_modal.html' %}
+{% include 'payments/modals/withdraw_modal.html' %}
+{% include 'payments/modals/add_payment_method_modal.html' %}
+{% include 'payments/modals/purchase_token_modal.html' %}
+
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.wallet-overview {
+    background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+    color: white;
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 1rem;
+}
+
+.balance-display {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.balance-amount {
+    font-size: 2.5rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.balance-label {
+    opacity: 0.9;
+    margin: 0;
+}
+
+.wallet-limits {
+    display: flex;
+    justify-content: space-around;
+    text-align: center;
+}
+
+.limit-item {
+    display: flex;
+    flex-direction: column;
+}
+
+.limit-label {
+    font-size: 0.9rem;
+    opacity: 0.8;
+}
+
+.limit-value {
+    font-weight: bold;
+    margin-top: 0.25rem;
+}
+
+.transaction-item {
+    display: flex;
+    align-items: center;
+    padding: 1rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.transaction-item:last-child {
+    border-bottom: none;
+}
+
+.transaction-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.transaction-details {
+    flex-grow: 1;
+}
+
+.transaction-amount {
+    text-align: right;
+}
+
+.amount {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.status-badge {
+    margin-top: 0.25rem;
+}
+
+.payment-method-item, .token-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem 0;
+    border-bottom: 1px solid #eee;
+}
+
+.payment-method-item:last-child, .token-item:last-child {
+    border-bottom: none;
+}
+
+.method-icon, .token-icon {
+    width: 35px;
+    height: 35px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+}
+
+.method-details, .token-details {
+    flex-grow: 1;
+}
+
+.method-details h6, .token-details h6 {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 8px;
+    padding: 2rem;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+// Payments dashboard JavaScript
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize tooltips
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl);
+    });
+    
+    // Auto-refresh balance every 30 seconds
+    setInterval(function() {
+        fetch('{% url "payments:dashboard" %}')
+            .then(response => response.text())
+            .then(html => {
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                const newBalance = doc.querySelector('.balance-amount').textContent;
+                document.querySelector('.balance-amount').textContent = newBalance;
+            });
+    }, 30000);
+});
+</script>
+{% endblock %}

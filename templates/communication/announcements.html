@@ -1,0 +1,585 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Announcements - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-bullhorn"></i> Announcements</h1>
+        <p>Stay informed about important updates and news</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'communication:send_announcement' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> New Announcement
+        </a>
+        <button class="btn btn-outline-primary" onclick="refreshAnnouncements()">
+            <i class="fas fa-sync"></i> Refresh
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Categories</h5>
+            </div>
+            <div class="card-body">
+                <div class="category-filter">
+                    <button class="filter-btn active" data-category="all">
+                        <i class="fas fa-bullhorn"></i> All (15)
+                    </button>
+                    <button class="filter-btn" data-category="urgent">
+                        <i class="fas fa-exclamation-triangle text-danger"></i> Urgent (3)
+                    </button>
+                    <button class="filter-btn" data-category="meetings">
+                        <i class="fas fa-users text-primary"></i> Meetings (4)
+                    </button>
+                    <button class="filter-btn" data-category="system">
+                        <i class="fas fa-cog text-secondary"></i> System (2)
+                    </button>
+                    <button class="filter-btn" data-category="events">
+                        <i class="fas fa-calendar text-success"></i> Events (6)
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-star"></i> Pinned</h5>
+            </div>
+            <div class="card-body">
+                <div class="pinned-announcement">
+                    <h6>Emergency Procedures</h6>
+                    <p class="small">Updated emergency contact procedures...</p>
+                    <small class="text-muted">Pinned 1 week ago</small>
+                </div>
+                <div class="pinned-announcement">
+                    <h6>New Contribution Rates</h6>
+                    <p class="small">Monthly contributions increased to KSh 2,500...</p>
+                    <small class="text-muted">Pinned 2 weeks ago</small>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-newspaper"></i> Recent Announcements</h5>
+                    <select class="form-select w-auto" onchange="sortAnnouncements(this.value)">
+                        <option value="newest">Newest First</option>
+                        <option value="oldest">Oldest First</option>
+                        <option value="priority">By Priority</option>
+                    </select>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="announcements-list">
+                    <!-- Urgent Announcement -->
+                    <div class="announcement-item urgent" data-category="urgent">
+                        <div class="announcement-header">
+                            <div class="announcement-meta">
+                                <span class="priority-badge urgent">URGENT</span>
+                                <span class="category-tag meetings">Meeting</span>
+                                <span class="date">July 22, 2025</span>
+                            </div>
+                            <div class="announcement-actions">
+                                <button class="btn-action" onclick="pinAnnouncement(1)">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                                <button class="btn-action" onclick="shareAnnouncement(1)">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="announcement-content">
+                            <h4>Emergency Stage Meeting - Tomorrow</h4>
+                            <p>An emergency meeting has been called for July 23, 2025, at 7:00 PM to discuss the recent security concerns in our area. All stage members are required to attend.</p>
+                            <div class="announcement-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Tomorrow, 7:00 PM</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Kikuyu Main Stage Office</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>By: Stage Chairman Mary Wanjiku</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="engagement">
+                                <button class="btn btn-sm btn-outline-primary" onclick="acknowledgement(1)">
+                                    <i class="fas fa-check"></i> Acknowledge (23)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showComments(1)">
+                                    <i class="fas fa-comment"></i> Comments (5)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Announcement -->
+                    <div class="announcement-item system" data-category="system">
+                        <div class="announcement-header">
+                            <div class="announcement-meta">
+                                <span class="priority-badge normal">NORMAL</span>
+                                <span class="category-tag system">System</span>
+                                <span class="date">July 20, 2025</span>
+                            </div>
+                            <div class="announcement-actions">
+                                <button class="btn-action" onclick="pinAnnouncement(2)">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                                <button class="btn-action" onclick="shareAnnouncement(2)">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="announcement-content">
+                            <h4>System Maintenance Update</h4>
+                            <p>The KwaStage system maintenance has been completed successfully. New features include enhanced security, improved mobile experience, and faster processing times.</p>
+                            <div class="announcement-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-tools"></i>
+                                    <span>Maintenance completed</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-shield-alt"></i>
+                                    <span>Enhanced security features</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>By: System Administrator</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="engagement">
+                                <button class="btn btn-sm btn-outline-primary" onclick="acknowledgement(2)">
+                                    <i class="fas fa-check"></i> Acknowledge (45)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showComments(2)">
+                                    <i class="fas fa-comment"></i> Comments (12)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Event Announcement -->
+                    <div class="announcement-item events" data-category="events">
+                        <div class="announcement-header">
+                            <div class="announcement-meta">
+                                <span class="priority-badge normal">NORMAL</span>
+                                <span class="category-tag events">Event</span>
+                                <span class="date">July 18, 2025</span>
+                            </div>
+                            <div class="announcement-actions">
+                                <button class="btn-action" onclick="pinAnnouncement(3)">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                                <button class="btn-action" onclick="shareAnnouncement(3)">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="announcement-content">
+                            <h4>Annual End-of-Year Party</h4>
+                            <p>Join us for our annual end-of-year celebration! Food, drinks, entertainment, and awards ceremony. Bring your families for a day of fun and community bonding.</p>
+                            <div class="announcement-image">
+                                <img src="{% static 'images/party-placeholder.jpg' %}" alt="End of Year Party" class="img-fluid rounded">
+                            </div>
+                            <div class="announcement-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-calendar"></i>
+                                    <span>December 20, 2025</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-map-marker-alt"></i>
+                                    <span>Kiambu Sports Club</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-money-bill"></i>
+                                    <span>Entry: KSh 500 per person</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="engagement">
+                                <button class="btn btn-sm btn-success" onclick="rsvp(3)">
+                                    <i class="fas fa-calendar-check"></i> RSVP (78)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showComments(3)">
+                                    <i class="fas fa-comment"></i> Comments (28)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Meeting Announcement -->
+                    <div class="announcement-item meetings" data-category="meetings">
+                        <div class="announcement-header">
+                            <div class="announcement-meta">
+                                <span class="priority-badge high">HIGH</span>
+                                <span class="category-tag meetings">Meeting</span>
+                                <span class="date">July 15, 2025</span>
+                            </div>
+                            <div class="announcement-actions">
+                                <button class="btn-action" onclick="pinAnnouncement(4)">
+                                    <i class="fas fa-thumbtack"></i>
+                                </button>
+                                <button class="btn-action" onclick="shareAnnouncement(4)">
+                                    <i class="fas fa-share"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="announcement-content">
+                            <h4>Monthly Financial Report Meeting</h4>
+                            <p>Review of monthly financial statements, contribution collections, loan disbursements, and emergency fund status. All members welcome to attend.</p>
+                            <div class="announcement-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-clock"></i>
+                                    <span>Last Saturday of every month, 2:00 PM</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-file-alt"></i>
+                                    <span>Agenda: Financial review & planning</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-user"></i>
+                                    <span>By: Treasurer Peter Kimani</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="announcement-footer">
+                            <div class="engagement">
+                                <button class="btn btn-sm btn-outline-primary" onclick="acknowledgement(4)">
+                                    <i class="fas fa-check"></i> Acknowledge (34)
+                                </button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="showComments(4)">
+                                    <i class="fas fa-comment"></i> Comments (8)
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Load More -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary" onclick="loadMoreAnnouncements()">
+                        <i class="fas fa-chevron-down"></i> Load More Announcements
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.category-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: #f8f9fa;
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.pinned-announcement {
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.pinned-announcement:last-child {
+    border-bottom: none;
+}
+
+.pinned-announcement h6 {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.announcements-list {
+    max-height: 800px;
+    overflow-y: auto;
+}
+
+.announcement-item {
+    background: white;
+    border: 1px solid #eee;
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    transition: all 0.3s ease;
+}
+
+.announcement-item:hover {
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.announcement-item.urgent {
+    border-left: 4px solid #dc3545;
+    background: linear-gradient(90deg, #fff5f5 0%, white 10%);
+}
+
+.announcement-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.announcement-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.priority-badge {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.priority-badge.urgent {
+    background: #dc3545;
+    color: white;
+}
+
+.priority-badge.high {
+    background: #fd7e14;
+    color: white;
+}
+
+.priority-badge.normal {
+    background: #6c757d;
+    color: white;
+}
+
+.category-tag {
+    padding: 3px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+.category-tag.meetings {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.category-tag.system {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.category-tag.events {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.date {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.announcement-actions {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-action {
+    background: none;
+    border: none;
+    padding: 5px;
+    color: #666;
+    cursor: pointer;
+    border-radius: 3px;
+    transition: all 0.3s ease;
+}
+
+.btn-action:hover {
+    background: #f8f9fa;
+    color: var(--primary-color);
+}
+
+.announcement-content h4 {
+    margin-bottom: 15px;
+    color: #333;
+    font-weight: 600;
+}
+
+.announcement-content p {
+    margin-bottom: 15px;
+    line-height: 1.6;
+    color: #555;
+}
+
+.announcement-image {
+    margin: 15px 0;
+}
+
+.announcement-image img {
+    max-height: 200px;
+    width: 100%;
+    object-fit: cover;
+}
+
+.announcement-details {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 15px;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #555;
+}
+
+.detail-item i {
+    color: var(--primary-color);
+    width: 16px;
+}
+
+.announcement-footer {
+    border-top: 1px solid #eee;
+    padding-top: 15px;
+}
+
+.engagement {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .announcement-header {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 10px;
+    }
+    
+    .announcement-details {
+        flex-direction: column;
+        gap: 8px;
+    }
+    
+    .engagement {
+        justify-content: center;
+    }
+}
+</style>
+
+<script>
+function refreshAnnouncements() {
+    location.reload();
+}
+
+function sortAnnouncements(sortBy) {
+    // Implement sorting logic
+    console.log('Sorting by:', sortBy);
+}
+
+function filterAnnouncements(category) {
+    const announcements = document.querySelectorAll('.announcement-item');
+    
+    announcements.forEach(item => {
+        if (category === 'all') {
+            item.style.display = 'block';
+        } else {
+            item.style.display = item.dataset.category === category ? 'block' : 'none';
+        }
+    });
+}
+
+function pinAnnouncement(id) {
+    alert('Announcement pinned successfully!');
+}
+
+function shareAnnouncement(id) {
+    if (navigator.share) {
+        navigator.share({
+            title: 'KwaStage Announcement',
+            text: 'Check out this important announcement from KwaStage',
+            url: window.location.href
+        });
+    } else {
+        alert('Announcement shared!');
+    }
+}
+
+function acknowledgement(id) {
+    alert('Acknowledgement recorded!');
+}
+
+function showComments(id) {
+    alert('Comments for announcement ' + id);
+}
+
+function rsvp(id) {
+    alert('RSVP recorded for event!');
+}
+
+function loadMoreAnnouncements() {
+    alert('Loading more announcements...');
+}
+
+// Category filter event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Filter announcements
+            const category = this.dataset.category;
+            filterAnnouncements(category);
+        });
+    });
+});
+</script>
+{% endblock %}

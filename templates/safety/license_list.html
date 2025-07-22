@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Licenses & Permits - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-id-card"></i> Licenses & Permits</h1>
+        <p>Manage your driving licenses and permits</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLicenseModal">
+            <i class="fas fa-plus"></i> Add License
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- License List -->
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-id-card"></i> Your Licenses & Permits</h5>
+            </div>
+            <div class="card-body">
+                {% if licenses %}
+                    <div class="row">
+                        {% for license in licenses %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card border-start border-4 {% if license.is_expired %}border-danger{% elif license.is_expiring_soon %}border-warning{% else %}border-success{% endif %}">
+                                <div class="card-body">
+                                    <h6 class="card-title">{{ license.get_license_type_display }}</h6>
+                                    <p class="card-text">
+                                        <strong>License No:</strong> {{ license.license_number }}<br>
+                                        <strong>Issued by:</strong> {{ license.issuing_authority }}<br>
+                                        <strong>Issue Date:</strong> {{ license.issue_date }}<br>
+                                        <strong>Expires:</strong> {{ license.expiry_date }}
+                                    </p>
+                                    
+                                    {% if license.is_expired %}
+                                        <span class="badge bg-danger">Expired</span>
+                                    {% elif license.is_expiring_soon %}
+                                        <span class="badge bg-warning">Expiring Soon</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Valid</span>
+                                    {% endif %}
+                                    
+                                    <div class="mt-2">
+                                        <button class="btn btn-sm btn-outline-primary">View Details</button>
+                                        <button class="btn btn-sm btn-outline-success">Renew</button>
+                                        {% if license.license_document %}
+                                        <a href="{{ license.license_document.url }}" target="_blank" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-download"></i> Download
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-id-card fa-3x text-muted mb-3"></i>
+                        <h5>No Licenses or Permits</h5>
+                        <p class="text-muted">You don't have any licenses registered yet. Add your driving license or permits.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLicenseModal">
+                            <i class="fas fa-plus"></i> Add Your First License
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- License Info -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-info-circle"></i> Required Documents</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Valid Driving License
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Motorcycle Permit
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Commercial Permit (if applicable)
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Certificate of Good Conduct
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        PSV License (if applicable)
+                    </li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-calendar-alt"></i> Renewal Reminders</h6>
+            </div>
+            <div class="card-body">
+                {% if expiring_licenses %}
+                    {% for license in expiring_licenses %}
+                    <div class="alert alert-warning">
+                        <strong>{{ license.get_license_type_display }}</strong><br>
+                        Expires: {{ license.expiry_date }}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <p class="text-muted">No licenses expiring soon.</p>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-3">
+            <div class="card-header">
+                <h6><i class="fas fa-phone"></i> NTSA Contacts</h6>
+            </div>
+            <div class="card-body">
+                <p><strong>NTSA Hotline:</strong><br>+254 20 2729000</p>
+                <p><strong>Licensing Offices:</strong><br>Visit nearest NTSA office</p>
+                <p><strong>Online Services:</strong><br>ntsa.go.ke</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add License Modal -->
+<div class="modal fade" id="addLicenseModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add License/Permit</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">License Type *</label>
+                        <select class="form-select" name="license_type" required>
+                            <option value="">Select license type</option>
+                            <option value="driving_license">Driving License</option>
+                            <option value="motorcycle_permit">Motorcycle Permit</option>
+                            <option value="commercial_permit">Commercial Permit</option>
+                            <option value="psv_license">PSV License</option>
+                            <option value="good_conduct">Certificate of Good Conduct</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">License Number *</label>
+                        <input type="text" class="form-control" name="license_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Issuing Authority *</label>
+                        <input type="text" class="form-control" name="issuing_authority" required 
+                               placeholder="e.g., NTSA, Ministry of Transport">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Issue Date *</label>
+                                <input type="date" class="form-control" name="issue_date" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Expiry Date *</label>
+                                <input type="date" class="form-control" name="expiry_date" required>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">License Document (Optional)</label>
+                        <input type="file" class="form-control" name="license_document" accept=".pdf,.jpg,.jpeg,.png">
+                        <small class="text-muted">Upload a clear photo or scan of your license</small>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Restrictions (Optional)</label>
+                        <textarea class="form-control" name="restrictions" rows="2" 
+                                  placeholder="Any restrictions on this license..."></textarea>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add License</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

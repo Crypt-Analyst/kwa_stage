@@ -1,0 +1,289 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emergency Case Detail - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-file-medical"></i> Emergency Case Detail</h1>
+        <p>Case ID: #EM001</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cases
+        </a>
+        <button class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Case
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info-circle"></i> Case Information</h5>
+                <span class="badge bg-danger">Critical Priority</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <strong>Emergency Type:</strong>
+                            <span>Medical Emergency</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Affected Person:</strong>
+                            <span>John Kamau</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Relationship:</strong>
+                            <span>Member</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Phone Number:</strong>
+                            <span>+254 700 123 456</span>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="detail-item">
+                            <strong>Date Reported:</strong>
+                            <span>July 22, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Incident Date:</strong>
+                            <span>July 20, 2025</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Location:</strong>
+                            <span>Githurai, Kiambu County</span>
+                        </div>
+                        <div class="detail-item">
+                            <strong>Status:</strong>
+                            <span class="badge bg-warning">Under Review</span>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <strong>Case Description:</strong>
+                    <p class="mt-2">Member was involved in a serious motorcycle accident and requires immediate medical attention. He is currently hospitalized at Kenyatta National Hospital with multiple injuries including a broken leg and internal bleeding. The family needs financial support for medical bills and ongoing treatment.</p>
+                </div>
+                
+                <div class="mt-4">
+                    <strong>Support Requested:</strong>
+                    <div class="d-flex flex-wrap gap-2 mt-2">
+                        <span class="badge bg-primary">Financial Support</span>
+                        <span class="badge bg-info">Medical Assistance</span>
+                        <span class="badge bg-success">Transportation</span>
+                    </div>
+                    <p class="mt-2"><strong>Amount Requested:</strong> KSh 150,000</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-tasks"></i> Case Progress</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6>Case Reported</h6>
+                            <p>Emergency case submitted by John Kamau</p>
+                            <small class="text-muted">July 22, 2025 - 10:30 AM</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item completed">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6>Initial Review</h6>
+                            <p>Case reviewed by emergency committee</p>
+                            <small class="text-muted">July 22, 2025 - 2:15 PM</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item active">
+                        <div class="timeline-marker bg-warning"></div>
+                        <div class="timeline-content">
+                            <h6>Verification in Progress</h6>
+                            <p>Verifying case details and supporting documents</p>
+                            <small class="text-muted">In Progress</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-light"></div>
+                        <div class="timeline-content">
+                            <h6>Approval Pending</h6>
+                            <p>Awaiting committee approval for fund disbursement</p>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-light"></div>
+                        <div class="timeline-content">
+                            <h6>Fund Disbursement</h6>
+                            <p>Release approved funds to the member</p>
+                            <small class="text-muted">Pending</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-cogs"></i> Actions</h5>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-success">
+                        <i class="fas fa-check"></i> Verify Case
+                    </button>
+                    <button class="btn btn-primary">
+                        <i class="fas fa-thumbs-up"></i> Approve Case
+                    </button>
+                    <button class="btn btn-warning">
+                        <i class="fas fa-money-bill-wave"></i> Disburse Funds
+                    </button>
+                    <button class="btn btn-info">
+                        <i class="fas fa-heart"></i> Add Support Record
+                    </button>
+                    <button class="btn btn-danger">
+                        <i class="fas fa-times"></i> Reject Case
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-paperclip"></i> Supporting Documents</h5>
+            </div>
+            <div class="card-body">
+                <div class="document-item">
+                    <i class="fas fa-file-image text-primary"></i>
+                    <span>accident_photo.jpg</span>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+                <div class="document-item">
+                    <i class="fas fa-file-pdf text-danger"></i>
+                    <span>medical_report.pdf</span>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+                <div class="document-item">
+                    <i class="fas fa-file-image text-primary"></i>
+                    <span>hospital_bill.jpg</span>
+                    <a href="#" class="btn btn-sm btn-outline-primary">View</a>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-user"></i> Contact Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="contact-item">
+                    <strong>Emergency Contact:</strong>
+                    <p>Mary Kamau (Wife)<br>+254 701 234 567</p>
+                </div>
+                <div class="contact-item">
+                    <strong>Hospital:</strong>
+                    <p>Kenyatta National Hospital<br>Ward 3B, Bed 15</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.detail-item {
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+    border-bottom: none;
+}
+
+.timeline {
+    position: relative;
+    padding-left: 30px;
+}
+
+.timeline::before {
+    content: '';
+    position: absolute;
+    left: 15px;
+    top: 0;
+    bottom: 0;
+    width: 2px;
+    background: #dee2e6;
+}
+
+.timeline-item {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: -22px;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+.timeline-content h6 {
+    margin-bottom: 5px;
+    color: #495057;
+}
+
+.timeline-content p {
+    margin-bottom: 5px;
+    color: #6c757d;
+}
+
+.timeline-item.completed .timeline-content h6 {
+    color: #28a745;
+}
+
+.timeline-item.active .timeline-content h6 {
+    color: #ffc107;
+}
+
+.document-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.document-item:last-child {
+    border-bottom: none;
+}
+
+.document-item i {
+    margin-right: 10px;
+}
+
+.contact-item {
+    margin-bottom: 15px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.contact-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}

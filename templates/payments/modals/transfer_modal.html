@@ -1,0 +1,147 @@
+<!-- Transfer Modal -->
+<div class="modal fade" id="transferModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-exchange-alt"></i> Transfer Funds</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'payments:transfer' %}" id="transferForm">
+                    {% csrf_token %}
+                    
+                    <!-- Recipient Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Recipient *</label>
+                        <input type="text" class="form-control" name="recipient" id="recipientInput" 
+                               placeholder="Enter member number or phone number" required>
+                        <div id="recipientSuggestions" class="suggestions-dropdown"></div>
+                    </div>
+
+                    <!-- Amount -->
+                    <div class="mb-3">
+                        <label class="form-label">Amount *</label>
+                        <div class="input-group">
+                            <span class="input-group-text">KSh</span>
+                            <input type="number" class="form-control" name="amount" id="transferAmount" 
+                                   placeholder="Enter amount" min="10" step="0.01" required>
+                        </div>
+                        <small class="text-muted">Available Balance: KSh {{ ewallet.balance|floatformat:2 }}</small>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label class="form-label">Description (Optional)</label>
+                        <input type="text" class="form-control" name="description" 
+                               placeholder="Payment for...">
+                    </div>
+
+                    <!-- PIN -->
+                    <div class="mb-3">
+                        <label class="form-label">Wallet PIN *</label>
+                        <input type="password" class="form-control" name="pin" id="walletPin" 
+                               placeholder="Enter your 4-digit PIN" maxlength="4" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="transferForm" class="btn btn-primary" id="transferSubmitBtn">
+                    <i class="fas fa-paper-plane"></i> Send Transfer
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const recipientInput = document.getElementById('recipientInput');
+    const transferAmount = document.getElementById('transferAmount');
+    const walletPin = document.getElementById('walletPin');
+    const submitBtn = document.getElementById('transferSubmitBtn');
+
+    // Recipient search
+    recipientInput.addEventListener('input', function() {
+        const query = this.value;
+        if (query.length >= 3) {
+            // Fetch recipient suggestions
+            fetch(`/payments/search-recipients/?q=${query}`)
+                .then(response => response.json())
+                .then(data => {
+                    showSuggestions(data);
+                });
+        }
+    });
+
+    function showSuggestions(recipients) {
+        const suggestionsDiv = document.getElementById('recipientSuggestions');
+        suggestionsDiv.innerHTML = '';
+        
+        recipients.forEach(recipient => {
+            const item = document.createElement('div');
+            item.className = 'suggestion-item';
+            item.innerHTML = `
+                <strong>${recipient.name}</strong><br>
+                <small>${recipient.member_number} - ${recipient.phone}</small>
+            `;
+            item.addEventListener('click', function() {
+                recipientInput.value = recipient.member_number;
+                suggestionsDiv.innerHTML = '';
+            });
+            suggestionsDiv.appendChild(item);
+        });
+    }
+
+    // Form validation
+    [transferAmount, walletPin].forEach(input => {
+        input.addEventListener('input', validateForm);
+    });
+
+    function validateForm() {
+        const amount = parseFloat(transferAmount.value) || 0;
+        const pin = walletPin.value;
+        const balance = {{ ewallet.balance }};
+        
+        submitBtn.disabled = amount < 10 || amount > balance || pin.length !== 4;
+    }
+
+    // Form submission
+    document.getElementById('transferForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        this.submit();
+    });
+});
+</script>
+
+<style>
+.suggestions-dropdown {
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    border-top: none;
+    border-radius: 0 0 4px 4px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: 100%;
+}
+
+.suggestion-item {
+    padding: 10px;
+    cursor: pointer;
+    border-bottom: 1px solid #eee;
+}
+
+.suggestion-item:hover {
+    background-color: #f8f9fa;
+}
+
+.suggestion-item:last-child {
+    border-bottom: none;
+}
+</style>

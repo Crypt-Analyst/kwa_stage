@@ -1,0 +1,209 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}All Stages{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-map-marker-alt"></i> All Stages</h1>
+        <div class="header-actions">
+            <a href="{% url 'stages:create' %}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Register New Stage
+            </a>
+            <a href="{% url 'stages:map_view' %}" class="btn btn-outline">
+                <i class="fas fa-map"></i> Map View
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-8">
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Registered Stages</h5>
+                        <span class="badge bg-primary">{{ stages.count }} Total</span>
+                    </div>
+                    <div class="card-body">
+                        {% if stages %}
+                            <div class="row">
+                                {% for stage in stages %}
+                                <div class="col-md-6 mb-4">
+                                    <div class="card h-100 border">
+                                        <div class="card-body">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h6 class="card-title mb-0">{{ stage.name }}</h6>
+                                                {% if stage.latitude and stage.longitude %}
+                                                    <span class="badge bg-success">GPS</span>
+                                                {% else %}
+                                                    <span class="badge bg-secondary">Manual</span>
+                                                {% endif %}
+                                            </div>
+                                            
+                                            {% if stage.location %}
+                                                <p class="text-muted small mb-2">
+                                                    <i class="fas fa-map-marker-alt"></i> {{ stage.location }}
+                                                </p>
+                                            {% endif %}
+                                            
+                                            {% if stage.description %}
+                                                <p class="card-text small">{{ stage.description|truncatewords:15 }}</p>
+                                            {% endif %}
+                                            
+                                            <div class="row text-center mt-3">
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">Members</small>
+                                                    <strong>0</strong>
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">Active</small>
+                                                    <strong>Yes</strong>
+                                                </div>
+                                                <div class="col-4">
+                                                    <small class="text-muted d-block">Created</small>
+                                                    <strong>{{ stage.created_at|date:"M d" }}</strong>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="d-flex gap-2 mt-3">
+                                                <a href="{% url 'stages:detail' stage.id %}" class="btn btn-sm btn-primary flex-fill">
+                                                    <i class="fas fa-eye"></i> View
+                                                </a>
+                                                {% if stage.latitude and stage.longitude %}
+                                                    <button onclick="showOnMap({{ stage.latitude }}, {{ stage.longitude }})" class="btn btn-sm btn-outline-secondary">
+                                                        <i class="fas fa-map"></i>
+                                                    </button>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                            
+                            <!-- Pagination if needed -->
+                            {% if stages.count > 10 %}
+                            <nav aria-label="Stages pagination">
+                                <ul class="pagination justify-content-center">
+                                    <li class="page-item disabled">
+                                        <span class="page-link">Previous</span>
+                                    </li>
+                                    <li class="page-item active">
+                                        <span class="page-link">1</span>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">2</a>
+                                    </li>
+                                    <li class="page-item">
+                                        <a class="page-link" href="#">Next</a>
+                                    </li>
+                                </ul>
+                            </nav>
+                            {% endif %}
+                        {% else %}
+                            <div class="text-center py-5">
+                                <i class="fas fa-map-marker-alt fa-3x text-muted mb-3"></i>
+                                <h5 class="text-muted">No Stages Registered Yet</h5>
+                                <p class="text-muted">Get started by registering your first stage.</p>
+                                <a href="{% url 'stages:create' %}" class="btn btn-primary">
+                                    <i class="fas fa-plus"></i> Register First Stage
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Statistics Card -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">Stage Statistics</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-6 mb-3">
+                                <div class="stat-card">
+                                    <h3 class="text-primary">{{ stages.count }}</h3>
+                                    <small class="text-muted">Total Stages</small>
+                                </div>
+                            </div>
+                            <div class="col-6 mb-3">
+                                <div class="stat-card">
+                                    <h3 class="text-success">0</h3>
+                                    <small class="text-muted">Total Members</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <h3 class="text-info">{{ stages|length }}</h3>
+                                    <small class="text-muted">Active Stages</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="stat-card">
+                                    <h3 class="text-warning">0</h3>
+                                    <small class="text-muted">Pending</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <a href="{% url 'stages:create' %}" class="btn btn-primary">
+                                <i class="fas fa-plus"></i> Register New Stage
+                            </a>
+                            <a href="{% url 'stages:map_view' %}" class="btn btn-outline-primary">
+                                <i class="fas fa-map"></i> View on Map
+                            </a>
+                            <a href="{% url 'stages:reports' %}" class="btn btn-outline-info">
+                                <i class="fas fa-chart-bar"></i> View Reports
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Search/Filter -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">Search & Filter</h5>
+                    </div>
+                    <div class="card-body">
+                        <form method="get">
+                            <div class="mb-3">
+                                <input type="text" name="search" class="form-control" placeholder="Search stages..." value="{{ request.GET.search }}">
+                            </div>
+                            <div class="mb-3">
+                                <select name="location" class="form-select">
+                                    <option value="">All Locations</option>
+                                    <option value="nairobi">Nairobi</option>
+                                    <option value="mombasa">Mombasa</option>
+                                    <option value="kisumu">Kisumu</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-outline-primary btn-sm w-100">
+                                <i class="fas fa-search"></i> Search
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function showOnMap(lat, lng) {
+    // Open map view and center on the stage
+    window.open(`{% url 'stages:map_view' %}?lat=${lat}&lng=${lng}`, '_blank');
+}
+</script>
+{% endblock %}

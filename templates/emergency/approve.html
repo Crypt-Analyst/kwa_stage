@@ -1,0 +1,350 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Approve Emergency Case - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-check-circle"></i> Approve Emergency Case</h1>
+        <p>Case ID: #EM001 - John Kamau</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cases
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-success text-white">
+                <h5><i class="fas fa-thumbs-up"></i> Case Approval</h5>
+            </div>
+            <div class="card-body">
+                <div class="verification-status mb-4">
+                    <div class="status-item">
+                        <i class="fas fa-check-circle text-success"></i>
+                        <span>Verification Completed</span>
+                        <small class="text-muted">by Mary Wanjiku on July 22, 2025</small>
+                    </div>
+                </div>
+
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="approval-section">
+                        <h6><i class="fas fa-money-bill-wave"></i> Financial Approval</h6>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Amount Requested</label>
+                                    <input type="number" class="form-control" value="150000" readonly>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Amount Approved *</label>
+                                    <input type="number" class="form-control" name="approved_amount" 
+                                           value="150000" min="0" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Approval Reason</label>
+                            <select class="form-select" name="approval_reason" required>
+                                <option value="">Select Reason</option>
+                                <option value="full_approval">Full approval - all criteria met</option>
+                                <option value="partial_funds">Partial approval - limited funds available</option>
+                                <option value="reduced_costs">Reduced costs after negotiation</option>
+                                <option value="emergency_basis">Emergency basis - pending full verification</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="approval-section">
+                        <h6><i class="fas fa-credit-card"></i> Disbursement Method</h6>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method</label>
+                            <select class="form-select" name="payment_method" required>
+                                <option value="">Select Payment Method</option>
+                                <option value="mpesa">M-Pesa Transfer</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="cash">Cash Payment</option>
+                                <option value="direct_payment">Direct Payment to Provider</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Payment Schedule</label>
+                            <select class="form-select" name="payment_schedule" required>
+                                <option value="">Select Schedule</option>
+                                <option value="immediate">Immediate (within 2 hours)</option>
+                                <option value="same_day">Same Day (within 8 hours)</option>
+                                <option value="next_business_day">Next Business Day</option>
+                                <option value="installments">Installments</option>
+                            </select>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Recipient Phone</label>
+                                    <input type="tel" class="form-control" name="recipient_phone" 
+                                           value="+254712345678" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label class="form-label">Recipient Name</label>
+                                    <input type="text" class="form-control" name="recipient_name" 
+                                           value="John Kamau" required>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="approval-section">
+                        <h6><i class="fas fa-users"></i> Approval Committee</h6>
+                        
+                        <div class="committee-member">
+                            <input type="checkbox" name="approver_1" id="approver_1" checked disabled>
+                            <label for="approver_1">Mary Wanjiku (Chairman) - Approved</label>
+                        </div>
+                        <div class="committee-member">
+                            <input type="checkbox" name="approver_2" id="approver_2" required>
+                            <label for="approver_2">Peter Kimani (Treasurer) - Pending</label>
+                        </div>
+                        <div class="committee-member">
+                            <input type="checkbox" name="approver_3" id="approver_3">
+                            <label for="approver_3">Grace Akinyi (Secretary) - Optional</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label">Approval Notes</label>
+                        <textarea class="form-control" name="approval_notes" rows="4" 
+                                  placeholder="Add any conditions, instructions, or notes for this approval..."></textarea>
+                    </div>
+
+                    <div class="approval-conditions">
+                        <h6><i class="fas fa-exclamation-triangle"></i> Approval Conditions</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="receipt_required" id="receipt_required" checked>
+                            <label class="form-check-label" for="receipt_required">
+                                Recipient must provide payment receipts
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="progress_updates" id="progress_updates" checked>
+                            <label class="form-check-label" for="progress_updates">
+                                Regular progress updates required
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="audit_trail" id="audit_trail" checked>
+                            <label class="form-check-label" for="audit_trail">
+                                Maintain complete audit trail
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check"></i> Approve Case
+                        </button>
+                        <button type="button" class="btn btn-warning btn-lg" data-bs-toggle="modal" data-bs-target="#holdModal">
+                            <i class="fas fa-pause"></i> Put on Hold
+                        </button>
+                        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Fund Status</h5>
+            </div>
+            <div class="card-body">
+                <div class="fund-item">
+                    <strong>Available Emergency Fund:</strong>
+                    <span class="text-success">KSh 2,450,000</span>
+                </div>
+                <div class="fund-item">
+                    <strong>Pending Approvals:</strong>
+                    <span class="text-warning">KSh 320,000</span>
+                </div>
+                <div class="fund-item">
+                    <strong>This Case:</strong>
+                    <span class="text-primary">KSh 150,000</span>
+                </div>
+                <div class="fund-item">
+                    <strong>Balance After Approval:</strong>
+                    <span class="text-info">KSh 2,300,000</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Case Timeline</h5>
+            </div>
+            <div class="card-body">
+                <div class="timeline-item">
+                    <div class="timeline-date">July 22, 10:30 AM</div>
+                    <div class="timeline-event">Case reported</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">July 22, 11:15 AM</div>
+                    <div class="timeline-event">Verification started</div>
+                </div>
+                <div class="timeline-item">
+                    <div class="timeline-date">July 22, 2:45 PM</div>
+                    <div class="timeline-event">Verification completed</div>
+                </div>
+                <div class="timeline-item active">
+                    <div class="timeline-date">Now</div>
+                    <div class="timeline-event">Pending approval</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Hold Modal -->
+<div class="modal fade" id="holdModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Put Case on Hold</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Reason for Hold</label>
+                        <select class="form-select" required>
+                            <option value="">Select Reason</option>
+                            <option value="additional_verification">Additional verification needed</option>
+                            <option value="committee_review">Awaiting committee review</option>
+                            <option value="documentation">Missing documentation</option>
+                            <option value="budget_constraints">Budget constraints</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Hold Notes</label>
+                        <textarea class="form-control" rows="3" placeholder="Explain why the case is being put on hold..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-warning">Put on Hold</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.approval-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.approval-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.verification-status {
+    background: #d4edda;
+    border: 1px solid #c3e6cb;
+    border-radius: 8px;
+    padding: 15px;
+}
+
+.status-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.committee-member {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    background: white;
+    border-radius: 5px;
+}
+
+.approval-conditions {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.fund-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.fund-item:last-child {
+    border-bottom: none;
+    padding-top: 15px;
+    margin-top: 10px;
+    border-top: 2px solid #dee2e6;
+    font-weight: bold;
+}
+
+.timeline-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-left: 3px solid #dee2e6;
+    padding-left: 15px;
+    margin-bottom: 10px;
+}
+
+.timeline-item.active {
+    border-left-color: #007bff;
+    background: #e3f2fd;
+    border-radius: 0 5px 5px 0;
+}
+
+.timeline-date {
+    font-size: 0.85rem;
+    color: #6c757d;
+}
+
+.timeline-event {
+    font-weight: 500;
+}
+</style>
+{% endblock %}

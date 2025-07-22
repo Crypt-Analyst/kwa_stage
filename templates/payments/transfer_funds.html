@@ -1,0 +1,178 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transfer Funds - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.transfer-modal {
+    max-width: 600px;
+    margin: 0 auto;
+}
+.recipient-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.recipient-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+.recipient-card.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card transfer-modal">
+                <div class="card-header">
+                    <h5><i class="fas fa-exchange-alt"></i> Transfer Funds</h5>
+                    <p class="mb-0 text-muted">Send money to another KwaStage member</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="transferForm">
+                        {% csrf_token %}
+                        
+                        <!-- Current Balance -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-wallet"></i> Available Balance: <strong>KES {{ wallet.balance|floatformat:2 }}</strong>
+                        </div>
+                        
+                        <!-- Recipient Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Recipient *</label>
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" id="recipientSearch" 
+                                           placeholder="Search by name, phone, or member number...">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="button" class="btn btn-outline-primary w-100" onclick="searchRecipients()">
+                                        <i class="fas fa-search"></i> Search
+                                    </button>
+                                </div>
+                            </div>
+                            <div id="recipientResults" class="mt-3"></div>
+                            <input type="hidden" name="recipient_id" id="selectedRecipient" required>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label class="form-label">Amount to Transfer *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">KES</span>
+                                <input type="number" class="form-control" name="amount" required 
+                                       min="1" max="{{ wallet.balance }}" step="0.01" placeholder="0.00">
+                            </div>
+                            <small class="text-muted">Maximum: KES {{ wallet.balance|floatformat:2 }}</small>
+                        </div>
+                        
+                        <!-- Description -->
+                        <div class="mb-3">
+                            <label class="form-label">Description (Optional)</label>
+                            <textarea class="form-control" name="description" rows="3" 
+                                      placeholder="Enter a note for this transfer..."></textarea>
+                        </div>
+                        
+                        <!-- PIN Verification -->
+                        <div class="mb-3">
+                            <label class="form-label">Wallet PIN *</label>
+                            <input type="password" class="form-control" name="pin" required 
+                                   maxlength="4" placeholder="Enter your 4-digit wallet PIN">
+                            <small class="text-muted">Enter your wallet PIN to authorize this transfer</small>
+                        </div>
+                        
+                        <!-- Transfer Fee Info -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Transfer Fee:</strong> KES 5.00 will be charged for this transfer
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-paper-plane"></i> Transfer Funds
+                            </button>
+                            <a href="{% url 'payments:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function searchRecipients() {
+    const query = document.getElementById('recipientSearch').value;
+    if (query.length < 3) {
+        alert('Please enter at least 3 characters to search');
+        return;
+    }
+    
+    // Simulate search results - in real implementation, this would be an AJAX call
+    const resultsContainer = document.getElementById('recipientResults');
+    resultsContainer.innerHTML = `
+        <div class="recipient-card" data-recipient-id="1">
+            <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">JD</div>
+                <div>
+                    <strong>John Doe</strong>
+                    <small class="d-block text-muted">Member: KWS1234 | Phone: +254712345678</small>
+                </div>
+            </div>
+        </div>
+        <div class="recipient-card" data-recipient-id="2">
+            <div class="d-flex align-items-center">
+                <div class="avatar-circle me-3">JS</div>
+                <div>
+                    <strong>Jane Smith</strong>
+                    <small class="d-block text-muted">Member: KWS5678 | Phone: +254787654321</small>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add click handlers to recipient cards
+    document.querySelectorAll('.recipient-card').forEach(card => {
+        card.addEventListener('click', function() {
+            document.querySelectorAll('.recipient-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            document.getElementById('selectedRecipient').value = this.dataset.recipientId;
+        });
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function() {
+    // Form validation
+    document.getElementById('transferForm').addEventListener('submit', function(e) {
+        const selectedRecipient = document.getElementById('selectedRecipient').value;
+        if (!selectedRecipient) {
+            e.preventDefault();
+            alert('Please select a recipient');
+        }
+    });
+});
+</script>
+
+<style>
+.avatar-circle {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+}
+</style>
+{% endblock %}

@@ -1,0 +1,444 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register New Bike - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-motorcycle"></i> Register New Bike</h1>
+        <p>Add a new motorcycle to the KwaStage system</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'bikes:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Bikes
+        </a>
+        <button class="btn btn-outline-info" onclick="showHelp()">
+            <i class="fas fa-question-circle"></i> Help
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <form method="post" enctype="multipart/form-data" id="bikeRegistrationForm">
+            {% csrf_token %}
+            
+            <!-- Basic Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-info-circle"></i> Basic Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Registration Number *</label>
+                                <input type="text" class="form-control" name="registration_number" required 
+                                       placeholder="e.g., KBA 123A" maxlength="10">
+                                <small class="text-muted">Enter the number plate as shown on the bike</small>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Owner *</label>
+                                <select class="form-select" name="owner" required id="ownerSelect">
+                                    <option value="">Select bike owner</option>
+                                    {% for member in members %}
+                                    <option value="{{ member.id }}">
+                                        {{ member.user.first_name }} {{ member.user.last_name }} - {{ member.member_number }}
+                                    </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Make/Brand *</label>
+                                <select class="form-select" name="make" required id="makeSelect">
+                                    <option value="">Select make</option>
+                                    <option value="Honda">Honda</option>
+                                    <option value="Yamaha">Yamaha</option>
+                                    <option value="TVS">TVS</option>
+                                    <option value="Bajaj">Bajaj</option>
+                                    <option value="Suzuki">Suzuki</option>
+                                    <option value="Kawasaki">Kawasaki</option>
+                                    <option value="Hero">Hero</option>
+                                    <option value="KTM">KTM</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Model *</label>
+                                <input type="text" class="form-control" name="model" required 
+                                       placeholder="e.g., CB150, FZ, Apache">
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="mb-3">
+                                <label class="form-label">Year of Manufacture</label>
+                                <select class="form-select" name="year">
+                                    <option value="">Select year</option>
+                                    <script>
+                                        for(let year = new Date().getFullYear(); year >= 2000; year--) {
+                                            document.write(`<option value="${year}">${year}</option>`);
+                                        }
+                                    </script>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Engine Number *</label>
+                                <input type="text" class="form-control" name="engine_number" required 
+                                       placeholder="Engine serial number">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Chassis Number *</label>
+                                <input type="text" class="form-control" name="chassis_number" required 
+                                       placeholder="Chassis/Frame number">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Color</label>
+                                <input type="text" class="form-control" name="color" 
+                                       placeholder="e.g., Red, Blue, Black">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Engine Capacity (CC)</label>
+                                <input type="number" class="form-control" name="engine_capacity" 
+                                       placeholder="e.g., 150" min="50" max="2000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Purchase Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-shopping-cart"></i> Purchase Information</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Purchase Date</label>
+                                <input type="date" class="form-control" name="purchase_date">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Purchase Price (KSh)</label>
+                                <input type="number" class="form-control" name="purchase_price" 
+                                       placeholder="Amount paid" min="0" step="1000">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Dealer/Seller Name</label>
+                                <input type="text" class="form-control" name="dealer_name" 
+                                       placeholder="Where you bought the bike">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Dealer/Seller Phone</label>
+                                <input type="tel" class="form-control" name="dealer_phone" 
+                                       placeholder="+254700000000">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Insurance & Legal -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-shield-alt"></i> Insurance & Legal Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Insurance Company</label>
+                                <select class="form-select" name="insurance_company">
+                                    <option value="">Select insurance company</option>
+                                    <option value="Jubilee Insurance">Jubilee Insurance</option>
+                                    <option value="Madison Insurance">Madison Insurance</option>
+                                    <option value="APA Insurance">APA Insurance</option>
+                                    <option value="CIC Insurance">CIC Insurance</option>
+                                    <option value="ICEA LION">ICEA LION</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Policy Number</label>
+                                <input type="text" class="form-control" name="insurance_policy_number" 
+                                       placeholder="Insurance policy number">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Insurance Expiry Date</label>
+                                <input type="date" class="form-control" name="insurance_expiry">
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">License Expiry Date</label>
+                                <input type="date" class="form-control" name="license_expiry">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Photos & Documents -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5><i class="fas fa-camera"></i> Photos & Documents</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Bike Photo</label>
+                                <div class="file-upload-area" onclick="document.getElementById('bikePhoto').click()">
+                                    <div class="upload-content">
+                                        <i class="fas fa-camera fa-2x"></i>
+                                        <p>Click to upload bike photo</p>
+                                        <small class="text-muted">Max 5MB, JPG/PNG only</small>
+                                    </div>
+                                    <input type="file" id="bikePhoto" name="photo" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="bikePhotoPreview" class="photo-preview" style="display: none;"></div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Logbook Photo</label>
+                                <div class="file-upload-area" onclick="document.getElementById('logbookPhoto').click()">
+                                    <div class="upload-content">
+                                        <i class="fas fa-file-image fa-2x"></i>
+                                        <p>Click to upload logbook photo</p>
+                                        <small class="text-muted">Max 5MB, clear and readable</small>
+                                    </div>
+                                    <input type="file" id="logbookPhoto" name="logbook_photo" accept="image/*" style="display: none;">
+                                </div>
+                                <div id="logbookPhotoPreview" class="photo-preview" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Actions -->
+            <div class="card">
+                <div class="card-body text-center">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save"></i> Register Bike
+                    </button>
+                    <a href="{% url 'bikes:list' %}" class="btn btn-secondary btn-lg ms-3">
+                        <i class="fas fa-times"></i> Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Sidebar with help and info -->
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-lightbulb"></i> Registration Tips</h5>
+            </div>
+            <div class="card-body">
+                <div class="tip-item">
+                    <i class="fas fa-id-card text-primary"></i>
+                    <div>
+                        <strong>Registration Number</strong>
+                        <p>Enter exactly as shown on your number plate</p>
+                    </div>
+                </div>
+                
+                <div class="tip-item">
+                    <i class="fas fa-cogs text-success"></i>
+                    <div>
+                        <strong>Engine & Chassis Numbers</strong>
+                        <p>Found on the bike frame and engine block</p>
+                    </div>
+                </div>
+                
+                <div class="tip-item">
+                    <i class="fas fa-shield-alt text-warning"></i>
+                    <div>
+                        <strong>Insurance</strong>
+                        <p>Keep your insurance up to date for protection</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-star"></i> Why Register Your Bike?</h5>
+            </div>
+            <div class="card-body">
+                <ul class="benefits-list">
+                    <li><i class="fas fa-check text-success"></i> Track your assets digitally</li>
+                    <li><i class="fas fa-check text-success"></i> Quick insurance claims</li>
+                    <li><i class="fas fa-check text-success"></i> Theft recovery assistance</li>
+                    <li><i class="fas fa-check text-success"></i> Maintenance reminders</li>
+                    <li><i class="fas fa-check text-success"></i> Transfer ownership easily</li>
+                    <li><i class="fas fa-check text-success"></i> Community protection</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.file-upload-area {
+    border: 2px dashed #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fafafa;
+}
+
+.file-upload-area:hover {
+    border-color: var(--primary-color);
+    background: rgba(var(--primary-color-rgb), 0.05);
+}
+
+.upload-content i {
+    color: #999;
+    margin-bottom: 10px;
+}
+
+.upload-content p {
+    margin: 10px 0 5px 0;
+    font-weight: 500;
+    color: #666;
+}
+
+.photo-preview {
+    margin-top: 15px;
+    text-align: center;
+}
+
+.photo-preview img {
+    max-width: 100%;
+    max-height: 200px;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.tip-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #eee;
+}
+
+.tip-item:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.tip-item i {
+    font-size: 1.2rem;
+    margin-top: 2px;
+}
+
+.tip-item strong {
+    display: block;
+    margin-bottom: 5px;
+    color: #333;
+}
+
+.tip-item p {
+    margin: 0;
+    font-size: 0.9rem;
+    color: #666;
+}
+
+.benefits-list {
+    list-style: none;
+    padding: 0;
+}
+
+.benefits-list li {
+    margin-bottom: 10px;
+    font-size: 0.9rem;
+}
+
+.benefits-list i {
+    margin-right: 10px;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Photo upload previews
+    function setupPhotoPreview(inputId, previewId) {
+        const input = document.getElementById(inputId);
+        const preview = document.getElementById(previewId);
+        
+        input.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Preview">`;
+                    preview.style.display = 'block';
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+    }
+    
+    setupPhotoPreview('bikePhoto', 'bikePhotoPreview');
+    setupPhotoPreview('logbookPhoto', 'logbookPhotoPreview');
+    
+    // Registration number formatting
+    const regNumberInput = document.querySelector('input[name="registration_number"]');
+    regNumberInput.addEventListener('input', function() {
+        this.value = this.value.toUpperCase();
+    });
+});
+
+function showHelp() {
+    alert('Registration Help:\n\n1. Fill in all required fields marked with *\n2. Upload clear photos of your bike and logbook\n3. Double-check all numbers for accuracy\n4. Contact support if you need assistance');
+}
+</script>
+{% endblock %}

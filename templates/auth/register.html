@@ -1,0 +1,548 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Register - Boda Boda Welfare System{% endblock %}
+
+{% block extra_css %}
+<style>
+    .register-page {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+        padding: 2rem 0;
+    }
+
+    .register-page::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='m36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        opacity: 0.1;
+    }
+
+    .register-container {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+        max-width: 600px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    .register-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        overflow: hidden;
+        animation: slideUp 0.6s ease-out;
+    }
+
+    @keyframes slideUp {
+        from {
+            opacity: 0;
+            transform: translateY(30px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .register-header {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        color: white;
+        padding: 3rem 2rem 2rem;
+        text-align: center;
+        position: relative;
+    }
+
+    .register-header::after {
+        content: '';
+        position: absolute;
+        bottom: -1px;
+        left: 0;
+        right: 0;
+        height: 20px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        border-radius: 0 0 50% 50%;
+    }
+
+    .brand-icon {
+        font-size: 4rem;
+        color: var(--secondary-color);
+        margin-bottom: 1rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+
+    .register-title {
+        font-size: 2.2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .register-subtitle {
+        font-size: 1.1rem;
+        opacity: 0.9;
+        font-weight: 300;
+    }
+
+    .family-motto {
+        font-style: italic;
+        font-size: 1rem;
+        margin-top: 0.5rem;
+        opacity: 0.8;
+        color: var(--secondary-color);
+    }
+
+    .register-body {
+        padding: 3rem 2rem 2rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-floating .form-control {
+        height: 60px;
+        border: 2px solid #e9ecef;
+        border-radius: 15px;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    .form-floating .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.25rem rgba(44, 90, 160, 0.15);
+        background: white;
+    }
+
+    .form-floating label {
+        font-weight: 500;
+        color: #6c757d;
+    }
+
+    .form-floating .form-control:focus ~ label,
+    .form-floating .form-control:not(:placeholder-shown) ~ label {
+        color: var(--primary-color);
+    }
+
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .terms-section {
+        margin-bottom: 2rem;
+    }
+
+    .form-check {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: rgba(248, 249, 250, 0.8);
+        border-radius: 10px;
+    }
+
+    .form-check-input {
+        width: 1.2em;
+        height: 1.2em;
+        margin-right: 0.75rem;
+        border: 2px solid #dee2e6;
+    }
+
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .form-check-label {
+        font-size: 0.95rem;
+        color: #495057;
+        line-height: 1.4;
+    }
+
+    .form-check-label a {
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 500;
+    }
+
+    .form-check-label a:hover {
+        text-decoration: underline;
+    }
+
+    .register-btn {
+        width: 100%;
+        height: 60px;
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        border: none;
+        border-radius: 15px;
+        font-size: 1.2rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .register-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(44, 90, 160, 0.4);
+    }
+
+    .register-btn:active {
+        transform: translateY(0);
+    }
+
+    .divider {
+        text-align: center;
+        margin: 2rem 0;
+        position: relative;
+    }
+
+    .divider::before {
+        content: '';
+        position: absolute;
+        top: 50%;
+        left: 0;
+        right: 0;
+        height: 1px;
+        background: #dee2e6;
+    }
+
+    .divider span {
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0 1rem;
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .login-section {
+        text-align: center;
+        margin-bottom: 1rem;
+    }
+
+    .login-btn {
+        background: transparent;
+        border: 2px solid var(--primary-color);
+        color: var(--primary-color);
+        padding: 12px 30px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s ease;
+    }
+
+    .login-btn:hover {
+        background: var(--primary-color);
+        color: white;
+        transform: translateY(-1px);
+    }
+
+    .benefits-section {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1rem;
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .benefit-item {
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.8);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+
+    .benefit-item:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .benefit-item i {
+        font-size: 2rem;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .benefit-item h6 {
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: #343a40;
+    }
+
+    .benefit-item p {
+        font-size: 0.85rem;
+        color: #6c757d;
+        margin: 0;
+    }
+
+    .security-note {
+        text-align: center;
+        margin-top: 1.5rem;
+        color: #6c757d;
+        font-size: 0.9rem;
+    }
+
+    .security-note i {
+        color: var(--success-color);
+        margin-right: 0.5rem;
+    }
+
+    @media (max-width: 768px) {
+        .register-container {
+            padding: 1rem;
+        }
+
+        .register-header {
+            padding: 2rem 1.5rem 1.5rem;
+        }
+
+        .register-body {
+            padding: 2rem 1.5rem;
+        }
+
+        .register-title {
+            font-size: 1.8rem;
+        }
+
+        .brand-icon {
+            font-size: 3rem;
+        }
+
+        .form-row {
+            grid-template-columns: 1fr;
+            gap: 0;
+        }
+
+        .benefits-section {
+            grid-template-columns: 1fr;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="register-page">
+    <div class="register-container">
+        <div class="register-card">
+            <!-- Header Section -->
+            <div class="register-header">
+                <div class="brand-icon">
+                    <i class="fas fa-motorcycle"></i>
+                </div>
+                <h1 class="register-title">Join Our Family</h1>
+                <p class="register-subtitle">Become part of Kenya's largest Boda Boda welfare network</p>
+                <p class="family-motto">"Boda Boda is Family - Don't Forget That"</p>
+            </div>
+
+            <!-- Form Section -->
+            <div class="register-body">
+                <form method="post" id="registerForm">
+                    {% csrf_token %}
+                    
+                    <!-- Name Fields -->
+                    <div class="form-row">
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="first_name" name="first_name" placeholder="First Name" required>
+                            <label for="first_name">
+                                <i class="fas fa-user me-2"></i>First Name
+                            </label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="text" class="form-control" id="last_name" name="last_name" placeholder="Last Name" required>
+                            <label for="last_name">
+                                <i class="fas fa-user me-2"></i>Last Name
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Username Field -->
+                    <div class="form-floating">
+                        <input type="text" class="form-control" id="username" name="username" placeholder="Username" required>
+                        <label for="username">
+                            <i class="fas fa-at me-2"></i>Username
+                        </label>
+                    </div>
+
+                    <!-- Email Field -->
+                    <div class="form-floating">
+                        <input type="email" class="form-control" id="email" name="email" placeholder="Email Address" required>
+                        <label for="email">
+                            <i class="fas fa-envelope me-2"></i>Email Address
+                        </label>
+                    </div>
+
+                    <!-- Password Fields -->
+                    <div class="form-row">
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="password" name="password" placeholder="Password" required>
+                            <label for="password">
+                                <i class="fas fa-lock me-2"></i>Password
+                            </label>
+                        </div>
+                        <div class="form-floating">
+                            <input type="password" class="form-control" id="confirm_password" name="confirm_password" placeholder="Confirm Password" required>
+                            <label for="confirm_password">
+                                <i class="fas fa-lock me-2"></i>Confirm Password
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="terms-section">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="terms" name="terms" required>
+                            <label class="form-check-label" for="terms">
+                                I agree to the <a href="#" target="_blank">Terms and Conditions</a> 
+                                and <a href="#" target="_blank">Privacy Policy</a>, and I understand that 
+                                joining means becoming part of the Boda Boda family with shared responsibilities.
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Register Button -->
+                    <button type="submit" class="btn btn-primary register-btn">
+                        <i class="fas fa-user-plus me-2"></i>
+                        Create Account
+                    </button>
+                </form>
+
+                <!-- Divider -->
+                <div class="divider">
+                    <span>Already a family member?</span>
+                </div>
+
+                <!-- Login Section -->
+                <div class="login-section">
+                    <p class="text-muted mb-3">Welcome back to the family</p>
+                    <a href="{% url 'login' %}" class="login-btn">
+                        <i class="fas fa-sign-in-alt me-2"></i>Sign In
+                    </a>
+                </div>
+
+                <!-- Benefits Section -->
+                <div class="benefits-section">
+                    <div class="benefit-item">
+                        <i class="fas fa-shield-alt"></i>
+                        <h6>Secure</h6>
+                        <p>Bank-level security</p>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-users"></i>
+                        <h6>Community</h6>
+                        <p>Join 1000+ members</p>
+                    </div>
+                    <div class="benefit-item">
+                        <i class="fas fa-heart"></i>
+                        <h6>Family</h6>
+                        <p>Welfare & support</p>
+                    </div>
+                </div>
+
+                <!-- Security Note -->
+                <div class="security-note">
+                    <i class="fas fa-shield-alt"></i>
+                    Your information is protected and never shared with third parties
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add loading state to form submission
+    const form = document.getElementById('registerForm');
+    const submitBtn = form.querySelector('.register-btn');
+    
+    form.addEventListener('submit', function() {
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>Creating Account...';
+        submitBtn.disabled = true;
+    });
+
+    // Add focus animations
+    const inputs = document.querySelectorAll('.form-control');
+    inputs.forEach(input => {
+        input.addEventListener('focus', function() {
+            this.parentElement.style.transform = 'translateY(-2px)';
+        });
+        
+        input.addEventListener('blur', function() {
+            this.parentElement.style.transform = 'translateY(0)';
+        });
+    });
+
+    // Password confirmation validation
+    const password = document.getElementById('password');
+    const confirmPassword = document.getElementById('confirm_password');
+
+    function validatePasswords() {
+        if (password.value !== confirmPassword.value) {
+            confirmPassword.setCustomValidity('Passwords do not match');
+            confirmPassword.style.borderColor = '#dc3545';
+        } else {
+            confirmPassword.setCustomValidity('');
+            confirmPassword.style.borderColor = '#28a745';
+        }
+    }
+
+    password.addEventListener('input', validatePasswords);
+    confirmPassword.addEventListener('input', validatePasswords);
+
+    // Real-time password strength indicator
+    password.addEventListener('input', function() {
+        const value = this.value;
+        const strength = calculatePasswordStrength(value);
+        
+        // Remove any existing strength indicator
+        let indicator = document.querySelector('.password-strength');
+        if (!indicator) {
+            indicator = document.createElement('div');
+            indicator.className = 'password-strength';
+            indicator.style.cssText = 'font-size: 0.8rem; margin-top: 0.25rem; font-weight: 500;';
+            this.parentElement.appendChild(indicator);
+        }
+        
+        if (value.length === 0) {
+            indicator.style.display = 'none';
+            return;
+        }
+        
+        indicator.style.display = 'block';
+        
+        if (strength < 2) {
+            indicator.innerHTML = '<span style="color: #dc3545;"><i class="fas fa-times"></i> Weak password</span>';
+        } else if (strength < 4) {
+            indicator.innerHTML = '<span style="color: #ffc107;"><i class="fas fa-exclamation"></i> Medium password</span>';
+        } else {
+            indicator.innerHTML = '<span style="color: #28a745;"><i class="fas fa-check"></i> Strong password</span>';
+        }
+    });
+
+    function calculatePasswordStrength(password) {
+        let strength = 0;
+        if (password.length >= 8) strength++;
+        if (/[a-z]/.test(password)) strength++;
+        if (/[A-Z]/.test(password)) strength++;
+        if (/[0-9]/.test(password)) strength++;
+        if (/[^A-Za-z0-9]/.test(password)) strength++;
+        return strength;
+    }
+});
+</script>
+{% endblock %}

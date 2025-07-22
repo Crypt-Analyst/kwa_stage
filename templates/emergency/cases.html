@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Emergency Cases{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-exclamation-triangle"></i> Emergency Cases Management</h1>
+        <div class="header-actions">
+            <a href="{% url 'emergency:report_case' %}" class="btn btn-danger">
+                <i class="fas fa-plus"></i> Report Emergency
+            </a>
+            <a href="{% url 'emergency:family_support' %}" class="btn btn-outline-primary">
+                <i class="fas fa-heart"></i> Family Support
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Emergency Statistics -->
+        <div class="stats-grid">
+            <div class="stat-card urgent">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>12</h3>
+                    <p>Active Cases</p>
+                </div>
+            </div>
+            <div class="stat-card resolved">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>48</h3>
+                    <p>Resolved Cases</p>
+                </div>
+            </div>
+            <div class="stat-card support">
+                <div class="stat-icon">
+                    <i class="fas fa-hand-holding-heart"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh 850,000</h3>
+                    <p>Total Support Given</p>
+                </div>
+            </div>
+            <div class="stat-card families">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>25</h3>
+                    <p>Families Helped</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Active Emergency Cases -->
+        <div class="card mt-4">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Active Emergency Cases</h5>
+                <span class="badge bg-danger">2FA Protected</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <!-- Emergency Case 1 -->
+                    <div class="col-md-6 mb-4">
+                        <div class="emergency-case urgent">
+                            <div class="case-header">
+                                <div class="case-priority">
+                                    <span class="badge bg-danger">URGENT</span>
+                                </div>
+                                <div class="case-date">
+                                    <small class="text-muted">Jan 15, 2025</small>
+                                </div>
+                            </div>
+                            <div class="case-details">
+                                <h6>Medical Emergency - John Kamau</h6>
+                                <p class="text-muted small">Stage: Kencom | Family Contact: Mary Kamau</p>
+                                <div class="case-info">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Amount Needed</small>
+                                            <div class="fw-bold">KSh 45,000</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Collected</small>
+                                            <div class="fw-bold text-success">KSh 32,000</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div class="progress-bar bg-success" style="width: 71%"></div>
+                                </div>
+                            </div>
+                            <div class="case-actions mt-3">
+                                <button class="btn btn-sm btn-primary">View Details</button>
+                                <button class="btn btn-sm btn-success">Add Support</button>
+                                <button class="btn btn-sm btn-outline-secondary">Contact Family</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Emergency Case 2 -->
+                    <div class="col-md-6 mb-4">
+                        <div class="emergency-case high">
+                            <div class="case-header">
+                                <div class="case-priority">
+                                    <span class="badge bg-warning">HIGH</span>
+                                </div>
+                                <div class="case-date">
+                                    <small class="text-muted">Jan 18, 2025</small>
+                                </div>
+                            </div>
+                            <div class="case-details">
+                                <h6>Funeral Support - Peter Mwangi</h6>
+                                <p class="text-muted small">Stage: Kawangware | Family Contact: Grace Mwangi</p>
+                                <div class="case-info">
+                                    <div class="row">
+                                        <div class="col-6">
+                                            <small class="text-muted">Amount Needed</small>
+                                            <div class="fw-bold">KSh 80,000</div>
+                                        </div>
+                                        <div class="col-6">
+                                            <small class="text-muted">Collected</small>
+                                            <div class="fw-bold text-warning">KSh 25,000</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="progress mt-2" style="height: 6px;">
+                                    <div class="progress-bar bg-warning" style="width: 31%"></div>
+                                </div>
+                            </div>
+                            <div class="case-actions mt-3">
+                                <button class="btn btn-sm btn-primary">View Details</button>
+                                <button class="btn btn-sm btn-success">Add Support</button>
+                                <button class="btn btn-sm btn-outline-secondary">Contact Family</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="emergency-quick-actions mt-4">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <a href="{% url 'emergency:report_case' %}" class="quick-action-card">
+                                <i class="fas fa-plus-circle"></i>
+                                <span>Report New Emergency</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="quick-action-card">
+                                <i class="fas fa-search"></i>
+                                <span>Search Cases</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="{% url 'emergency:family_support' %}" class="quick-action-card">
+                                <i class="fas fa-heart"></i>
+                                <span>Family Support</span>
+                            </a>
+                        </div>
+                        <div class="col-md-3">
+                            <a href="#" class="quick-action-card">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Emergency Reports</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Recent Emergency Activity -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Recent Emergency Activity</h5>
+            </div>
+            <div class="card-body">
+                <div class="activity-timeline">
+                    <div class="activity-item">
+                        <div class="activity-icon bg-success">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">
+                                <strong>KSh 5,000</strong> donated for John Kamau's medical emergency
+                            </div>
+                            <div class="activity-time">2 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon bg-info">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">
+                                Family contact made for Peter Mwangi case
+                            </div>
+                            <div class="activity-time">4 hours ago</div>
+                        </div>
+                    </div>
+                    <div class="activity-item">
+                        <div class="activity-icon bg-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="activity-content">
+                            <div class="activity-text">
+                                New emergency case reported - Medical Emergency
+                            </div>
+                            <div class="activity-time">6 hours ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.emergency-case {
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    background: white;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.emergency-case.urgent {
+    border-left: 4px solid #dc3545;
+}
+
+.emergency-case.high {
+    border-left: 4px solid #ffc107;
+}
+
+.case-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.quick-action-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    text-decoration: none;
+    color: #495057;
+    transition: all 0.3s;
+}
+
+.quick-action-card:hover {
+    color: #007bff;
+    border-color: #007bff;
+    transform: translateY(-2px);
+    text-decoration: none;
+}
+
+.quick-action-card i {
+    font-size: 2rem;
+    margin-bottom: 10px;
+}
+
+.activity-timeline {
+    position: relative;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.activity-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    margin-right: 15px;
+}
+
+.activity-content {
+    flex: 1;
+}
+
+.activity-time {
+    font-size: 0.875rem;
+    color: #6c757d;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card.urgent .stat-icon {
+    background: linear-gradient(135deg, #dc3545, #c82333);
+}
+
+.stat-card.resolved .stat-icon {
+    background: linear-gradient(135deg, #28a745, #218838);
+}
+
+.stat-card.support .stat-icon {
+    background: linear-gradient(135deg, #17a2b8, #138496);
+}
+
+.stat-card.families .stat-icon {
+    background: linear-gradient(135deg, #6f42c1, #5a37a3);
+}
+</style>
+{% endblock %}

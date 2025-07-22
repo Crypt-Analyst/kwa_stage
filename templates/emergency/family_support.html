@@ -1,0 +1,265 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Family Support - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-heart"></i> Family Support</h1>
+        <p>Support services for families in need</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Emergency Cases
+        </a>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSupportModal">
+            <i class="fas fa-plus"></i> Add Support Record
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="card bg-primary text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-hand-holding-heart fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>25</h4>
+                        <p class="mb-0">Active Support Cases</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-success text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-users fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>150</h4>
+                        <p class="mb-0">Families Supported</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card bg-warning text-white">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="me-3">
+                        <i class="fas fa-money-bill-wave fa-2x"></i>
+                    </div>
+                    <div>
+                        <h4>KSh 2.5M</h4>
+                        <p class="mb-0">Total Support Provided</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list"></i> Recent Family Support Records</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Case ID</th>
+                                <th>Family Name</th>
+                                <th>Support Type</th>
+                                <th>Amount</th>
+                                <th>Date Provided</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>EM001</td>
+                                <td>Kamau Family</td>
+                                <td>Funeral Support</td>
+                                <td>KSh 50,000</td>
+                                <td>2025-07-15</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>EM002</td>
+                                <td>Wanjiku Family</td>
+                                <td>Medical Emergency</td>
+                                <td>KSh 75,000</td>
+                                <td>2025-07-10</td>
+                                <td><span class="badge bg-warning">In Progress</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-success">
+                                        <i class="fas fa-check"></i> Complete
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>EM003</td>
+                                <td>Ochieng Family</td>
+                                <td>Emergency Relief</td>
+                                <td>KSh 25,000</td>
+                                <td>2025-07-05</td>
+                                <td><span class="badge bg-success">Completed</span></td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Support Type Distribution</h5>
+            </div>
+            <div class="card-body">
+                <div class="support-type-item">
+                    <div class="support-type-info">
+                        <span class="support-type-color bg-primary"></span>
+                        <span>Funeral Support</span>
+                    </div>
+                    <span class="support-type-percentage">45%</span>
+                </div>
+                <div class="support-type-item">
+                    <div class="support-type-info">
+                        <span class="support-type-color bg-success"></span>
+                        <span>Medical Emergency</span>
+                    </div>
+                    <span class="support-type-percentage">30%</span>
+                </div>
+                <div class="support-type-item">
+                    <div class="support-type-info">
+                        <span class="support-type-color bg-warning"></span>
+                        <span>Emergency Relief</span>
+                    </div>
+                    <span class="support-type-percentage">25%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-calendar-alt"></i> Monthly Support Trends</h5>
+            </div>
+            <div class="card-body">
+                <div style="height: 200px; display: flex; align-items: center; justify-content: center; background: #f8f9fa;">
+                    <p class="text-muted">Chart will be displayed here</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Support Modal -->
+<div class="modal fade" id="addSupportModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Family Support Record</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form>
+                    <div class="mb-3">
+                        <label class="form-label">Emergency Case</label>
+                        <select class="form-select" required>
+                            <option value="">Select Case</option>
+                            <option value="1">EM001 - Kamau Family</option>
+                            <option value="2">EM002 - Wanjiku Family</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Support Type</label>
+                        <select class="form-select" required>
+                            <option value="">Select Type</option>
+                            <option value="funeral">Funeral Support</option>
+                            <option value="medical">Medical Emergency</option>
+                            <option value="relief">Emergency Relief</option>
+                            <option value="education">Education Support</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Amount (KSh)</label>
+                        <input type="number" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Date Provided</label>
+                        <input type="date" class="form-control" required>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary">Add Support Record</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.support-type-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.support-type-item:last-child {
+    border-bottom: none;
+}
+
+.support-type-info {
+    display: flex;
+    align-items: center;
+}
+
+.support-type-color {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 10px;
+}
+
+.support-type-percentage {
+    font-weight: bold;
+}
+</style>
+{% endblock %}

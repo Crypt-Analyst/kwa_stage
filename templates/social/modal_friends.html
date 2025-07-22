@@ -1,0 +1,389 @@
+<!-- Modal Friends Content -->
+<div class="modal-friends-container">
+    <!-- Search Friends -->
+    <div class="friends-search mb-4">
+        <div class="card">
+            <div class="card-body">
+                <form method="get" id="friendsSearchForm">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Search friends by name or stage..." value="{{ request.GET.search }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Friend Requests -->
+    {% if pending_requests %}
+    <div class="friend-requests mb-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-user-plus"></i> Friend Requests
+                    <span class="badge bg-primary">{{ pending_requests|length }}</span>
+                </h6>
+            </div>
+            <div class="card-body">
+                {% for request in pending_requests %}
+                <div class="friend-request-item d-flex align-items-center justify-content-between mb-3">
+                    <div class="d-flex align-items-center">
+                        {% if request.from_member.profile_photo %}
+                            <img src="{{ request.from_member.profile_photo.url }}" alt="{{ request.from_member.user.get_full_name }}" class="friend-avatar me-3">
+                        {% else %}
+                            <div class="friend-avatar me-3">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                        <div>
+                            <h6 class="mb-0">{{ request.from_member.user.get_full_name }}</h6>
+                            <small class="text-muted">
+                                {{ request.from_member.stage.name|default:"No stage" }}
+                                • {{ request.created_at|timesince }} ago
+                            </small>
+                        </div>
+                    </div>
+                    <div class="request-actions">
+                        <button class="btn btn-success btn-sm me-2" onclick="respondToRequest({{ request.id }}, 'accept')">
+                            <i class="fas fa-check"></i> Accept
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm" onclick="respondToRequest({{ request.id }}, 'decline')">
+                            <i class="fas fa-times"></i> Decline
+                        </button>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Friends Tabs -->
+    <div class="friends-tabs">
+        <ul class="nav nav-pills mb-4" role="tablist">
+            <li class="nav-item" role="presentation">
+                <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#my-friends" type="button" role="tab">
+                    <i class="fas fa-users"></i> My Friends ({{ friends_count }})
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#suggested-friends" type="button" role="tab">
+                    <i class="fas fa-user-plus"></i> Suggested Friends
+                </button>
+            </li>
+            <li class="nav-item" role="presentation">
+                <button class="nav-link" data-bs-toggle="pill" data-bs-target="#online-friends" type="button" role="tab">
+                    <i class="fas fa-circle text-success"></i> Online Now
+                </button>
+            </li>
+        </ul>
+
+        <div class="tab-content">
+            <!-- My Friends Tab -->
+            <div class="tab-pane fade show active" id="my-friends" role="tabpanel">
+                <div class="friends-grid">
+                    {% for friend in friends %}
+                    <div class="friend-card">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                {% if friend.profile_photo %}
+                                    <img src="{{ friend.profile_photo.url }}" alt="{{ friend.user.get_full_name }}" class="friend-photo mb-3">
+                                {% else %}
+                                    <div class="friend-photo mb-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <h6 class="card-title">{{ friend.user.get_full_name }}</h6>
+                                <p class="card-text text-muted small">{{ friend.stage.name|default:"No stage" }}</p>
+                                <div class="friend-actions">
+                                    <button class="btn btn-primary btn-sm" onclick="startChat({{ friend.id }})">
+                                        <i class="fas fa-comment"></i> Chat
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="viewProfile({{ friend.id }})">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state text-center py-5">
+                        <i class="fas fa-user-friends fa-3x text-muted mb-3"></i>
+                        <h5>No friends yet</h5>
+                        <p class="text-muted">Start connecting with other riders in your stage!</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Suggested Friends Tab -->
+            <div class="tab-pane fade" id="suggested-friends" role="tabpanel">
+                <div class="friends-grid">
+                    {% for suggestion in suggested_friends %}
+                    <div class="friend-card">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                {% if suggestion.profile_photo %}
+                                    <img src="{{ suggestion.profile_photo.url }}" alt="{{ suggestion.user.get_full_name }}" class="friend-photo mb-3">
+                                {% else %}
+                                    <div class="friend-photo mb-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <h6 class="card-title">{{ suggestion.user.get_full_name }}</h6>
+                                <p class="card-text text-muted small">{{ suggestion.stage.name|default:"No stage" }}</p>
+                                <div class="friend-actions">
+                                    <button class="btn btn-success btn-sm" onclick="sendFriendRequest({{ suggestion.id }})">
+                                        <i class="fas fa-user-plus"></i> Add Friend
+                                    </button>
+                                    <button class="btn btn-outline-secondary btn-sm" onclick="viewProfile({{ suggestion.id }})">
+                                        <i class="fas fa-eye"></i> View
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state text-center py-5">
+                        <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                        <h5>No suggestions</h5>
+                        <p class="text-muted">All caught up! Check back later for new friend suggestions.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Online Friends Tab -->
+            <div class="tab-pane fade" id="online-friends" role="tabpanel">
+                <div class="online-friends-list">
+                    {% for friend in online_friends %}
+                    <div class="online-friend-item d-flex align-items-center justify-content-between mb-3">
+                        <div class="d-flex align-items-center">
+                            <div class="position-relative">
+                                {% if friend.profile_photo %}
+                                    <img src="{{ friend.profile_photo.url }}" alt="{{ friend.user.get_full_name }}" class="friend-avatar me-3">
+                                {% else %}
+                                    <div class="friend-avatar me-3">
+                                        <i class="fas fa-user"></i>
+                                    </div>
+                                {% endif %}
+                                <span class="online-indicator"></span>
+                            </div>
+                            <div>
+                                <h6 class="mb-0">{{ friend.user.get_full_name }}</h6>
+                                <small class="text-muted">Active now</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-primary btn-sm" onclick="startChat({{ friend.id }})">
+                            <i class="fas fa-comment"></i>
+                        </button>
+                    </div>
+                    {% empty %}
+                    <div class="empty-state text-center py-5">
+                        <i class="fas fa-circle text-muted fa-3x mb-3"></i>
+                        <h5>No friends online</h5>
+                        <p class="text-muted">None of your friends are currently online.</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.modal-friends-container {
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.friend-avatar, .friend-photo {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    object-fit: cover;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+}
+
+.friend-photo {
+    width: 80px;
+    height: 80px;
+    margin: 0 auto;
+}
+
+.friends-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 1rem;
+}
+
+.friend-card {
+    transition: transform 0.3s ease;
+}
+
+.friend-card:hover {
+    transform: translateY(-5px);
+}
+
+.friend-actions .btn {
+    margin: 0.25rem;
+}
+
+.online-indicator {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 12px;
+    height: 12px;
+    background: #28a745;
+    border: 2px solid white;
+    border-radius: 50%;
+}
+
+.friend-request-item {
+    padding: 1rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+}
+
+.empty-state {
+    background: #f8f9fa;
+    border-radius: 12px;
+    margin: 2rem 0;
+}
+
+.nav-pills .nav-link {
+    border-radius: 20px;
+    margin-right: 0.5rem;
+}
+
+.nav-pills .nav-link.active {
+    background-color: var(--primary-color);
+}
+</style>
+
+<script>
+// Friends-specific JavaScript
+function sendFriendRequest(memberId) {
+    fetch(`/social/friends/request/${memberId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('Friend request sent!', 'success');
+            // Remove the suggestion from the list
+            event.target.closest('.friend-card').remove();
+        } else {
+            showToast(data.message || 'Error sending friend request', 'error');
+        }
+    });
+}
+
+function respondToRequest(requestId, action) {
+    fetch(`/social/friends/respond/${requestId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ action: action })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast(action === 'accept' ? 'Friend request accepted!' : 'Friend request declined', 'success');
+            // Remove the request from the list
+            event.target.closest('.friend-request-item').remove();
+            
+            // Update friends count if accepted
+            if (action === 'accept') {
+                loadModalContent('friendsModal', '{% url "social:friends" %}');
+            }
+        } else {
+            showToast(data.message || 'Error processing request', 'error');
+        }
+    });
+}
+
+function startChat(memberId) {
+    // Close friends modal and open chat
+    document.getElementById('friendsModal').querySelector('.btn-close').click();
+    
+    // Open chat modal with this member
+    fetch(`/social/chat/start/${memberId}/`, {
+        method: 'POST',
+        headers: {
+            'X-CSRFToken': getCookie('csrftoken'),
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            openChatModal(data.chat_id);
+        }
+    });
+}
+
+function viewProfile(memberId) {
+    // Open profile modal or navigate to profile
+    window.open(`/members/profile/${memberId}/`, '_blank');
+}
+
+// Search functionality
+document.getElementById('friendsSearchForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData(this);
+    const searchParams = new URLSearchParams(formData);
+    searchParams.append('modal', '1');
+    
+    fetch(`{% url "social:friends" %}?${searchParams.toString()}`)
+        .then(response => response.text())
+        .then(html => {
+            document.getElementById('friendsModalBody').innerHTML = html;
+        });
+});
+
+function showToast(message, type) {
+    // Simple toast notification
+    const toast = document.createElement('div');
+    toast.className = `alert alert-${type === 'success' ? 'success' : 'danger'} alert-dismissible fade show position-fixed`;
+    toast.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+    toast.innerHTML = `
+        ${message}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    `;
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.remove();
+    }, 5000);
+}
+
+function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === (name + '=')) {
+                cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                break;
+            }
+        }
+    }
+    return cookieValue;
+}
+</script>

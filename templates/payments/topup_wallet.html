@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wallet Top-up - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+.topup-modal {
+    max-width: 500px;
+    margin: 0 auto;
+}
+.provider-card {
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+.provider-card:hover {
+    border-color: #007bff;
+    background-color: #f8f9fa;
+}
+.provider-card.selected {
+    border-color: #007bff;
+    background-color: #e3f2fd;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card topup-modal">
+                <div class="card-header">
+                    <h5><i class="fas fa-plus-circle"></i> Top-up Wallet</h5>
+                    <p class="mb-0 text-muted">Add funds to your e-wallet</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="topupForm">
+                        {% csrf_token %}
+                        
+                        <!-- Current Balance -->
+                        <div class="alert alert-info">
+                            <i class="fas fa-wallet"></i> Current Balance: <strong>KES {{ wallet.balance|floatformat:2 }}</strong>
+                        </div>
+                        
+                        <!-- Amount -->
+                        <div class="mb-3">
+                            <label class="form-label">Amount to Top-up *</label>
+                            <div class="input-group">
+                                <span class="input-group-text">KES</span>
+                                <input type="number" class="form-control" name="amount" required 
+                                       min="10" max="50000" step="0.01" placeholder="0.00">
+                            </div>
+                            <small class="text-muted">Minimum: KES 10, Maximum: KES 50,000</small>
+                        </div>
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method *</label>
+                            <div class="provider-options">
+                                <div class="provider-card" data-provider="mpesa">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-mobile-alt text-success me-2"></i>
+                                        <div>
+                                            <strong>M-Pesa</strong>
+                                            <small class="d-block text-muted">Pay via Safaricom M-Pesa</small>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="provider-card" data-provider="airtel">
+                                    <div class="d-flex align-items-center">
+                                        <i class="fas fa-mobile-alt text-danger me-2"></i>
+                                        <div>
+                                            <strong>Airtel Money</strong>
+                                            <small class="d-block text-muted">Pay via Airtel Money</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="payment_method" id="selectedProvider" required>
+                        </div>
+                        
+                        <!-- Phone Number -->
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number *</label>
+                            <input type="tel" class="form-control" name="phone_number" required 
+                                   value="{{ user.member.phone_number }}" pattern="^\+?254\d{9}$"
+                                   placeholder="+254700000000">
+                            <small class="text-muted">The phone number to receive payment prompt</small>
+                        </div>
+                        
+                        <!-- Transaction Fee Info -->
+                        <div class="alert alert-warning">
+                            <i class="fas fa-info-circle"></i> 
+                            <strong>Transaction Fees:</strong> Standard mobile money charges apply
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-credit-card"></i> Initiate Top-up
+                            </button>
+                            <a href="{% url 'payments:dashboard' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Provider selection
+    const providerCards = document.querySelectorAll('.provider-card');
+    const selectedProviderInput = document.getElementById('selectedProvider');
+    
+    providerCards.forEach(card => {
+        card.addEventListener('click', function() {
+            // Remove selected class from all cards
+            providerCards.forEach(c => c.classList.remove('selected'));
+            
+            // Add selected class to clicked card
+            this.classList.add('selected');
+            
+            // Set hidden input value
+            selectedProviderInput.value = this.dataset.provider;
+        });
+    });
+    
+    // Form validation
+    document.getElementById('topupForm').addEventListener('submit', function(e) {
+        if (!selectedProviderInput.value) {
+            e.preventDefault();
+            alert('Please select a payment method');
+        }
+    });
+});
+</script>
+{% endblock %}

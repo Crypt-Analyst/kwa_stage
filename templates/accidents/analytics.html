@@ -1,0 +1,341 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Accident Analytics - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-chart-line"></i> Accident Analytics</h1>
+        <p>View accident statistics and trends</p>
+    </div>
+    <div class="header-actions">
+        <div class="btn-group">
+            <button class="btn btn-outline-primary active" data-period="7">7 Days</button>
+            <button class="btn btn-outline-primary" data-period="30">30 Days</button>
+            <button class="btn btn-outline-primary" data-period="90">90 Days</button>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-exclamation-triangle text-warning"></i>
+            </div>
+            <div class="stat-content">
+                <h3>0</h3>
+                <p>Total Accidents</p>
+                <small class="text-muted">This period</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-injured text-danger"></i>
+            </div>
+            <div class="stat-content">
+                <h3>0</h3>
+                <p>Injuries</p>
+                <small class="text-muted">Total reported</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-ambulance text-info"></i>
+            </div>
+            <div class="stat-content">
+                <h3>0</h3>
+                <p>Emergency Responses</p>
+                <small class="text-muted">Quick response</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-lg-3">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-shield-alt text-success"></i>
+            </div>
+            <div class="stat-content">
+                <h3>0</h3>
+                <p>Resolved Cases</p>
+                <small class="text-muted">Successfully handled</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-area"></i> Accident Trends</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="accidentTrendsChart" height="300"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-map-marker-alt"></i> Top Accident Zones</h5>
+            </div>
+            <div class="card-body">
+                <div class="zone-item">
+                    <div class="zone-info">
+                        <strong>Kikuyu Main Stage</strong>
+                        <span class="badge bg-danger">High Risk</span>
+                    </div>
+                    <div class="zone-count">0 incidents</div>
+                </div>
+                
+                <div class="zone-item">
+                    <div class="zone-info">
+                        <strong>Westlands Roundabout</strong>
+                        <span class="badge bg-warning">Medium Risk</span>
+                    </div>
+                    <div class="zone-count">0 incidents</div>
+                </div>
+                
+                <div class="zone-item">
+                    <div class="zone-info">
+                        <strong>CBD Junction</strong>
+                        <span class="badge bg-info">Low Risk</span>
+                    </div>
+                    <div class="zone-count">0 incidents</div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-clock"></i> Peak Accident Times</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="peakTimesChart" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-list-ul"></i> Accident Types</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="accidentTypesChart" height="250"></canvas>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-6">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-tachometer-alt"></i> Response Times</h5>
+            </div>
+            <div class="card-body">
+                <div class="response-metric">
+                    <div class="metric-label">Average Response Time</div>
+                    <div class="metric-value text-success">N/A</div>
+                </div>
+                
+                <div class="response-metric">
+                    <div class="metric-label">Fastest Response</div>
+                    <div class="metric-value text-info">N/A</div>
+                </div>
+                
+                <div class="response-metric">
+                    <div class="metric-label">Emergency Services</div>
+                    <div class="metric-value text-warning">N/A</div>
+                </div>
+                
+                <canvas id="responseTimesChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.stat-card {
+    background: white;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    width: 60px;
+    text-align: center;
+}
+
+.stat-content h3 {
+    font-size: 2rem;
+    font-weight: bold;
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.stat-content p {
+    margin: 5px 0;
+    font-weight: 500;
+}
+
+.zone-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.zone-item:last-child {
+    border-bottom: none;
+}
+
+.zone-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.zone-count {
+    font-weight: bold;
+    color: #666;
+}
+
+.response-metric {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.response-metric:last-of-type {
+    border-bottom: none;
+    margin-bottom: 20px;
+}
+
+.metric-label {
+    font-weight: 500;
+}
+
+.metric-value {
+    font-weight: bold;
+    font-size: 1.1rem;
+}
+
+.btn-group .btn.active {
+    background: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Initialize charts (mock data for now)
+    
+    // Accident Trends Chart
+    const trendsCtx = document.getElementById('accidentTrendsChart').getContext('2d');
+    new Chart(trendsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            datasets: [{
+                label: 'Accidents',
+                data: [0, 0, 0, 0, 0, 0, 0],
+                borderColor: '#ff6b6b',
+                backgroundColor: 'rgba(255, 107, 107, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Peak Times Chart
+    const peakCtx = document.getElementById('peakTimesChart').getContext('2d');
+    new Chart(peakCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Morning', 'Afternoon', 'Evening', 'Night'],
+            datasets: [{
+                data: [0, 0, 0, 0],
+                backgroundColor: ['#4ecdc4', '#45b7d1', '#f9ca24', '#6c5ce7']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Accident Types Chart
+    const typesCtx = document.getElementById('accidentTypesChart').getContext('2d');
+    new Chart(typesCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Collision', 'Fall', 'Hit & Run', 'Mechanical'],
+            datasets: [{
+                label: 'Incidents',
+                data: [0, 0, 0, 0],
+                backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#f9ca24']
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Response Times Chart
+    const responseCtx = document.getElementById('responseTimesChart').getContext('2d');
+    new Chart(responseCtx, {
+        type: 'line',
+        data: {
+            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+            datasets: [{
+                label: 'Response Time (minutes)',
+                data: [0, 0, 0, 0],
+                borderColor: '#2ecc71',
+                backgroundColor: 'rgba(46, 204, 113, 0.1)',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false
+        }
+    });
+    
+    // Period filter buttons
+    document.querySelectorAll('[data-period]').forEach(btn => {
+        btn.addEventListener('click', function() {
+            document.querySelectorAll('[data-period]').forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Update charts based on selected period
+            const period = this.getAttribute('data-period');
+            console.log('Updating analytics for period:', period);
+        });
+    });
+});
+</script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}

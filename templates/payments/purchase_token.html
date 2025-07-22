@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Purchase Token - KwaStage{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-lg-6">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="fas fa-shopping-cart"></i> Purchase Digital Token</h5>
+                    <p class="mb-0 text-muted">Buy tokens for services and discounts</p>
+                </div>
+                <div class="card-body">
+                    <form method="POST" id="purchaseForm">
+                        {% csrf_token %}
+                        
+                        <!-- Token Selection -->
+                        <div class="mb-3">
+                            <label class="form-label">Select Token Type *</label>
+                            <div class="token-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="token_type" value="stage_pass" id="stagePass">
+                                    <label class="form-check-label" for="stagePass">
+                                        <strong>Stage Pass</strong> - KES 100
+                                        <small class="d-block text-muted">Access to premium stage facilities</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="token_type" value="parking_token" id="parkingToken">
+                                    <label class="form-check-label" for="parkingToken">
+                                        <strong>Parking Token</strong> - KES 50
+                                        <small class="d-block text-muted">Secure parking for your bike</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="token_type" value="fuel_voucher" id="fuelVoucher">
+                                    <label class="form-check-label" for="fuelVoucher">
+                                        <strong>Fuel Voucher</strong> - KES 500
+                                        <small class="d-block text-muted">10% discount on fuel at partner stations</small>
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="token_type" value="service_credit" id="serviceCredit">
+                                    <label class="form-check-label" for="serviceCredit">
+                                        <strong>Service Credit</strong> - KES 200
+                                        <small class="d-block text-muted">Maintenance and repair discounts</small>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Quantity -->
+                        <div class="mb-3">
+                            <label class="form-label">Quantity *</label>
+                            <input type="number" class="form-control" name="quantity" required min="1" max="10" value="1">
+                        </div>
+                        
+                        <!-- Total Cost -->
+                        <div class="mb-3">
+                            <div class="alert alert-info">
+                                <strong>Total Cost: KES <span id="totalCost">0.00</span></strong>
+                            </div>
+                        </div>
+                        
+                        <!-- Payment Method -->
+                        <div class="mb-3">
+                            <label class="form-label">Payment Method *</label>
+                            <select class="form-select" name="payment_method" required>
+                                <option value="">Select payment method</option>
+                                <option value="wallet">E-Wallet (Balance: KES {{ wallet.balance|floatformat:2 }})</option>
+                                <option value="mpesa">M-Pesa</option>
+                                <option value="airtel">Airtel Money</option>
+                            </select>
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-shopping-cart"></i> Purchase Token
+                            </button>
+                            <a href="{% url 'payments:digital_tokens' %}" class="btn btn-secondary">Cancel</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenPrices = {
+        'stage_pass': 100,
+        'parking_token': 50,
+        'fuel_voucher': 500,
+        'service_credit': 200
+    };
+    
+    const tokenRadios = document.querySelectorAll('input[name="token_type"]');
+    const quantityInput = document.querySelector('input[name="quantity"]');
+    const totalCostSpan = document.getElementById('totalCost');
+    
+    function updateTotal() {
+        const selectedToken = document.querySelector('input[name="token_type"]:checked');
+        const quantity = parseInt(quantityInput.value) || 1;
+        
+        if (selectedToken) {
+            const price = tokenPrices[selectedToken.value];
+            const total = price * quantity;
+            totalCostSpan.textContent = total.toFixed(2);
+        } else {
+            totalCostSpan.textContent = '0.00';
+        }
+    }
+    
+    tokenRadios.forEach(radio => {
+        radio.addEventListener('change', updateTotal);
+    });
+    
+    quantityInput.addEventListener('input', updateTotal);
+});
+</script>
+{% endblock %}

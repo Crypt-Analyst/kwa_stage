@@ -1,0 +1,125 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contributions{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-donate"></i> Contributions Management</h1>
+        <a href="{% url 'contributions:make_payment' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Make Payment
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-money-bill-wave"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ total_contributions|default:0|floatformat:0 }}</h3>
+                    <p>Total Contributions</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ contributors_count|default:0 }}</h3>
+                    <p>Contributors</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-calendar-alt"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ this_month|default:0|floatformat:0 }}</h3>
+                    <p>This Month</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>KSh {{ welfare_balance|default:0|floatformat:0 }}</h3>
+                    <p>Welfare Balance</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>Recent Contributions</h3>
+                <div class="table-actions">
+                    <a href="{% url 'contributions:my_history' %}" class="btn btn-outline">
+                        <i class="fas fa-history"></i> My History
+                    </a>
+                    <a href="{% url 'contributions:reports' %}" class="btn btn-outline">
+                        <i class="fas fa-chart-bar"></i> Reports
+                    </a>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Date</th>
+                        <th>Member</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Method</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for contribution in contributions %}
+                    <tr>
+                        <td>{{ contribution.date_created|date:"M d, Y" }}</td>
+                        <td>
+                            <div class="user-info">
+                                <strong>{{ contribution.member.first_name }} {{ contribution.member.last_name }}</strong>
+                                <small>{{ contribution.member.member_id }}</small>
+                            </div>
+                        </td>
+                        <td>{{ contribution.contribution_type }}</td>
+                        <td><strong>KSh {{ contribution.amount|floatformat:0 }}</strong></td>
+                        <td>{{ contribution.payment_method }}</td>
+                        <td>
+                            {% if contribution.status == 'completed' %}
+                                <span class="status-badge status-success">Completed</span>
+                            {% elif contribution.status == 'pending' %}
+                                <span class="status-badge status-warning">Pending</span>
+                            {% else %}
+                                <span class="status-badge status-danger">{{ contribution.status|title }}</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="#" class="btn btn-sm btn-outline" title="View Details">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                {% if contribution.status == 'pending' %}
+                                <a href="{% url 'contributions:confirm_payment' contribution.id %}" class="btn btn-sm btn-success" title="Confirm">
+                                    <i class="fas fa-check"></i>
+                                </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No contributions found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

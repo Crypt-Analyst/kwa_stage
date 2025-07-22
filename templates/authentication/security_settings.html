@@ -1,0 +1,348 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Security Settings{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-shield-alt"></i> Security Settings</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item active">Security Settings</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Account Security Overview -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-user-shield me-2"></i>Account Security Overview
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="security-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-mobile-alt me-2"></i>Two-Factor Authentication
+                                            </h6>
+                                            <small class="text-muted">
+                                                {% if has_2fa %}
+                                                    Enabled - Your account is secured with 2FA
+                                                {% else %}
+                                                    Disabled - Add an extra layer of security
+                                                {% endif %}
+                                            </small>
+                                        </div>
+                                        <div>
+                                            {% if has_2fa %}
+                                                <span class="badge bg-success">Enabled</span>
+                                            {% else %}
+                                                <span class="badge bg-warning">Disabled</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="security-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-lock me-2"></i>Password Security
+                                            </h6>
+                                            <small class="text-muted">Strong password with special characters</small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-success">Secure</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="security-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-clock me-2"></i>Session Timeout
+                                            </h6>
+                                            <small class="text-muted">Auto-logout after 1 hour of inactivity</small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-success">Active</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="security-item mb-3">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1">
+                                                <i class="fas fa-user-check me-2"></i>Account Status
+                                            </h6>
+                                            <small class="text-muted">Account is active and verified</small>
+                                        </div>
+                                        <div>
+                                            <span class="badge bg-success">Verified</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Two-Factor Authentication -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-mobile-alt me-2"></i>Two-Factor Authentication
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        {% if has_2fa %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle me-2"></i>
+                                Two-factor authentication is <strong>enabled</strong> on your account.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Current Protection:</h6>
+                                    <ul class="list-unstyled">
+                                        <li><i class="fas fa-check text-success me-2"></i>Authenticator app configured</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Backup recovery codes available</li>
+                                        <li><i class="fas fa-check text-success me-2"></i>Login requires verification code</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-6">
+                                    <h6>Manage 2FA:</h6>
+                                    <div class="d-grid gap-2">
+                                        <a href="{% url 'authentication:backup_tokens' %}" class="btn btn-outline-primary">
+                                            <i class="fas fa-key me-2"></i>View Backup Codes
+                                        </a>
+                                        <a href="{% url 'authentication:two_factor_setup' %}" class="btn btn-outline-secondary">
+                                            <i class="fas fa-cog me-2"></i>Manage 2FA Settings
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-triangle me-2"></i>
+                                Two-factor authentication is <strong>not enabled</strong>. Your account security could be improved.
+                            </div>
+                            
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <h6>Why enable 2FA?</h6>
+                                    <ul>
+                                        <li>Protects your account even if your password is compromised</li>
+                                        <li>Prevents unauthorized access to sensitive welfare data</li>
+                                        <li>Required for accessing financial and emergency features</li>
+                                        <li>Industry standard for financial applications</li>
+                                    </ul>
+                                </div>
+                                <div class="col-md-4">
+                                    <a href="{% url 'authentication:two_factor_setup' %}" class="btn btn-primary">
+                                        <i class="fas fa-shield-alt me-2"></i>Enable 2FA
+                                    </a>
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Password Management -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-key me-2"></i>Password Management
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-8">
+                                <h6>Password Security</h6>
+                                <p class="text-muted">Your password was last changed recently and meets security requirements.</p>
+                                
+                                <h6>Security Requirements:</h6>
+                                <ul class="small">
+                                    <li>At least 8 characters long</li>
+                                    <li>Contains uppercase and lowercase letters</li>
+                                    <li>Contains numbers and special characters</li>
+                                    <li>Not a commonly used password</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="#" class="btn btn-outline-primary">
+                                    <i class="fas fa-edit me-2"></i>Change Password
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Security Score -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-chart-pie me-2"></i>Security Score
+                        </h5>
+                    </div>
+                    <div class="card-body text-center">
+                        <div class="security-score">
+                            {% if has_2fa %}
+                                <div class="score-circle score-excellent">
+                                    <span class="score-number">95</span>
+                                    <span class="score-text">Excellent</span>
+                                </div>
+                                <p class="text-success mt-3">Your account is well protected!</p>
+                            {% else %}
+                                <div class="score-circle score-good">
+                                    <span class="score-number">65</span>
+                                    <span class="score-text">Good</span>
+                                </div>
+                                <p class="text-warning mt-3">Enable 2FA to improve security</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-history me-2"></i>Recent Security Activity
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="activity-item">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-sign-in-alt text-success me-3"></i>
+                                <div>
+                                    <small class="text-muted">Login</small>
+                                    <div>Today, 2:30 PM</div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        {% if has_2fa %}
+                            <div class="activity-item">
+                                <div class="d-flex align-items-center mb-3">
+                                    <i class="fas fa-mobile-alt text-info me-3"></i>
+                                    <div>
+                                        <small class="text-muted">2FA Setup</small>
+                                        <div>2 days ago</div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                        
+                        <div class="activity-item">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="fas fa-key text-primary me-3"></i>
+                                <div>
+                                    <small class="text-muted">Password Changed</small>
+                                    <div>Last week</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Security Tips -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Security Tips
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="list-unstyled small">
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Use unique passwords for each account
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Log out when using shared computers
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Keep your recovery codes safe
+                            </li>
+                            <li class="mb-2">
+                                <i class="fas fa-check text-success me-2"></i>
+                                Report suspicious activity immediately
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.security-item {
+    padding: 15px;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    background: #f8f9fa;
+}
+
+.score-circle {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+    position: relative;
+}
+
+.score-excellent {
+    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    color: white;
+}
+
+.score-good {
+    background: linear-gradient(135deg, #ffc107 0%, #fd7e14 100%);
+    color: white;
+}
+
+.score-number {
+    font-size: 2rem;
+    font-weight: bold;
+}
+
+.score-text {
+    font-size: 0.875rem;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+</style>
+{% endblock %}

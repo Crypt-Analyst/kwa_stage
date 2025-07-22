@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Emergency Case - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-check-circle"></i> Verify Emergency Case</h1>
+        <p>Case ID: #EM001 - John Kamau</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Cases
+        </a>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-clipboard-check"></i> Verification Checklist</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="verification-section">
+                        <h6><i class="fas fa-user-check"></i> Identity Verification</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="identity_verified" id="identity_verified">
+                            <label class="form-check-label" for="identity_verified">
+                                Member identity confirmed (ID, membership records)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="relationship_verified" id="relationship_verified">
+                            <label class="form-check-label" for="relationship_verified">
+                                Relationship to affected person verified
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="verification-section">
+                        <h6><i class="fas fa-file-contract"></i> Document Verification</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="medical_docs" id="medical_docs">
+                            <label class="form-check-label" for="medical_docs">
+                                Medical reports/hospital records reviewed
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="supporting_docs" id="supporting_docs">
+                            <label class="form-check-label" for="supporting_docs">
+                                Supporting documents authenticated
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="photos_verified" id="photos_verified">
+                            <label class="form-check-label" for="photos_verified">
+                                Photos/evidence reviewed and verified
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="verification-section">
+                        <h6><i class="fas fa-map-marker-alt"></i> Location & Incident Verification</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="location_verified" id="location_verified">
+                            <label class="form-check-label" for="location_verified">
+                                Incident location confirmed
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="witness_contacted" id="witness_contacted">
+                            <label class="form-check-label" for="witness_contacted">
+                                Witnesses contacted (if applicable)
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="verification-section">
+                        <h6><i class="fas fa-calculator"></i> Financial Verification</h6>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="costs_verified" id="costs_verified">
+                            <label class="form-check-label" for="costs_verified">
+                                Estimated costs reviewed and reasonable
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="bills_verified" id="bills_verified">
+                            <label class="form-check-label" for="bills_verified">
+                                Hospital bills/invoices verified
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Verification Notes</label>
+                        <textarea class="form-control" name="verification_notes" rows="4" 
+                                  placeholder="Add any additional notes about the verification process..."></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Recommended Action</label>
+                        <select class="form-select" name="recommendation" required>
+                            <option value="">Select Recommendation</option>
+                            <option value="approve">Approve - Case verified successfully</option>
+                            <option value="partial_approve">Partial Approval - Reduce amount</option>
+                            <option value="request_more_info">Request More Information</option>
+                            <option value="reject">Reject - Case not verified</option>
+                        </select>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="fas fa-check"></i> Complete Verification
+                        </button>
+                        <a href="{% url 'emergency:cases' %}" class="btn btn-secondary btn-lg">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-info"></i> Case Summary</h5>
+            </div>
+            <div class="card-body">
+                <div class="summary-item">
+                    <strong>Emergency Type:</strong>
+                    <span>Medical Emergency</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Amount Requested:</strong>
+                    <span>KSh 150,000</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Affected Person:</strong>
+                    <span>John Kamau</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Date Reported:</strong>
+                    <span>July 22, 2025</span>
+                </div>
+                <div class="summary-item">
+                    <strong>Priority:</strong>
+                    <span class="badge bg-danger">Critical</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-exclamation-triangle"></i> Verification Guidelines</h5>
+            </div>
+            <div class="card-body">
+                <div class="guideline">
+                    <i class="fas fa-shield-alt text-primary"></i>
+                    <p>Verify all documents are authentic and recent</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-user-friends text-success"></i>
+                    <p>Contact witnesses or emergency contacts when possible</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-calculator text-warning"></i>
+                    <p>Ensure requested amount is reasonable and justified</p>
+                </div>
+                <div class="guideline">
+                    <i class="fas fa-clock text-info"></i>
+                    <p>Complete verification within 24 hours for critical cases</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.verification-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+}
+
+.verification-section h6 {
+    color: #495057;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.form-check {
+    margin-bottom: 10px;
+}
+
+.form-actions {
+    text-align: center;
+    padding: 20px 0;
+}
+
+.summary-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.summary-item:last-child {
+    border-bottom: none;
+}
+
+.guideline {
+    display: flex;
+    align-items: flex-start;
+    margin-bottom: 15px;
+}
+
+.guideline i {
+    margin-right: 10px;
+    margin-top: 2px;
+    width: 20px;
+}
+
+.guideline p {
+    margin: 0;
+    font-size: 0.9rem;
+}
+</style>
+{% endblock %}

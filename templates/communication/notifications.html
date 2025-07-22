@@ -1,0 +1,390 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-bell"></i> Notifications</h1>
+        <p>Stay updated with important messages and alerts</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" onclick="markAllRead()">
+            <i class="fas fa-check-double"></i> Mark All Read
+        </button>
+        <button class="btn btn-outline-primary" onclick="clearRead()">
+            <i class="fas fa-trash"></i> Clear Read
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Filter</h5>
+            </div>
+            <div class="card-body">
+                <div class="notification-filter">
+                    <button class="filter-btn active" data-filter="all">
+                        <i class="fas fa-bell"></i> All (24)
+                    </button>
+                    <button class="filter-btn" data-filter="unread">
+                        <i class="fas fa-circle text-danger"></i> Unread (8)
+                    </button>
+                    <button class="filter-btn" data-filter="emergency">
+                        <i class="fas fa-exclamation-triangle text-warning"></i> Emergency (3)
+                    </button>
+                    <button class="filter-btn" data-filter="contributions">
+                        <i class="fas fa-coins text-success"></i> Contributions (5)
+                    </button>
+                    <button class="filter-btn" data-filter="loans">
+                        <i class="fas fa-hand-holding-usd text-info"></i> Loans (2)
+                    </button>
+                    <button class="filter-btn" data-filter="bikes">
+                        <i class="fas fa-motorcycle text-primary"></i> Bikes (6)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-inbox"></i> Your Notifications</h5>
+            </div>
+            <div class="card-body">
+                <div class="notification-list">
+                    <!-- Emergency Notification -->
+                    <div class="notification-item unread emergency" data-category="emergency">
+                        <div class="notification-icon bg-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Emergency Case Approved</h6>
+                                <span class="notification-time">5 minutes ago</span>
+                            </div>
+                            <p>Emergency case #EM001 for John Kamau has been approved for KSh 150,000.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-primary" onclick="viewEmergency('EM001')">View Case</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contribution Notification -->
+                    <div class="notification-item unread contributions" data-category="contributions">
+                        <div class="notification-icon bg-success">
+                            <i class="fas fa-coins"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Monthly Contribution Reminder</h6>
+                                <span class="notification-time">2 hours ago</span>
+                            </div>
+                            <p>Your monthly contribution of KSh 2,000 is due on July 30, 2025.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-success" onclick="payContribution()">Pay Now</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Loan Notification -->
+                    <div class="notification-item unread loans" data-category="loans">
+                        <div class="notification-icon bg-info">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Loan Application Status</h6>
+                                <span class="notification-time">1 day ago</span>
+                            </div>
+                            <p>Your loan application #LN002 for KSh 50,000 is under review.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-info" onclick="viewLoan('LN002')">View Application</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bike Notification -->
+                    <div class="notification-item read bikes" data-category="bikes">
+                        <div class="notification-icon bg-primary">
+                            <i class="fas fa-motorcycle"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Lost Bike Alert</h6>
+                                <span class="notification-time">2 days ago</span>
+                            </div>
+                            <p>A Honda CB 150R (KCA 123A) has been reported lost in Kiambu area.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-warning" onclick="reportSighting('KCA123A')">Report Sighting</button>
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Stage Meeting -->
+                    <div class="notification-item read" data-category="meetings">
+                        <div class="notification-icon bg-warning">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>Stage Meeting Reminder</h6>
+                                <span class="notification-time">3 days ago</span>
+                            </div>
+                            <p>Monthly stage meeting scheduled for July 25, 2025 at 6:00 PM at Kikuyu Main Stage.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Update -->
+                    <div class="notification-item read" data-category="system">
+                        <div class="notification-icon bg-secondary">
+                            <i class="fas fa-cog"></i>
+                        </div>
+                        <div class="notification-content">
+                            <div class="notification-header">
+                                <h6>System Maintenance</h6>
+                                <span class="notification-time">1 week ago</span>
+                            </div>
+                            <p>System maintenance completed. New features and improvements are now available.</p>
+                            <div class="notification-actions">
+                                <button class="btn btn-sm btn-outline-secondary" onclick="markRead(this)">Mark Read</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Load More -->
+                <div class="text-center mt-4">
+                    <button class="btn btn-outline-primary" onclick="loadMore()">
+                        <i class="fas fa-chevron-down"></i> Load More Notifications
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.notification-filter {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filter-btn {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    background: white;
+    border-radius: 5px;
+    text-align: left;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.filter-btn:hover {
+    background: #f8f9fa;
+    border-color: var(--primary-color);
+}
+
+.filter-btn.active {
+    background: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+.notification-list {
+    max-height: 700px;
+    overflow-y: auto;
+}
+
+.notification-item {
+    display: flex;
+    padding: 20px;
+    border-bottom: 1px solid #eee;
+    background: white;
+    transition: all 0.3s ease;
+}
+
+.notification-item:hover {
+    background: #f8f9fa;
+}
+
+.notification-item.unread {
+    background: #fff8e1;
+    border-left: 4px solid var(--primary-color);
+}
+
+.notification-item.read {
+    opacity: 0.7;
+}
+
+.notification-icon {
+    flex: 0 0 50px;
+    height: 50px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 15px;
+    color: white;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.notification-header h6 {
+    margin: 0;
+    font-weight: 600;
+}
+
+.notification-time {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.notification-content p {
+    margin-bottom: 10px;
+    color: #555;
+}
+
+.notification-actions {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+@media (max-width: 768px) {
+    .notification-item {
+        flex-direction: column;
+        text-align: center;
+    }
+    
+    .notification-icon {
+        margin: 0 auto 15px auto;
+    }
+    
+    .notification-header {
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+    }
+}
+</style>
+
+<script>
+function markAllRead() {
+    const unreadItems = document.querySelectorAll('.notification-item.unread');
+    unreadItems.forEach(item => {
+        item.classList.remove('unread');
+        item.classList.add('read');
+    });
+    
+    // Update filter counts
+    updateFilterCounts();
+    
+    alert('All notifications marked as read');
+}
+
+function clearRead() {
+    if (confirm('Are you sure you want to clear all read notifications?')) {
+        const readItems = document.querySelectorAll('.notification-item.read');
+        readItems.forEach(item => item.remove());
+        
+        updateFilterCounts();
+        alert('Read notifications cleared');
+    }
+}
+
+function markRead(button) {
+    const notificationItem = button.closest('.notification-item');
+    notificationItem.classList.remove('unread');
+    notificationItem.classList.add('read');
+    
+    updateFilterCounts();
+}
+
+function updateFilterCounts() {
+    const all = document.querySelectorAll('.notification-item').length;
+    const unread = document.querySelectorAll('.notification-item.unread').length;
+    
+    document.querySelector('[data-filter="all"]').innerHTML = `<i class="fas fa-bell"></i> All (${all})`;
+    document.querySelector('[data-filter="unread"]').innerHTML = `<i class="fas fa-circle text-danger"></i> Unread (${unread})`;
+}
+
+function filterNotifications(category) {
+    const notifications = document.querySelectorAll('.notification-item');
+    
+    notifications.forEach(item => {
+        if (category === 'all') {
+            item.style.display = 'flex';
+        } else if (category === 'unread') {
+            item.style.display = item.classList.contains('unread') ? 'flex' : 'none';
+        } else {
+            item.style.display = item.classList.contains(category) ? 'flex' : 'none';
+        }
+    });
+}
+
+// Filter button event listeners
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filter-btn');
+    
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            filterButtons.forEach(btn => btn.classList.remove('active'));
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Filter notifications
+            const category = this.dataset.filter;
+            filterNotifications(category);
+        });
+    });
+});
+
+function viewEmergency(caseId) {
+    window.location.href = `/emergency/detail/${caseId}/`;
+}
+
+function payContribution() {
+    window.location.href = '/contributions/make-payment/';
+}
+
+function viewLoan(loanId) {
+    window.location.href = `/loans/detail/${loanId}/`;
+}
+
+function reportSighting(registration) {
+    window.location.href = `/bikes/lost-tracking/?report=${registration}`;
+}
+
+function loadMore() {
+    // Simulate loading more notifications
+    alert('Loading more notifications...');
+}
+</script>
+{% endblock %}

@@ -1,0 +1,257 @@
+<!-- Top Up Modal -->
+<div class="modal fade" id="topupModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Top Up E-Wallet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'payments:topup' %}" id="topupForm">
+                    {% csrf_token %}
+                    
+                    <!-- Amount Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Select Amount *</label>
+                        <div class="amount-options">
+                            <div class="row">
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="100">KSh 100</button>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="500">KSh 500</button>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="1000">KSh 1,000</button>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="2000">KSh 2,000</button>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="5000">KSh 5,000</button>
+                                </div>
+                                <div class="col-4 mb-2">
+                                    <button type="button" class="btn btn-outline-primary w-100 amount-btn" data-amount="10000">KSh 10,000</button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Custom Amount -->
+                        <div class="mt-3">
+                            <label for="customAmount" class="form-label">Or enter custom amount</label>
+                            <div class="input-group">
+                                <span class="input-group-text">KSh</span>
+                                <input type="number" class="form-control" name="amount" id="customAmount" 
+                                       placeholder="Enter amount" min="10" max="70000" step="0.01" required>
+                            </div>
+                            <small class="text-muted">Minimum: KSh 10, Maximum: KSh 70,000</small>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method Selection -->
+                    <div class="mb-4">
+                        <label class="form-label">Payment Method *</label>
+                        {% if payment_methods %}
+                        <div class="payment-methods">
+                            {% for method in payment_methods %}
+                            <div class="payment-method-option">
+                                <input type="radio" class="form-check-input" name="payment_method" 
+                                       value="{{ method.id }}" id="method{{ method.id }}" 
+                                       {% if method.is_default %}checked{% endif %}>
+                                <label class="form-check-label w-100" for="method{{ method.id }}">
+                                    <div class="method-card">
+                                        <div class="method-icon">
+                                            {% if method.provider.code == 'MPESA' %}
+                                                <i class="fas fa-mobile-alt text-success"></i>
+                                            {% elif method.provider.code == 'AIRTEL' %}
+                                                <i class="fas fa-mobile-alt text-danger"></i>
+                                            {% else %}
+                                                <i class="fas fa-credit-card text-primary"></i>
+                                            {% endif %}
+                                        </div>
+                                        <div class="method-details">
+                                            <h6>{{ method.provider.name }}</h6>
+                                            <p class="mb-0">{{ method.account_number }}</p>
+                                        </div>
+                                        {% if method.is_default %}
+                                        <span class="badge bg-primary">Default</span>
+                                        {% endif %}
+                                    </div>
+                                </label>
+                            </div>
+                            {% endfor %}
+                        </div>
+                        {% else %}
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            No payment methods found. Please add a payment method first.
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Transaction Summary -->
+                    <div class="transaction-summary bg-light p-3 rounded">
+                        <h6><i class="fas fa-receipt"></i> Transaction Summary</h6>
+                        <div class="d-flex justify-content-between">
+                            <span>Amount:</span>
+                            <span id="summaryAmount">KSh 0.00</span>
+                        </div>
+                        <div class="d-flex justify-content-between">
+                            <span>Transaction Fee:</span>
+                            <span id="summaryFee">KSh 0.00</span>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between fw-bold">
+                            <span>Total:</span>
+                            <span id="summaryTotal">KSh 0.00</span>
+                        </div>
+                    </div>
+
+                    <!-- Terms and Conditions -->
+                    <div class="mt-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="agreeTerms" required>
+                            <label class="form-check-label" for="agreeTerms">
+                                I agree to the <a href="#" target="_blank">Terms and Conditions</a> and understand that this transaction is non-refundable.
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="topupForm" class="btn btn-primary" id="topupSubmitBtn" disabled>
+                    <i class="fas fa-credit-card"></i> Proceed to Payment
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.amount-options .amount-btn {
+    transition: all 0.3s ease;
+}
+
+.amount-options .amount-btn:hover,
+.amount-options .amount-btn.active {
+    background-color: var(--primary-color);
+    color: white;
+    border-color: var(--primary-color);
+}
+
+.payment-method-option {
+    margin-bottom: 1rem;
+}
+
+.method-card {
+    display: flex;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.payment-method-option input:checked + label .method-card {
+    border-color: var(--primary-color);
+    background-color: #f0f8ff;
+}
+
+.method-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 1rem;
+    font-size: 1.2rem;
+}
+
+.method-details {
+    flex-grow: 1;
+}
+
+.method-details h6 {
+    margin-bottom: 0.25rem;
+    font-size: 0.9rem;
+}
+
+.method-details p {
+    color: #666;
+    font-size: 0.85rem;
+}
+
+.transaction-summary {
+    border: 1px solid #e0e0e0;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const amountButtons = document.querySelectorAll('.amount-btn');
+    const customAmountInput = document.getElementById('customAmount');
+    const summaryAmount = document.getElementById('summaryAmount');
+    const summaryFee = document.getElementById('summaryFee');
+    const summaryTotal = document.getElementById('summaryTotal');
+    const agreeTerms = document.getElementById('agreeTerms');
+    const submitBtn = document.getElementById('topupSubmitBtn');
+
+    // Amount button selection
+    amountButtons.forEach(btn => {
+        btn.addEventListener('click', function() {
+            amountButtons.forEach(b => b.classList.remove('active'));
+            this.classList.add('active');
+            customAmountInput.value = this.dataset.amount;
+            updateSummary();
+        });
+    });
+
+    // Custom amount input
+    customAmountInput.addEventListener('input', function() {
+        amountButtons.forEach(b => b.classList.remove('active'));
+        updateSummary();
+    });
+
+    // Terms checkbox
+    agreeTerms.addEventListener('change', function() {
+        submitBtn.disabled = !this.checked || !customAmountInput.value;
+    });
+
+    function updateSummary() {
+        const amount = parseFloat(customAmountInput.value) || 0;
+        const fee = calculateFee(amount);
+        const total = amount + fee;
+
+        summaryAmount.textContent = `KSh ${amount.toFixed(2)}`;
+        summaryFee.textContent = `KSh ${fee.toFixed(2)}`;
+        summaryTotal.textContent = `KSh ${total.toFixed(2)}`;
+
+        submitBtn.disabled = !agreeTerms.checked || amount < 10;
+    }
+
+    function calculateFee(amount) {
+        // Simple fee calculation - you can customize this
+        if (amount <= 100) return 5;
+        if (amount <= 500) return 10;
+        if (amount <= 1000) return 15;
+        if (amount <= 5000) return 25;
+        return 50;
+    }
+
+    // Form submission
+    document.getElementById('topupForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+        
+        // Show loading state
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Processing...';
+        
+        // Submit form
+        this.submit();
+    });
+});
+</script>

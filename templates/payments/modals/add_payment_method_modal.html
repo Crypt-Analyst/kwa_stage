@@ -1,0 +1,58 @@
+<!-- Add Payment Method Modal -->
+<div class="modal fade" id="addPaymentMethodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-plus"></i> Add Payment Method</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="post" action="{% url 'payments:add_payment_method' %}" id="addPaymentMethodForm">
+                    {% csrf_token %}
+                    
+                    <!-- Provider Selection -->
+                    <div class="mb-3">
+                        <label class="form-label">Payment Provider *</label>
+                        <select class="form-select" name="provider" id="providerSelect" required>
+                            <option value="">Select a provider</option>
+                            <option value="MPESA">M-Pesa</option>
+                            <option value="AIRTEL">Airtel Money</option>
+                            <option value="TKASH">T-Kash</option>
+                        </select>
+                    </div>
+
+                    <!-- Account Number -->
+                    <div class="mb-3">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-control" name="account_number" id="accountNumber" 
+                               placeholder="+254700000000" pattern="^\+?254\d{9}$" required>
+                        <small class="text-muted">Enter your mobile money phone number</small>
+                    </div>
+
+                    <!-- Account Name -->
+                    <div class="mb-3">
+                        <label class="form-label">Account Name *</label>
+                        <input type="text" class="form-control" name="account_name" 
+                               placeholder="Name as registered with provider" required>
+                    </div>
+
+                    <!-- Set as Default -->
+                    <div class="mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" name="is_default" id="setDefault">
+                            <label class="form-check-label" for="setDefault">
+                                Set as default payment method
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" form="addPaymentMethodForm" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Method
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

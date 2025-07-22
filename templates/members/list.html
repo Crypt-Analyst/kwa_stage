@@ -1,0 +1,122 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Members{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-users"></i> Members Management</h1>
+        <a href="{% url 'members:add' %}" class="btn btn-primary">
+            <i class="fas fa-plus"></i> Add New Member
+        </a>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ members.count }}</h3>
+                    <p>Total Members</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-user-check"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ active_count|default:0 }}</h3>
+                    <p>Active Members</p>
+                </div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">
+                    <i class="fas fa-crown"></i>
+                </div>
+                <div class="stat-content">
+                    <h3>{{ leadership_count|default:0 }}</h3>
+                    <p>Leadership</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="data-table">
+            <div class="table-header">
+                <h3>All Members</h3>
+                <div class="table-actions">
+                    <input type="text" placeholder="Search members..." class="search-input">
+                    <button class="btn btn-outline">
+                        <i class="fas fa-filter"></i> Filter
+                    </button>
+                </div>
+            </div>
+            
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Member ID</th>
+                        <th>Name</th>
+                        <th>Phone</th>
+                        <th>Stage</th>
+                        <th>Chama</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                    <tr>
+                        <td>#{{ member.member_id }}</td>
+                        <td>
+                            <div class="user-info">
+                                <div class="user-avatar">
+                                    {% if member.photo %}
+                                        <img src="{{ member.photo.url }}" alt="{{ member.first_name }}">
+                                    {% else %}
+                                        <div class="avatar-placeholder">{{ member.first_name|first }}{{ member.last_name|first }}</div>
+                                    {% endif %}
+                                </div>
+                                <div>
+                                    <strong>{{ member.first_name }} {{ member.last_name }}</strong>
+                                    <small>{{ member.email }}</small>
+                                </div>
+                            </div>
+                        </td>
+                        <td>{{ member.phone_number }}</td>
+                        <td>{{ member.stage|default:"-" }}</td>
+                        <td>{{ member.chama|default:"-" }}</td>
+                        <td>
+                            {% if member.is_active %}
+                                <span class="status-badge status-active">Active</span>
+                            {% else %}
+                                <span class="status-badge status-inactive">Inactive</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <div class="action-buttons">
+                                <a href="{% url 'members:profile' member.id %}" class="btn btn-sm btn-outline" title="View Profile">
+                                    <i class="fas fa-eye"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-outline" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                                <a href="#" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="7" class="text-center">No members found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

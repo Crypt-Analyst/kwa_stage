@@ -1,0 +1,466 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Analytics Dashboard - Boda Boda Welfare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .analytics-container {
+        padding: 20px;
+    }
+    
+    .analytics-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border-left: 4px solid;
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+    }
+    
+    .stat-card.primary { border-left-color: #667eea; }
+    .stat-card.success { border-left-color: #28a745; }
+    .stat-card.warning { border-left-color: #ffc107; }
+    .stat-card.danger { border-left-color: #dc3545; }
+    .stat-card.info { border-left-color: #17a2b8; }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        opacity: 0.8;
+    }
+    
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .chart-container {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .chart-title {
+        color: var(--primary-color);
+        font-weight: 600;
+        margin-bottom: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .filter-section {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 1.5rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .table-responsive {
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .table th {
+        background-color: #f8f9fa;
+        border: none;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .progress {
+        height: 8px;
+        border-radius: 4px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="analytics-container">
+    <div class="analytics-header">
+        <h2><i class="fas fa-chart-line"></i> Analytics Dashboard</h2>
+        <p class="mb-0">Comprehensive insights into your Boda Boda welfare system</p>
+    </div>
+
+    <!-- Filter Section -->
+    <div class="filter-section">
+        <h5><i class="fas fa-filter"></i> Filter Analytics</h5>
+        <form method="get">
+            <div class="row">
+                <div class="col-md-3">
+                    <select class="form-select" name="period">
+                        <option value="7">Last 7 days</option>
+                        <option value="30" selected>Last 30 days</option>
+                        <option value="90">Last 3 months</option>
+                        <option value="365">Last year</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="stage">
+                        <option value="all">All Stages</option>
+                        <option value="1">Stage 1</option>
+                        <option value="2">Stage 2</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" name="metric">
+                        <option value="contributions">Contributions</option>
+                        <option value="members">Members</option>
+                        <option value="emergencies">Emergencies</option>
+                        <option value="accidents">Accidents</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Apply Filters
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="row">
+        <div class="col-md-2-4">
+            <div class="stat-card primary">
+                <div class="text-center">
+                    <div class="stat-icon text-primary">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">{{ total_members|default:"0" }}</div>
+                    <div class="stat-label">Total Members</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-4">
+            <div class="stat-card success">
+                <div class="text-center">
+                    <div class="stat-icon text-success">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-number">KES {{ total_contributions|default:"0" }}</div>
+                    <div class="stat-label">Total Contributions</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-4">
+            <div class="stat-card warning">
+                <div class="text-center">
+                    <div class="stat-icon text-warning">
+                        <i class="fas fa-hand-holding-heart"></i>
+                    </div>
+                    <div class="stat-number">KES {{ emergency_fund|default:"0" }}</div>
+                    <div class="stat-label">Emergency Fund</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-4">
+            <div class="stat-card danger">
+                <div class="text-center">
+                    <div class="stat-icon text-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                    </div>
+                    <div class="stat-number">{{ total_emergencies|default:"0" }}</div>
+                    <div class="stat-label">Emergency Cases</div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2-4">
+            <div class="stat-card info">
+                <div class="text-center">
+                    <div class="stat-icon text-info">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <div class="stat-number">{{ total_bikes|default:"0" }}</div>
+                    <div class="stat-label">Registered Bikes</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="row">
+        <div class="col-md-8">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-chart-area"></i>
+                    Contributions Over Time
+                </h5>
+                <canvas id="contributionsChart" height="100"></canvas>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-chart-pie"></i>
+                    Fund Distribution
+                </h5>
+                <canvas id="fundDistributionChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-chart-bar"></i>
+                    Members by Stage
+                </h5>
+                <canvas id="membersByStageChart" height="150"></canvas>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-chart-line"></i>
+                    Monthly Growth
+                </h5>
+                <canvas id="growthChart" height="150"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Analytics Tables -->
+    <div class="row">
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-trophy"></i>
+                    Top Contributors This Month
+                </h5>
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Member</th>
+                                <th>Amount</th>
+                                <th>Consistency</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><span class="badge bg-warning">1</span></td>
+                                <td>John Doe</td>
+                                <td>KES 2,000</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 100%"></div>
+                                    </div>
+                                    100%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-secondary">2</span></td>
+                                <td>Jane Smith</td>
+                                <td>KES 1,800</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-success" style="width: 90%"></div>
+                                    </div>
+                                    90%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><span class="badge bg-secondary">3</span></td>
+                                <td>Mike Johnson</td>
+                                <td>KES 1,600</td>
+                                <td>
+                                    <div class="progress">
+                                        <div class="progress-bar bg-warning" style="width: 80%"></div>
+                                    </div>
+                                    80%
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="chart-container">
+                <h5 class="chart-title">
+                    <i class="fas fa-clock"></i>
+                    Recent Activities
+                </h5>
+                <div class="activity-feed">
+                    <div class="activity-item d-flex align-items-center mb-3">
+                        <div class="activity-icon bg-success rounded-circle p-2 me-3">
+                            <i class="fas fa-money-bill-wave text-white"></i>
+                        </div>
+                        <div>
+                            <strong>New contribution received</strong>
+                            <br><small class="text-muted">John Doe contributed KES 500 - 5 minutes ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item d-flex align-items-center mb-3">
+                        <div class="activity-icon bg-primary rounded-circle p-2 me-3">
+                            <i class="fas fa-user-plus text-white"></i>
+                        </div>
+                        <div>
+                            <strong>New member registered</strong>
+                            <br><small class="text-muted">Mary Wilson joined Stage 2 - 1 hour ago</small>
+                        </div>
+                    </div>
+                    <div class="activity-item d-flex align-items-center mb-3">
+                        <div class="activity-icon bg-warning rounded-circle p-2 me-3">
+                            <i class="fas fa-exclamation-triangle text-white"></i>
+                        </div>
+                        <div>
+                            <strong>Emergency case reported</strong>
+                            <br><small class="text-muted">Emergency fund disbursement - 2 hours ago</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Contributions Over Time Chart
+    const contributionsCtx = document.getElementById('contributionsChart').getContext('2d');
+    new Chart(contributionsCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'Contributions (KES)',
+                data: [12000, 15000, 18000, 20000, 22000, 25000],
+                borderColor: '#667eea',
+                backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return 'KES ' + value.toLocaleString();
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Fund Distribution Chart
+    const fundCtx = document.getElementById('fundDistributionChart').getContext('2d');
+    new Chart(fundCtx, {
+        type: 'doughnut',
+        data: {
+            labels: ['Emergency Fund', 'Welfare Fund', 'Loan Fund', 'Operating Costs'],
+            datasets: [{
+                data: [40, 35, 15, 10],
+                backgroundColor: ['#ff6b6b', '#4ecdc4', '#45b7d1', '#96ceb4']
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    position: 'bottom'
+                }
+            }
+        }
+    });
+
+    // Members by Stage Chart
+    const stageCtx = document.getElementById('membersByStageChart').getContext('2d');
+    new Chart(stageCtx, {
+        type: 'bar',
+        data: {
+            labels: ['Stage 1', 'Stage 2', 'Stage 3', 'Stage 4'],
+            datasets: [{
+                label: 'Members',
+                data: [25, 30, 20, 15],
+                backgroundColor: '#667eea'
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+    // Growth Chart
+    const growthCtx = document.getElementById('growthChart').getContext('2d');
+    new Chart(growthCtx, {
+        type: 'line',
+        data: {
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+            datasets: [{
+                label: 'New Members',
+                data: [5, 8, 12, 15, 10, 18],
+                borderColor: '#28a745',
+                backgroundColor: 'rgba(40, 167, 69, 0.1)',
+                tension: 0.4,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: {
+                    display: false
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %}

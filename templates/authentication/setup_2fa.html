@@ -1,0 +1,290 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Two-Factor Authentication Setup{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-shield-alt"></i> Two-Factor Authentication</h1>
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item"><a href="{% url 'dashboard' %}">Dashboard</a></li>
+                <li class="breadcrumb-item"><a href="{% url 'authentication:security_settings' %}">Security</a></li>
+                <li class="breadcrumb-item active">2FA Setup</li>
+            </ol>
+        </nav>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                {% if step == 'initial' %}
+                    <!-- Initial Setup Step -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-mobile-alt me-2"></i>Two-Factor Authentication
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            {% if existing_device %}
+                                <!-- 2FA Already Enabled -->
+                                <div class="alert alert-success">
+                                    <i class="fas fa-check-circle me-2"></i>
+                                    <strong>2FA is currently enabled</strong> for your account.
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <h6>Current Status</h6>
+                                        <ul class="list-unstyled">
+                                            <li><i class="fas fa-check text-success me-2"></i>Authenticator app configured</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Backup codes available</li>
+                                            <li><i class="fas fa-check text-success me-2"></i>Account secured</li>
+                                        </ul>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <h6>Quick Actions</h6>
+                                        <div class="d-grid gap-2">
+                                            <a href="{% url 'authentication:backup_tokens' %}" class="btn btn-outline-primary">
+                                                <i class="fas fa-key me-2"></i>View Backup Codes
+                                            </a>
+                                            <button type="button" class="btn btn-outline-danger" onclick="confirmDisable2FA()">
+                                                <i class="fas fa-times me-2"></i>Disable 2FA
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Disable 2FA Form (Hidden) -->
+                                <div id="disable2FAForm" style="display: none;" class="mt-4 p-3 border rounded bg-light">
+                                    <h6 class="text-danger">⚠️ Disable Two-Factor Authentication</h6>
+                                    <p class="small text-muted">
+                                        This will remove 2FA protection from your account. Are you sure you want to continue?
+                                    </p>
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="disable">
+                                        <button type="submit" class="btn btn-danger btn-sm">
+                                            Yes, Disable 2FA
+                                        </button>
+                                        <button type="button" class="btn btn-secondary btn-sm ms-2" onclick="cancelDisable2FA()">
+                                            Cancel
+                                        </button>
+                                    </form>
+                                </div>
+                            {% else %}
+                                <!-- Enable 2FA -->
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <h6>Enhance Your Account Security</h6>
+                                        <p>Two-factor authentication adds an extra layer of security to your account by requiring a second verification step in addition to your password.</p>
+                                        
+                                        <div class="benefits mb-4">
+                                            <h6>Benefits of 2FA:</h6>
+                                            <ul>
+                                                <li><strong>Enhanced Security:</strong> Protects against password breaches</li>
+                                                <li><strong>Secure Access:</strong> Only you can access your account</li>
+                                                <li><strong>Peace of Mind:</strong> Your sensitive welfare data stays safe</li>
+                                                <li><strong>Industry Standard:</strong> Used by banks and financial institutions</li>
+                                            </ul>
+                                        </div>
+                                        
+                                        <form method="post">
+                                            {% csrf_token %}
+                                            <input type="hidden" name="action" value="enable">
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-shield-alt me-2"></i>Enable 2FA
+                                            </button>
+                                        </form>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <div class="text-center">
+                                            <i class="fas fa-mobile-alt fa-4x text-primary mb-3"></i>
+                                            <h6>Supported Apps</h6>
+                                            <div class="small text-muted">
+                                                <div class="mb-2">
+                                                    <i class="fab fa-google me-2"></i>Google Authenticator
+                                                </div>
+                                                <div class="mb-2">
+                                                    <i class="fas fa-mobile me-2"></i>Microsoft Authenticator
+                                                </div>
+                                                <div class="mb-2">
+                                                    <i class="fas fa-key me-2"></i>Authy
+                                                </div>
+                                                <div>
+                                                    <i class="fas fa-shield-alt me-2"></i>Any TOTP app
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                {% elif step == 'configure' %}
+                    <!-- Configuration Step -->
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">
+                                <i class="fas fa-qrcode me-2"></i>Configure Your Authenticator App
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <h6>Step 1: Scan QR Code</h6>
+                                    <p class="small text-muted">Use your authenticator app to scan this QR code:</p>
+                                    
+                                    <div class="text-center mb-4">
+                                        <img src="data:image/png;base64,{{ qr_code }}" alt="2FA QR Code" class="img-fluid border rounded" style="max-width: 200px;">
+                                    </div>
+                                    
+                                    <div class="alert alert-info">
+                                        <h6><i class="fas fa-info-circle me-2"></i>Can't scan?</h6>
+                                        <p class="small mb-2">Manually enter this secret key in your authenticator app:</p>
+                                        <code id="secretKey">{{ secret_key }}</code>
+                                        <button type="button" class="btn btn-sm btn-outline-primary ms-2" onclick="copySecretKey()">
+                                            <i class="fas fa-copy"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <h6>Step 2: Enter Verification Code</h6>
+                                    <p class="small text-muted">Enter the 6-digit code from your authenticator app to confirm setup:</p>
+                                    
+                                    <form method="post">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="action" value="confirm">
+                                        <input type="hidden" name="device_id" value="{{ device.id }}">
+                                        
+                                        <div class="mb-3">
+                                            <input 
+                                                type="text" 
+                                                class="form-control form-control-lg text-center" 
+                                                name="token" 
+                                                placeholder="000000"
+                                                maxlength="6"
+                                                pattern="[0-9]{6}"
+                                                style="letter-spacing: 0.3rem; font-size: 1.5rem;"
+                                                required>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <button type="submit" class="btn btn-success">
+                                                <i class="fas fa-check me-2"></i>Verify & Enable 2FA
+                                            </button>
+                                            <a href="{% url 'authentication:two_factor_setup' %}" class="btn btn-outline-secondary">
+                                                <i class="fas fa-arrow-left me-2"></i>Start Over
+                                            </a>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endif %}
+
+                <!-- Security Tips -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h6 class="mb-0">
+                            <i class="fas fa-lightbulb me-2"></i>Security Tips
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Keep your backup codes in a safe place
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Don't share your authenticator app with others
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Use a strong password in addition to 2FA
+                                    </li>
+                                    <li class="mb-2">
+                                        <i class="fas fa-check text-success me-2"></i>
+                                        Log out when using shared computers
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function confirmDisable2FA() {
+    document.getElementById('disable2FAForm').style.display = 'block';
+}
+
+function cancelDisable2FA() {
+    document.getElementById('disable2FAForm').style.display = 'none';
+}
+
+function copySecretKey() {
+    const secretKey = document.getElementById('secretKey').textContent;
+    navigator.clipboard.writeText(secretKey).then(function() {
+        // Show success message
+        const btn = event.target;
+        const originalText = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i>';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+        
+        setTimeout(() => {
+            btn.innerHTML = originalText;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    });
+}
+
+// Auto-focus and auto-submit for verification code
+document.addEventListener('DOMContentLoaded', function() {
+    const tokenInput = document.querySelector('input[name="token"]');
+    if (tokenInput) {
+        tokenInput.focus();
+        
+        tokenInput.addEventListener('input', function() {
+            // Remove any non-digit characters
+            this.value = this.value.replace(/\D/g, '');
+            
+            // Auto-submit when 6 digits are entered
+            if (this.value.length === 6) {
+                setTimeout(() => {
+                    this.form.submit();
+                }, 500);
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

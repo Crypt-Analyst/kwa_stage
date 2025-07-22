@@ -1,0 +1,159 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Methods - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-credit-card"></i> Payment Methods</h1>
+        <p>Manage your saved payment methods</p>
+    </div>
+    <div class="header-actions">
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMethodModal">
+            <i class="fas fa-plus"></i> Add Payment Method
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-credit-card"></i> Your Payment Methods</h5>
+            </div>
+            <div class="card-body">
+                {% if payment_methods %}
+                    {% for method in payment_methods %}
+                    <div class="card mb-3 {% if method.is_default %}border-primary{% endif %}">
+                        <div class="card-body">
+                            <div class="row align-items-center">
+                                <div class="col-md-8">
+                                    <div class="d-flex align-items-center">
+                                        {% if method.method_type == 'mobile_money' %}
+                                            <i class="fas fa-mobile-alt text-success me-3 fa-2x"></i>
+                                        {% elif method.method_type == 'bank_card' %}
+                                            <i class="fas fa-credit-card text-primary me-3 fa-2x"></i>
+                                        {% elif method.method_type == 'bank_account' %}
+                                            <i class="fas fa-university text-info me-3 fa-2x"></i>
+                                        {% else %}
+                                            <i class="fas fa-wallet text-warning me-3 fa-2x"></i>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-1">{{ method.get_method_type_display }}</h6>
+                                            <p class="mb-1">{{ method.account_name }}</p>
+                                            <small class="text-muted">{{ method.account_number }}</small>
+                                            {% if method.is_default %}
+                                                <span class="badge bg-primary ms-2">Default</span>
+                                            {% endif %}
+                                            {% if method.is_verified %}
+                                                <span class="badge bg-success ms-2">Verified</span>
+                                            {% else %}
+                                                <span class="badge bg-warning ms-2">Unverified</span>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <div class="btn-group" role="group">
+                                        {% if not method.is_default %}
+                                        <button class="btn btn-sm btn-outline-primary">Set Default</button>
+                                        {% endif %}
+                                        <button class="btn btn-sm btn-outline-secondary">Edit</button>
+                                        <button class="btn btn-sm btn-outline-danger">Remove</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-credit-card fa-3x text-muted mb-3"></i>
+                        <h5>No Payment Methods</h5>
+                        <p class="text-muted">You haven't added any payment methods yet. Add one for faster transactions.</p>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMethodModal">
+                            <i class="fas fa-plus"></i> Add Your First Payment Method
+                        </button>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6><i class="fas fa-shield-alt"></i> Security</h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        All payment data is encrypted
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        PCI DSS compliant processing
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Secure PIN authorization
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success me-2"></i>
+                        Real-time fraud detection
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Payment Method Modal -->
+<div class="modal fade" id="addMethodModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Payment Method</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Payment Method Type *</label>
+                        <select class="form-select" name="method_type" required>
+                            <option value="">Select type</option>
+                            <option value="mobile_money">Mobile Money</option>
+                            <option value="bank_card">Bank Card</option>
+                            <option value="bank_account">Bank Account</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Number/Phone *</label>
+                        <input type="text" class="form-control" name="account_number" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Account Name *</label>
+                        <input type="text" class="form-control" name="account_name" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Nickname (Optional)</label>
+                        <input type="text" class="form-control" name="nickname" placeholder="e.g., My M-Pesa">
+                    </div>
+                    <div class="form-check mb-3">
+                        <input class="form-check-input" type="checkbox" name="is_default" id="setDefault">
+                        <label class="form-check-label" for="setDefault">
+                            Set as default payment method
+                        </label>
+                    </div>
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary">Add Payment Method</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

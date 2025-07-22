@@ -1,0 +1,460 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Map View - Stages{% endblock %}
+
+{% block extra_css %}
+<style>
+    #map {
+        height: 500px;
+        width: 100%;
+        border-radius: 8px;
+    }
+    .map-controls {
+        background: white;
+        padding: 10px;
+        margin: 10px;
+        border-radius: 5px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .stage-info-window {
+        max-width: 300px;
+    }
+    .current-location-btn {
+        position: absolute;
+        top: 10px;
+        right: 10px;
+        z-index: 1000;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-map"></i> Stages Map View</h1>
+        <div>
+            <button class="btn btn-success me-2" onclick="getCurrentLocation()">
+                <i class="fas fa-location-arrow"></i> My Location
+            </button>
+            <button class="btn btn-primary me-2" data-bs-toggle="modal" data-bs-target="#addStageModal">
+                <i class="fas fa-plus"></i> Add Stage
+            </button>
+            <a href="{% url 'stages:list' %}" class="btn btn-outline">
+                <i class="fas fa-list"></i> List View
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Interactive Map - Click to Add New Stage</h5>
+                <small class="text-muted">Click anywhere on the map to register a new stage at that location</small>
+            </div>
+            <div class="card-body p-0 position-relative">
+                <button class="btn btn-primary current-location-btn" onclick="getCurrentLocation()">
+                    <i class="fas fa-crosshairs"></i>
+                </button>
+                <div id="map"></div>
+            </div>
+        </div>
+
+        <!-- Stage List Below Map -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5 class="mb-0">Registered Stages</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Stage Name</th>
+                                <th>Location</th>
+                                <th>Coordinates</th>
+                                <th>Members</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="stagesList">
+                            <tr>
+                                <td>Kencom Stage</td>
+                                <td>Nairobi CBD</td>
+                                <td>-1.2921°, 36.8219°</td>
+                                <td>45</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="focusStage(-1.2921, 36.8219)">
+                                        <i class="fas fa-map-marker-alt"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Kawangware Stage</td>
+                                <td>Dagoretti</td>
+                                <td>-1.2921°, 36.7219°</td>
+                                <td>32</td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" onclick="focusStage(-1.2921, 36.7219)">
+                                        <i class="fas fa-map-marker-alt"></i> View
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-secondary">
+                                        <i class="fas fa-edit"></i> Edit
+                                    </button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Stage Modal -->
+<div class="modal fade" id="addStageModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Register New Stage</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="stageForm">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label class="form-label">Stage Name *</label>
+                        <input type="text" class="form-control" id="stageName" placeholder="e.g., Kencom Stage" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        <textarea class="form-control" id="stageDescription" rows="3" placeholder="Brief description of the stage location"></textarea>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Latitude</label>
+                            <input type="number" class="form-control" id="stageLat" step="any" readonly>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Longitude</label>
+                            <input type="number" class="form-control" id="stageLng" step="any" readonly>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <small class="text-muted">
+                            <i class="fas fa-info-circle"></i> 
+                            Click on the map to set coordinates, or use "My Location" to use your current position
+                        </small>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="saveStage()">Register Stage</button>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+let map;
+let currentLocationMarker;
+let tempMarker;
+let stageMarkers = [];
+
+// Initialize map
+function initMap() {
+    // Default center (Nairobi, Kenya)
+    const defaultCenter = { lat: -1.2921, lng: 36.8219 };
+    
+    map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 13,
+        center: defaultCenter,
+        mapTypeControl: true,
+        streetViewControl: true,
+        fullscreenControl: true,
+    });
+
+    // Add click event to map for adding new stages
+    map.addListener("click", (event) => {
+        const clickedLat = event.latLng.lat();
+        const clickedLng = event.latLng.lng();
+        
+        // Update form coordinates
+        document.getElementById('stageLat').value = clickedLat.toFixed(6);
+        document.getElementById('stageLng').value = clickedLng.toFixed(6);
+        
+        // Remove previous temp marker
+        if (tempMarker) {
+            tempMarker.setMap(null);
+        }
+        
+        // Add temporary marker
+        tempMarker = new google.maps.Marker({
+            position: { lat: clickedLat, lng: clickedLng },
+            map: map,
+            title: "New Stage Location",
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="15" fill="#ff4444" stroke="white" stroke-width="2"/>
+                        <circle cx="16" cy="16" r="6" fill="white"/>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(32, 32),
+                anchor: new google.maps.Point(16, 16)
+            },
+            animation: google.maps.Animation.BOUNCE
+        });
+        
+        // Show modal
+        const modal = new bootstrap.Modal(document.getElementById('addStageModal'));
+        modal.show();
+    });
+
+    // Add existing stages to map
+    addExistingStages();
+}
+
+// Get user's current location
+function getCurrentLocation() {
+    if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const pos = {
+                    lat: position.coords.latitude,
+                    lng: position.coords.longitude,
+                };
+
+                // Center map on user location
+                map.setCenter(pos);
+                map.setZoom(15);
+
+                // Remove previous current location marker
+                if (currentLocationMarker) {
+                    currentLocationMarker.setMap(null);
+                }
+
+                // Add current location marker
+                currentLocationMarker = new google.maps.Marker({
+                    position: pos,
+                    map: map,
+                    title: "Your Current Location",
+                    icon: {
+                        url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="11" fill="#4285f4" stroke="white" stroke-width="2"/>
+                                <circle cx="12" cy="12" r="4" fill="white"/>
+                            </svg>
+                        `),
+                        scaledSize: new google.maps.Size(24, 24),
+                        anchor: new google.maps.Point(12, 12)
+                    }
+                });
+
+                // Update form with current location
+                document.getElementById('stageLat').value = pos.lat.toFixed(6);
+                document.getElementById('stageLng').value = pos.lng.toFixed(6);
+            },
+            () => {
+                alert("Error: The Geolocation service failed.");
+            }
+        );
+    } else {
+        alert("Error: Your browser doesn't support geolocation.");
+    }
+}
+
+// Add existing stages to map
+function addExistingStages() {
+    const existingStages = [
+        { name: "Kencom Stage", lat: -1.2921, lng: 36.8219, members: 45 },
+        { name: "Kawangware Stage", lat: -1.2921, lng: 36.7219, members: 32 }
+    ];
+
+    existingStages.forEach(stage => {
+        const marker = new google.maps.Marker({
+            position: { lat: stage.lat, lng: stage.lng },
+            map: map,
+            title: stage.name,
+            icon: {
+                url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                    <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="16" cy="16" r="15" fill="#28a745" stroke="white" stroke-width="2"/>
+                        <text x="16" y="20" text-anchor="middle" fill="white" font-size="16" font-weight="bold">S</text>
+                    </svg>
+                `),
+                scaledSize: new google.maps.Size(32, 32),
+                anchor: new google.maps.Point(16, 32)
+            }
+        });
+
+        const infoWindow = new google.maps.InfoWindow({
+            content: `
+                <div class="stage-info-window">
+                    <h6>${stage.name}</h6>
+                    <p><strong>Members:</strong> ${stage.members}</p>
+                    <p><strong>Coordinates:</strong> ${stage.lat.toFixed(4)}°, ${stage.lng.toFixed(4)}°</p>
+                    <button class="btn btn-sm btn-primary" onclick="viewStageDetails('${stage.name}')">
+                        <i class="fas fa-eye"></i> View Details
+                    </button>
+                </div>
+            `
+        });
+
+        marker.addListener("click", () => {
+            infoWindow.open(map, marker);
+        });
+
+        stageMarkers.push(marker);
+    });
+}
+
+// Focus on specific stage
+function focusStage(lat, lng) {
+    map.setCenter({ lat: lat, lng: lng });
+    map.setZoom(16);
+}
+
+// Save new stage
+function saveStage() {
+    const stageName = document.getElementById('stageName').value;
+    const stageDescription = document.getElementById('stageDescription').value;
+    const stageLat = parseFloat(document.getElementById('stageLat').value);
+    const stageLng = parseFloat(document.getElementById('stageLng').value);
+
+    if (!stageName || !stageLat || !stageLng) {
+        alert('Please fill in all required fields and set coordinates by clicking on the map.');
+        return;
+    }
+
+    // Send data to Django backend
+    fetch('{% url "stages:save_coordinates" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value,
+        },
+        body: JSON.stringify({
+            name: stageName,
+            description: stageDescription,
+            latitude: stageLat,
+            longitude: stageLng
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === 'success') {
+            // Add marker to map
+            const marker = new google.maps.Marker({
+                position: { lat: stageLat, lng: stageLng },
+                map: map,
+                title: stageName,
+                icon: {
+                    url: 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(`
+                        <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="16" cy="16" r="15" fill="#007bff" stroke="white" stroke-width="2"/>
+                            <text x="16" y="20" text-anchor="middle" fill="white" font-size="16" font-weight="bold">N</text>
+                        </svg>
+                    `),
+                    scaledSize: new google.maps.Size(32, 32),
+                    anchor: new google.maps.Point(16, 32)
+                }
+            });
+
+            // Add info window
+            const infoWindow = new google.maps.InfoWindow({
+                content: `
+                    <div class="stage-info-window">
+                        <h6>${stageName}</h6>
+                        <p>${stageDescription || 'No description'}</p>
+                        <p><strong>Coordinates:</strong> ${stageLat.toFixed(4)}°, ${stageLng.toFixed(4)}°</p>
+                        <span class="badge bg-primary">Newly Added</span>
+                    </div>
+                `
+            });
+
+            marker.addListener("click", () => {
+                infoWindow.open(map, marker);
+            });
+
+            // Remove temp marker
+            if (tempMarker) {
+                tempMarker.setMap(null);
+                tempMarker = null;
+            }
+
+            // Add to stages list
+            const stagesList = document.getElementById('stagesList');
+            const newRow = stagesList.insertRow();
+            newRow.innerHTML = `
+                <td>${stageName}</td>
+                <td>${stageDescription || 'No description'}</td>
+                <td>${stageLat.toFixed(6)}°, ${stageLng.toFixed(6)}°</td>
+                <td>0</td>
+                <td>
+                    <button class="btn btn-sm btn-primary" onclick="focusStage(${stageLat}, ${stageLng})">
+                        <i class="fas fa-map-marker-alt"></i> View
+                    </button>
+                    <button class="btn btn-sm btn-outline-secondary">
+                        <i class="fas fa-edit"></i> Edit
+                    </button>
+                </td>
+            `;
+
+            // Close modal and reset form
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addStageModal'));
+            modal.hide();
+            document.getElementById('stageForm').reset();
+
+            // Show success message
+            alert(data.message);
+        } else {
+            alert('Error: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred while saving the stage.');
+    });
+}
+
+// View stage details
+function viewStageDetails(stageName) {
+    alert(`Viewing details for ${stageName}`);
+    // Implement stage details view
+}
+
+// Initialize map when page loads
+window.onload = function() {
+    initMap();
+};
+</script>
+
+<!-- Google Maps API -->
+<script async defer 
+    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+</script>
+
+<script>
+// Fallback for demo if Google Maps API key is not available
+setTimeout(() => {
+    if (typeof google === 'undefined') {
+        console.log('Google Maps API not loaded, using fallback');
+        document.getElementById('map').innerHTML = `
+            <div style="height: 500px; background: #f0f0f0; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+                <i class="fas fa-map fa-3x text-muted mb-3"></i>
+                <h5>Google Maps Integration</h5>
+                <p class="text-muted">Add your Google Maps API key to enable interactive mapping</p>
+                <small class="text-muted">API Key needed in: templates/stages/map_view.html</small>
+            </div>
+        `;
+    }
+}, 2000);
+</script>
+{% endblock %}

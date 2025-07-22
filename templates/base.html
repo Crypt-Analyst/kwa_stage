@@ -1,0 +1,851 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}KwaStage - Boda Boda Welfare & Emergency Support System{% endblock %}</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/floating-social.css' %}">
+    
+    <!-- Sidebar CSS for authenticated pages -->
+    {% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    <style>
+        /* Fixed Header */
+        header {
+            position: fixed !important;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1001;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        /* Body padding to account for fixed header */
+        body {
+            padding-top: 95px;
+        }
+
+        .dashboard-sidebar {
+            position: fixed;
+            top: 95px;
+            left: 0;
+            width: 280px;
+            height: calc(100vh - 95px);
+            background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+            color: white;
+            z-index: 1000;
+            overflow-y: auto;
+            overflow-x: hidden;
+            box-shadow: 2px 0 10px rgba(0, 0, 0, 0.1);
+            scrollbar-width: thin;
+            scrollbar-color: rgba(255, 255, 255, 0.3) transparent;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 3px;
+        }
+
+        .dashboard-sidebar::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        .sidebar-header {
+            padding: 1.5rem 1.5rem 1rem;
+            text-align: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .sidebar-header h4 {
+            font-size: 1.3rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            color: var(--secondary-color);
+        }
+
+        .sidebar-header p {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin: 0;
+        }
+
+        .sidebar-menu {
+            padding: 0.5rem 0 2rem 0;
+        }
+
+        .menu-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .menu-section-title {
+            padding: 0.5rem 1.5rem;
+            font-size: 0.85rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.6);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            margin-bottom: 0.5rem;
+        }
+
+        .menu-item {
+            display: flex;
+            align-items: center;
+            padding: 0.6rem 1.5rem;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            font-size: 0.9rem;
+        }
+
+        .menu-item:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            text-decoration: none;
+            border-left-color: var(--secondary-color);
+        }
+
+        .menu-item.active {
+            background: rgba(255, 255, 255, 0.15);
+            color: white;
+            border-left-color: var(--secondary-color);
+        }
+
+        .menu-item i {
+            width: 20px;
+            margin-right: 0.75rem;
+            font-size: 1rem;
+        }
+
+        /* Main content adjustment */
+        #content.with-sidebar {
+            margin-left: 280px;
+            width: calc(100% - 280px);
+            box-sizing: border-box;
+            padding-top: 0;
+        }
+
+        /* Mobile responsive */
+        @media (max-width: 768px) {
+            body {
+                padding-top: 120px;
+            }
+            
+            .dashboard-sidebar {
+                left: -280px;
+                transition: left 0.3s ease;
+                top: 120px;
+                height: calc(100vh - 120px);
+            }
+            
+            .dashboard-sidebar.show {
+                left: 0;
+            }
+            
+            #content.with-sidebar {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+    </style>
+    {% endif %}
+    
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <!-- Header -->
+    <header class="bg-primary text-white py-3">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <!-- Sidebar toggle for mobile -->
+                    {% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+                    <button class="btn btn-outline-light btn-sm me-2 d-lg-none" type="button" id="sidebarToggle">
+                        <i class="fas fa-bars"></i>
+                    </button>
+                    {% endif %}
+                    
+                    <h3 class="mb-0 d-inline">
+                        <i class="fas fa-motorcycle me-2"></i>
+                        KwaStage
+                    </h3>
+                    <br>
+                    <small class="text-light">Boda Boda is Family - Don't Forget That</small>
+                </div>
+                <div class="col-md-6 text-end">
+                    {% if user.is_authenticated %}
+                        <div class="dropdown">
+                            <button class="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <i class="fas fa-user"></i> {{ user.get_full_name|default:user.username }}
+                            </button>
+                            <ul class="dropdown-menu">
+                                <li><a class="dropdown-item" href="{% url 'dashboard' %}"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                                <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'authentication:logout' %}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                            </ul>
+                        </div>
+                    {% else %}
+                        <a href="{% url 'login' %}" class="btn btn-outline-light me-2">
+                            <i class="fas fa-sign-in-alt"></i> Login
+                        </a>
+                        <a href="{% url 'register' %}" class="btn btn-light">
+                            <i class="fas fa-user-plus"></i> Register
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sidebar for authenticated users (only on home page) -->
+    {% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    <!-- Dashboard Sidebar -->
+    <div class="dashboard-sidebar" id="dashboardSidebar">
+        <div class="sidebar-header">
+            <h4>Welfare Dashboard</h4>
+            <p>Boda Boda Family</p>
+        </div>
+
+        <nav class="sidebar-menu">
+            <!-- Overview -->
+            <div class="menu-section">
+                <div class="menu-section-title">Overview</div>
+                <a href="{% url 'dashboard' %}" class="menu-item {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}">
+                    <i class="fas fa-tachometer-alt"></i>
+                    Dashboard
+                </a>
+                <a href="{% url 'analytics' %}" class="menu-item {% if request.resolver_match.url_name == 'analytics' %}active{% endif %}">
+                    <i class="fas fa-chart-bar"></i>
+                    Analytics
+                </a>
+            </div>
+
+            <!-- Members -->
+            <div class="menu-section">
+                <div class="menu-section-title">Members</div>
+                <a href="{% url 'members:list' %}" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    All Members
+                </a>
+                <a href="{% url 'members:add' %}" class="menu-item">
+                    <i class="fas fa-user-plus"></i>
+                    Add Member
+                </a>
+                <a href="{% url 'stages:list' %}" class="menu-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    Stages
+                </a>
+                <a href="{% url 'members:leadership' %}" class="menu-item">
+                    <i class="fas fa-crown"></i>
+                    Leadership
+                </a>
+            </div>
+
+            <!-- Finance -->
+            <div class="menu-section">
+                <div class="menu-section-title">Finance</div>
+                <a href="{% url 'contributions:list' %}" class="menu-item">
+                    <i class="fas fa-money-bill-wave"></i>
+                    Contributions
+                </a>
+                <a href="{% url 'loans:list' %}" class="menu-item">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    Loans
+                </a>
+                <a href="{% url 'contributions:reports' %}" class="menu-item">
+                    <i class="fas fa-chart-line"></i>
+                    Financial Reports
+                </a>
+            </div>
+
+            <!-- Emergency -->
+            <div class="menu-section">
+                <div class="menu-section-title">Emergency</div>
+                <a href="{% url 'emergency:cases' %}" class="menu-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Emergency Cases
+                </a>
+                <a href="{% url 'accidents:list' %}" class="menu-item">
+                    <i class="fas fa-ambulance"></i>
+                    Accident Reports
+                </a>
+                <a href="{% url 'emergency:family_support' %}" class="menu-item">
+                    <i class="fas fa-heart"></i>
+                    Family Support
+                </a>
+            </div>
+
+            <!-- Bikes -->
+            <div class="menu-section">
+                <div class="menu-section-title">Bikes</div>
+                <a href="{% url 'bikes:list' %}" class="menu-item">
+                    <i class="fas fa-motorcycle"></i>
+                    Bike Registry
+                </a>
+                <a href="{% url 'bikes:lost_tracking' %}" class="menu-item">
+                    <i class="fas fa-search"></i>
+                    Lost Bike Tracking
+                </a>
+            </div>
+
+            <!-- Communication -->
+            <div class="menu-section">
+                <div class="menu-section-title">Communication</div>
+                <a href="{% url 'communication:notifications' %}" class="menu-item">
+                    <i class="fas fa-bell"></i>
+                    Notifications
+                </a>
+                <a href="{% url 'communication:sms_alerts' %}" class="menu-item">
+                    <i class="fas fa-sms"></i>
+                    SMS Alerts
+                </a>
+                <a href="{% url 'communication:announcements' %}" class="menu-item">
+                    <i class="fas fa-bullhorn"></i>
+                    Announcements
+                </a>
+            </div>
+
+            <!-- Social -->
+            <div class="menu-section">
+                <div class="menu-section-title">Social</div>
+                <a href="{% url 'social:feed' %}" class="menu-item">
+                    <i class="fas fa-home"></i>
+                    Social Feed
+                </a>
+                <a href="{% url 'social:friends' %}" class="menu-item">
+                    <i class="fas fa-users"></i>
+                    Friends
+                </a>
+                <a href="{% url 'social:group_chats' %}" class="menu-item">
+                    <i class="fas fa-comments"></i>
+                    Group Chats
+                </a>
+                <a href="{% url 'social:stories' %}" class="menu-item">
+                    <i class="fas fa-camera"></i>
+                    Stories
+                </a>
+                <a href="{% url 'social:notifications' %}" class="menu-item">
+                    <i class="fas fa-bell"></i>
+                    Social Notifications
+                </a>
+            </div>
+
+            <!-- Safety & Compliance -->
+            <div class="menu-section">
+                <div class="menu-section-title">Safety & Compliance</div>
+                <a href="{% url 'safety:dashboard' %}" class="menu-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Safety Dashboard
+                </a>
+                <a href="{% url 'safety:insurance_list' %}" class="menu-item">
+                    <i class="fas fa-umbrella"></i>
+                    Insurance
+                </a>
+                <a href="{% url 'safety:license_list' %}" class="menu-item">
+                    <i class="fas fa-id-card"></i>
+                    License & Permits
+                </a>
+                <a href="{% url 'safety:training_list' %}" class="menu-item">
+                    <i class="fas fa-graduation-cap"></i>
+                    Safety Training
+                </a>
+                <a href="{% url 'safety:incident_list' %}" class="menu-item">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    Safety Incidents
+                </a>
+            </div>
+
+            <!-- Payments & Digital Services -->
+            <div class="menu-section">
+                <div class="menu-section-title">Payments & Digital</div>
+                <a href="{% url 'payments:dashboard' %}" class="menu-item">
+                    <i class="fas fa-wallet"></i>
+                    Payments Dashboard
+                </a>
+                <a href="{% url 'payments:wallet_transactions' %}" class="menu-item">
+                    <i class="fas fa-credit-card"></i>
+                    E-Wallet
+                </a>
+                <a href="{% url 'payments:digital_tokens' %}" class="menu-item">
+                    <i class="fas fa-coins"></i>
+                    Digital Tokens
+                </a>
+                <a href="{% url 'payments:payment_methods' %}" class="menu-item">
+                    <i class="fas fa-mobile-alt"></i>
+                    Payment Methods
+                </a>
+                <a href="{% url 'payments:payment_history' %}" class="menu-item">
+                    <i class="fas fa-history"></i>
+                    Payment History
+                </a>
+            </div>
+
+            <!-- Settings -->
+            <div class="menu-section">
+                <div class="menu-section-title">Settings</div>
+                <a href="{% url 'authentication:security_settings' %}" class="menu-item">
+                    <i class="fas fa-shield-alt"></i>
+                    Security Settings
+                </a>
+                <a href="{% url 'settings' %}" class="menu-item">
+                    <i class="fas fa-cog"></i>
+                    System Settings
+                </a>
+                <a href="{% url 'profile_settings' %}" class="menu-item">
+                    <i class="fas fa-user-cog"></i>
+                    Profile Settings
+                </a>
+            </div>
+        </nav>
+    </div>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div id="content" class="{% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}with-sidebar{% endif %}">
+        <!-- Messages -->
+        {% if messages %}
+        <div class="container mt-3">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <!-- Page Content -->
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-dark text-white py-4 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="fas fa-motorcycle"></i> Boda Boda Welfare</h5>
+                    <p class="mb-0">Supporting the Boda Boda community with comprehensive welfare and emergency support services.</p>
+                    <p class="mt-2"><strong>Boda Boda is Family - Don't Forget That</strong></p>
+                </div>
+                <div class="col-md-4">
+                    <h6>Quick Links</h6>
+                    <ul class="list-unstyled">
+                        <li><a href="{% url 'home' %}" class="text-light">Home</a></li>
+                        {% if user.is_authenticated %}
+                        <li><a href="{% url 'dashboard' %}" class="text-light">Dashboard</a></li>
+                        {% else %}
+                        <li><a href="{% url 'login' %}" class="text-light">Login</a></li>
+                        <li><a href="{% url 'register' %}" class="text-light">Register</a></li>
+                        {% endif %}
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h6>Contact Information</h6>
+                    <p class="mb-1"><i class="fas fa-phone"></i> +254 700 000 000</p>
+                    <p class="mb-1"><i class="fas fa-envelope"></i> support@bodabodawelfare.ke</p>
+                    <p class="mb-1"><i class="fas fa-map-marker-alt"></i> Nairobi, Kenya</p>
+                    <div class="mt-2">
+                        <a href="#" class="text-light me-3"><i class="fab fa-facebook"></i></a>
+                        <a href="#" class="text-light me-3"><i class="fab fa-twitter"></i></a>
+                        <a href="#" class="text-light"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+            </div>
+            <hr class="my-3">
+            <div class="row">
+                <div class="col-md-6">
+                    <p class="mb-0">&copy; {% now "Y" %} Boda Boda Welfare System. All rights reserved.</p>
+                </div>
+                <div class="col-md-6 text-end">
+                    <small>Developed with ❤️ for the Boda Boda Community</small>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JS -->
+    <script src="{% static 'js/main.js' %}"></script>
+    
+    <!-- Sidebar toggle script for authenticated pages -->
+    {% if user.is_authenticated and request.resolver_match.url_name != 'home' and request.resolver_match.url_name != 'login' and request.resolver_match.url_name != 'register' %}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const sidebarToggle = document.getElementById('sidebarToggle');
+            const sidebar = document.getElementById('dashboardSidebar');
+            
+            if (sidebarToggle && sidebar) {
+                sidebarToggle.addEventListener('click', function() {
+                    sidebar.classList.toggle('show');
+                });
+                
+                // Close sidebar when clicking outside on mobile
+                document.addEventListener('click', function(event) {
+                    if (window.innerWidth <= 768) {
+                        if (!sidebar.contains(event.target) && !sidebarToggle.contains(event.target)) {
+                            sidebar.classList.remove('show');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+    {% endif %}
+    
+    <!-- Floating Social Button -->
+    {% if user.is_authenticated %}
+    <div id="floating-social-btn" class="floating-social-btn" onclick="toggleSocialPanel()">
+        <i class="fas fa-comments"></i>
+        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+    </div>
+    
+    <!-- Social Quick Panel -->
+    <div id="social-quick-panel" class="social-quick-panel" style="display: none;">
+        <div class="social-panel-header">
+            <h5><i class="fas fa-comments"></i> Social Hub</h5>
+            <button class="btn-close-panel" onclick="toggleSocialPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="social-panel-body">
+            <div class="quick-actions">
+                <button class="quick-action-btn" onclick="openSocialModal('feed')">
+                    <i class="fas fa-home"></i>
+                    <span>Feed</span>
+                </button>
+                <button class="quick-action-btn" onclick="openSocialModal('chat')">
+                    <i class="fas fa-comment-alt"></i>
+                    <span>Chat</span>
+                </button>
+                <button class="quick-action-btn" onclick="openSocialModal('friends')">
+                    <i class="fas fa-users"></i>
+                    <span>Friends</span>
+                </button>
+                <button class="quick-action-btn" onclick="openSocialModal('notifications')">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="mini-badge" id="mini-notification-count" style="display: none;">0</span>
+                </button>
+            </div>
+            <div class="recent-activity">
+                <h6>Recent Activity</h6>
+                <div id="recent-notifications">
+                    <p class="text-muted">No recent notifications</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Social Modals -->
+    <!-- Feed Modal -->
+    <div class="modal fade" id="feedModal" tabindex="-1" aria-labelledby="feedModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="feedModalLabel">
+                        <i class="fas fa-home"></i> Social Feed
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="feedModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading social feed...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Chat Modal -->
+    <div class="modal fade" id="chatModal" tabindex="-1" aria-labelledby="chatModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="chatModalLabel">
+                        <i class="fas fa-comment-alt"></i> Group Chats
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="chatModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading group chats...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Friends Modal -->
+    <div class="modal fade" id="friendsModal" tabindex="-1" aria-labelledby="friendsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="friendsModalLabel">
+                        <i class="fas fa-users"></i> Friends
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="friendsModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading friends...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Modal -->
+    <div class="modal fade" id="notificationsModal" tabindex="-1" aria-labelledby="notificationsModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="notificationsModalLabel">
+                        <i class="fas fa-bell"></i> Notifications
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body" id="notificationsModalBody">
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <p class="mt-2">Loading notifications...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    
+    <script>
+        // Floating Social Button functionality
+        function toggleSocialPanel() {
+            const panel = document.getElementById('social-quick-panel');
+            if (panel.style.display === 'none' || panel.style.display === '') {
+                panel.style.display = 'block';
+                loadNotifications();
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+        
+        // Open social modals
+        function openSocialModal(type) {
+            // Close the quick panel first
+            document.getElementById('social-quick-panel').style.display = 'none';
+            
+            let modalId, url;
+            switch(type) {
+                case 'feed':
+                    modalId = 'feedModal';
+                    url = '{% url "social:feed" %}';
+                    break;
+                case 'chat':
+                    modalId = 'chatModal';
+                    url = '{% url "social:group_chats" %}';
+                    break;
+                case 'friends':
+                    modalId = 'friendsModal';
+                    url = '{% url "social:friends" %}';
+                    break;
+                case 'notifications':
+                    modalId = 'notificationsModal';
+                    url = '{% url "social:notifications" %}';
+                    break;
+                default:
+                    return;
+            }
+            
+            // Show modal
+            const modal = new bootstrap.Modal(document.getElementById(modalId));
+            modal.show();
+            
+            // Load content via AJAX
+            loadModalContent(modalId, url);
+        }
+        
+        function loadModalContent(modalId, url) {
+            const modalBody = document.getElementById(modalId.replace('Modal', 'ModalBody'));
+            
+            fetch(url + '?modal=1', {
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest',
+                }
+            })
+            .then(response => response.text())
+            .then(html => {
+                modalBody.innerHTML = html;
+                // Initialize any JavaScript needed for the loaded content
+                initializeModalContent(modalId);
+            })
+            .catch(error => {
+                modalBody.innerHTML = `
+                    <div class="alert alert-danger">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        Error loading content. Please try again.
+                        <button class="btn btn-sm btn-outline-danger ms-2" onclick="loadModalContent('${modalId}', '${url}')">
+                            <i class="fas fa-redo"></i> Retry
+                        </button>
+                    </div>
+                `;
+            });
+        }
+        
+        function initializeModalContent(modalId) {
+            // Initialize any specific functionality for loaded content
+            if (modalId === 'feedModal') {
+                // Initialize feed-specific JS
+                initializeFeed();
+            } else if (modalId === 'chatModal') {
+                // Initialize chat-specific JS
+                initializeChat();
+            } else if (modalId === 'friendsModal') {
+                // Initialize friends-specific JS
+                initializeFriends();
+            } else if (modalId === 'notificationsModal') {
+                // Initialize notifications-specific JS
+                initializeNotifications();
+            }
+        }
+        
+        function initializeFeed() {
+            // Handle post interactions
+            const likeButtons = document.querySelectorAll('.like-btn');
+            likeButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const postId = this.dataset.postId;
+                    toggleLike(postId);
+                });
+            });
+        }
+        
+        function initializeChat() {
+            // Handle chat functionality
+            const chatItems = document.querySelectorAll('.chat-item');
+            chatItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const chatId = this.dataset.chatId;
+                    openChat(chatId);
+                });
+            });
+        }
+        
+        function initializeFriends() {
+            // Handle friend request buttons
+            const friendButtons = document.querySelectorAll('.friend-action-btn');
+            friendButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const action = this.dataset.action;
+                    const memberId = this.dataset.memberId;
+                    handleFriendAction(action, memberId);
+                });
+            });
+        }
+        
+        function initializeNotifications() {
+            // Handle notification actions
+            const markReadButtons = document.querySelectorAll('.mark-read-btn');
+            markReadButtons.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const notificationId = this.dataset.notificationId;
+                    markNotificationRead(notificationId);
+                });
+            });
+        }
+        
+        // Mock function to simulate notification loading
+        function loadNotifications() {
+            // This would typically make an AJAX call to get real notifications
+            setTimeout(() => {
+                updateNotificationCount(3); // Example: 3 notifications
+                updateRecentActivity([
+                    'New message from John Doe',
+                    'Stage meeting reminder',
+                    'Payment received'
+                ]);
+            }, 500);
+        }
+        
+        function updateNotificationCount(count) {
+            const badge = document.getElementById('notification-badge');
+            const miniBadge = document.getElementById('mini-notification-count');
+            
+            if (count > 0) {
+                badge.textContent = count;
+                badge.style.display = 'flex';
+                if (miniBadge) {
+                    miniBadge.textContent = count;
+                    miniBadge.style.display = 'flex';
+                }
+            } else {
+                badge.style.display = 'none';
+                if (miniBadge) {
+                    miniBadge.style.display = 'none';
+                }
+            }
+        }
+        
+        function updateRecentActivity(notifications) {
+            const container = document.getElementById('recent-notifications');
+            if (notifications && notifications.length > 0) {
+                container.innerHTML = notifications.map(notification => 
+                    `<div class="notification-item" style="padding: 5px 0; border-bottom: 1px solid #eee; font-size: 0.85rem;">
+                        <i class="fas fa-bell text-primary me-2"></i>
+                        ${notification}
+                    </div>`
+                ).join('');
+            } else {
+                container.innerHTML = '<p class="text-muted">No recent notifications</p>';
+            }
+        }
+        
+        // Close panel when clicking outside
+        document.addEventListener('click', function(event) {
+            const panel = document.getElementById('social-quick-panel');
+            const btn = document.getElementById('floating-social-btn');
+            
+            if (panel && btn && !panel.contains(event.target) && !btn.contains(event.target)) {
+                panel.style.display = 'none';
+            }
+        });
+        
+        // Initialize notification count on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Simulate having some notifications
+            updateNotificationCount(3);
+        });
+    </script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

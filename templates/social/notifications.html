@@ -1,0 +1,269 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Social Notifications{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-bell"></i> Social Notifications</h1>
+        <div>
+            {% if unread_count > 0 %}
+            <a href="?mark_read=1" class="btn btn-primary">
+                <i class="fas fa-check"></i> Mark All Read ({{ unread_count }})
+            </a>
+            {% endif %}
+            <a href="{% url 'social:feed' %}" class="btn btn-outline-primary">
+                <i class="fas fa-arrow-left"></i> Back to Feed
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="notifications-container">
+            {% if notifications %}
+                {% for notification in notifications %}
+                <div class="notification-item {% if not notification.is_read %}unread{% endif %}">
+                    <div class="notification-avatar">
+                        {% if notification.sender.profile_photo %}
+                            <img src="{{ notification.sender.profile_photo.url }}" alt="{{ notification.sender.user.get_full_name }}">
+                        {% else %}
+                            <div class="avatar-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="notification-content">
+                        <div class="notification-message">
+                            {{ notification.message }}
+                        </div>
+                        
+                        <div class="notification-meta">
+                            <span class="time">
+                                <i class="fas fa-clock"></i>
+                                {{ notification.created_at|timesince }} ago
+                            </span>
+                            
+                            {% if notification.notification_type == 'like' or notification.notification_type == 'comment' %}
+                            <a href="{% url 'social:feed' %}#post-{{ notification.post.id }}" class="view-post">
+                                <i class="fas fa-external-link-alt"></i> View Post
+                            </a>
+                            {% elif notification.notification_type == 'friend_request' %}
+                            <a href="{% url 'social:friends' %}" class="view-friends">
+                                <i class="fas fa-users"></i> View Friends
+                            </a>
+                            {% elif notification.notification_type == 'message' %}
+                            <a href="{% url 'social:chat_detail' notification.group.id %}" class="view-chat">
+                                <i class="fas fa-comments"></i> View Chat
+                            </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="notification-icon">
+                        {% if notification.notification_type == 'like' %}
+                            <i class="fas fa-heart text-danger"></i>
+                        {% elif notification.notification_type == 'comment' %}
+                            <i class="fas fa-comment text-primary"></i>
+                        {% elif notification.notification_type == 'friend_request' %}
+                            <i class="fas fa-user-plus text-success"></i>
+                        {% elif notification.notification_type == 'friend_accepted' %}
+                            <i class="fas fa-user-check text-success"></i>
+                        {% elif notification.notification_type == 'message' %}
+                            <i class="fas fa-envelope text-info"></i>
+                        {% else %}
+                            <i class="fas fa-bell text-secondary"></i>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+                
+                <!-- Pagination -->
+                {% if notifications.has_other_pages %}
+                <div class="pagination-container">
+                    <nav aria-label="Notifications pagination">
+                        <ul class="pagination justify-content-center">
+                            {% if notifications.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.previous_page_number }}">
+                                        <i class="fas fa-chevron-left"></i> Previous
+                                    </a>
+                                </li>
+                            {% endif %}
+                            
+                            <li class="page-item active">
+                                <span class="page-link">
+                                    Page {{ notifications.number }} of {{ notifications.paginator.num_pages }}
+                                </span>
+                            </li>
+                            
+                            {% if notifications.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ notifications.next_page_number }}">
+                                        Next <i class="fas fa-chevron-right"></i>
+                                    </a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+                {% endif %}
+            {% else %}
+                <div class="empty-state">
+                    <div class="empty-icon">
+                        <i class="fas fa-bell-slash"></i>
+                    </div>
+                    <h3>No Notifications</h3>
+                    <p>You don't have any social notifications yet.</p>
+                    <a href="{% url 'social:feed' %}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Go to Feed
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style>
+.notifications-container {
+    max-width: 800px;
+    margin: 0 auto;
+}
+
+.notification-item {
+    display: flex;
+    align-items: center;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    margin-bottom: 1rem;
+    transition: all 0.3s ease;
+    border-left: 4px solid transparent;
+}
+
+.notification-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+}
+
+.notification-item.unread {
+    border-left-color: var(--primary-color);
+    background: linear-gradient(to right, rgba(44, 90, 160, 0.05), white);
+}
+
+.notification-avatar {
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    overflow: hidden;
+    margin-right: 1rem;
+    flex-shrink: 0;
+}
+
+.notification-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.avatar-placeholder {
+    width: 100%;
+    height: 100%;
+    background: var(--light-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--dark-color);
+    font-size: 1.2rem;
+}
+
+.notification-content {
+    flex-grow: 1;
+}
+
+.notification-message {
+    font-weight: 500;
+    color: var(--dark-color);
+    margin-bottom: 0.5rem;
+}
+
+.notification-meta {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    font-size: 0.9rem;
+    color: #6c757d;
+}
+
+.notification-meta .time i {
+    margin-right: 0.25rem;
+}
+
+.notification-meta a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+}
+
+.notification-meta a:hover {
+    text-decoration: underline;
+}
+
+.notification-icon {
+    flex-shrink: 0;
+    margin-left: 1rem;
+    font-size: 1.2rem;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1rem;
+}
+
+.empty-state h3 {
+    color: var(--dark-color);
+    margin-bottom: 1rem;
+}
+
+.empty-state p {
+    color: #6c757d;
+    margin-bottom: 2rem;
+}
+
+.pagination-container {
+    margin-top: 2rem;
+}
+
+@media (max-width: 768px) {
+    .notification-item {
+        padding: 1rem;
+    }
+    
+    .notification-avatar {
+        width: 40px;
+        height: 40px;
+    }
+    
+    .notification-meta {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.5rem;
+    }
+    
+    .notification-icon {
+        margin-left: 0.5rem;
+    }
+}
+</style>
+{% endblock %}

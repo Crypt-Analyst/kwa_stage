@@ -1,0 +1,656 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Lost Bike Tracking - KwaStage{% endblock %}
+
+{% block content %}
+<div class="content-header">
+    <div class="header-info">
+        <h1><i class="fas fa-search-location"></i> Lost Bike Tracking</h1>
+        <p>Track and recover stolen or lost motorcycles</p>
+    </div>
+    <div class="header-actions">
+        <a href="{% url 'bikes:list' %}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Bikes
+        </a>
+        <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#reportLostModal">
+            <i class="fas fa-exclamation-triangle"></i> Report Lost Bike
+        </button>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Search & Filter Panel -->
+    <div class="col-md-3">
+        <div class="card">
+            <div class="card-header">
+                <h5><i class="fas fa-filter"></i> Search Filters</h5>
+            </div>
+            <div class="card-body">
+                <form method="GET" id="searchForm">
+                    <div class="mb-3">
+                        <label class="form-label">Registration Number</label>
+                        <input type="text" class="form-control" name="registration" 
+                               placeholder="e.g., KCA 123A" value="{{ request.GET.registration }}">
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Make/Brand</label>
+                        <select class="form-select" name="make">
+                            <option value="">All Makes</option>
+                            <option value="Honda">Honda</option>
+                            <option value="Yamaha">Yamaha</option>
+                            <option value="TVS">TVS</option>
+                            <option value="Suzuki">Suzuki</option>
+                            <option value="Bajaj">Bajaj</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">County Lost</label>
+                        <select class="form-select" name="county">
+                            <option value="">All Counties</option>
+                            <option value="baringo">Baringo</option>
+                            <option value="bomet">Bomet</option>
+                            <option value="bungoma">Bungoma</option>
+                            <option value="busia">Busia</option>
+                            <option value="elgeyo_marakwet">Elgeyo-Marakwet</option>
+                            <option value="embu">Embu</option>
+                            <option value="garissa">Garissa</option>
+                            <option value="homa_bay">Homa Bay</option>
+                            <option value="isiolo">Isiolo</option>
+                            <option value="kajiado">Kajiado</option>
+                            <option value="kakamega">Kakamega</option>
+                            <option value="kericho">Kericho</option>
+                            <option value="kiambu">Kiambu</option>
+                            <option value="kilifi">Kilifi</option>
+                            <option value="kirinyaga">Kirinyaga</option>
+                            <option value="kisii">Kisii</option>
+                            <option value="kisumu">Kisumu</option>
+                            <option value="kitui">Kitui</option>
+                            <option value="kwale">Kwale</option>
+                            <option value="laikipia">Laikipia</option>
+                            <option value="lamu">Lamu</option>
+                            <option value="machakos">Machakos</option>
+                            <option value="makueni">Makueni</option>
+                            <option value="mandera">Mandera</option>
+                            <option value="marsabit">Marsabit</option>
+                            <option value="meru">Meru</option>
+                            <option value="migori">Migori</option>
+                            <option value="mombasa">Mombasa</option>
+                            <option value="muranga">Murang'a</option>
+                            <option value="nairobi">Nairobi</option>
+                            <option value="nakuru">Nakuru</option>
+                            <option value="nandi">Nandi</option>
+                            <option value="narok">Narok</option>
+                            <option value="nyamira">Nyamira</option>
+                            <option value="nyandarua">Nyandarua</option>
+                            <option value="nyeri">Nyeri</option>
+                            <option value="samburu">Samburu</option>
+                            <option value="siaya">Siaya</option>
+                            <option value="taita_taveta">Taita-Taveta</option>
+                            <option value="tana_river">Tana River</option>
+                            <option value="tharaka_nithi">Tharaka-Nithi</option>
+                            <option value="trans_nzoia">Trans Nzoia</option>
+                            <option value="turkana">Turkana</option>
+                            <option value="uasin_gishu">Uasin Gishu</option>
+                            <option value="vihiga">Vihiga</option>
+                            <option value="wajir">Wajir</option>
+                            <option value="west_pokot">West Pokot</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Status</label>
+                        <select class="form-select" name="status">
+                            <option value="">All Status</option>
+                            <option value="reported">Recently Reported</option>
+                            <option value="investigating">Under Investigation</option>
+                            <option value="found">Found</option>
+                            <option value="recovered">Recovered</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Date Range</label>
+                        <select class="form-select" name="date_range">
+                            <option value="">All Time</option>
+                            <option value="today">Today</option>
+                            <option value="week">This Week</option>
+                            <option value="month">This Month</option>
+                            <option value="3months">Last 3 Months</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                    <a href="{% url 'bikes:lost_tracking' %}" class="btn btn-outline-secondary w-100 mt-2">
+                        <i class="fas fa-times"></i> Clear Filters
+                    </a>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Stats -->
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5><i class="fas fa-chart-pie"></i> Quick Stats</h5>
+            </div>
+            <div class="card-body">
+                <div class="stat-item">
+                    <div class="stat-number text-danger">23</div>
+                    <div class="stat-label">Active Cases</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-success">89</div>
+                    <div class="stat-label">Recovered</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-warning">12</div>
+                    <div class="stat-label">Under Investigation</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-number text-info">67%</div>
+                    <div class="stat-label">Recovery Rate</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lost Bikes List -->
+    <div class="col-md-9">
+        <div class="card">
+            <div class="card-header">
+                <div class="d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-motorcycle"></i> Lost Bikes Registry</h5>
+                    <div class="view-toggle">
+                        <button class="btn btn-sm btn-outline-primary active" onclick="toggleView('list')">
+                            <i class="fas fa-list"></i> List
+                        </button>
+                        <button class="btn btn-sm btn-outline-primary" onclick="toggleView('grid')">
+                            <i class="fas fa-th"></i> Grid
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="listView">
+                    <div class="lost-bike-item">
+                        <div class="bike-image">
+                            <img src="{% static 'images/default-bike.jpg' %}" alt="Lost Bike" class="img-fluid">
+                            <div class="status-badge bg-danger">Lost</div>
+                        </div>
+                        <div class="bike-details">
+                            <h6>Honda CB 150R</h6>
+                            <p><strong>Reg:</strong> KCA 123A</p>
+                            <p><strong>Color:</strong> Red & Black</p>
+                            <p><strong>Year:</strong> 2022</p>
+                            <p><strong>Lost Date:</strong> July 20, 2025</p>
+                            <p><strong>Location:</strong> Kiambu, Kikuyu</p>
+                        </div>
+                        <div class="bike-owner">
+                            <h6>Owner: John Kamau</h6>
+                            <p><strong>Phone:</strong> +254712345678</p>
+                            <p><strong>Stage:</strong> Kikuyu Main</p>
+                            <p><strong>Member ID:</strong> MEM001</p>
+                        </div>
+                        <div class="bike-actions">
+                            <div class="status">
+                                <span class="badge bg-danger">Active Case</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bikeDetailModal">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="reportSighting(1)">
+                                    <i class="fas fa-map-marker-alt"></i> Report Sighting
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="shareAlert(1)">
+                                    <i class="fas fa-share"></i> Share Alert
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lost-bike-item">
+                        <div class="bike-image">
+                            <img src="{% static 'images/default-bike.jpg' %}" alt="Lost Bike" class="img-fluid">
+                            <div class="status-badge bg-warning">Investigating</div>
+                        </div>
+                        <div class="bike-details">
+                            <h6>Yamaha YBR 125</h6>
+                            <p><strong>Reg:</strong> KBA 456B</p>
+                            <p><strong>Color:</strong> Blue</p>
+                            <p><strong>Year:</strong> 2021</p>
+                            <p><strong>Lost Date:</strong> July 18, 2025</p>
+                            <p><strong>Location:</strong> Nairobi, CBD</p>
+                        </div>
+                        <div class="bike-owner">
+                            <h6>Owner: Mary Wanjiku</h6>
+                            <p><strong>Phone:</strong> +254723456789</p>
+                            <p><strong>Stage:</strong> Railways Stage</p>
+                            <p><strong>Member ID:</strong> MEM002</p>
+                        </div>
+                        <div class="bike-actions">
+                            <div class="status">
+                                <span class="badge bg-warning">Under Investigation</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bikeDetailModal">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="reportSighting(2)">
+                                    <i class="fas fa-map-marker-alt"></i> Report Sighting
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="shareAlert(2)">
+                                    <i class="fas fa-share"></i> Share Alert
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="lost-bike-item">
+                        <div class="bike-image">
+                            <img src="{% static 'images/default-bike.jpg' %}" alt="Found Bike" class="img-fluid">
+                            <div class="status-badge bg-success">Found</div>
+                        </div>
+                        <div class="bike-details">
+                            <h6>TVS Apache 160</h6>
+                            <p><strong>Reg:</strong> KCC 789C</p>
+                            <p><strong>Color:</strong> Black & Orange</p>
+                            <p><strong>Year:</strong> 2023</p>
+                            <p><strong>Lost Date:</strong> July 15, 2025</p>
+                            <p><strong>Found Date:</strong> July 21, 2025</p>
+                            <p><strong>Location:</strong> Thika, Town</p>
+                        </div>
+                        <div class="bike-owner">
+                            <h6>Owner: Peter Kimani</h6>
+                            <p><strong>Phone:</strong> +254734567890</p>
+                            <p><strong>Stage:</strong> Thika Main</p>
+                            <p><strong>Member ID:</strong> MEM003</p>
+                        </div>
+                        <div class="bike-actions">
+                            <div class="status">
+                                <span class="badge bg-success">Recovered</span>
+                            </div>
+                            <div class="action-buttons">
+                                <button class="btn btn-sm btn-primary" data-bs-toggle="modal" data-bs-target="#bikeDetailModal">
+                                    <i class="fas fa-eye"></i> View Details
+                                </button>
+                                <button class="btn btn-sm btn-info" onclick="viewRecovery(3)">
+                                    <i class="fas fa-check-circle"></i> Recovery Details
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Lost bikes pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item disabled">
+                    <a class="page-link" href="#" aria-label="Previous">
+                        <span aria-hidden="true">&laquo;</span>
+                    </a>
+                </li>
+                <li class="page-item active"><a class="page-link" href="#">1</a></li>
+                <li class="page-item"><a class="page-link" href="#">2</a></li>
+                <li class="page-item"><a class="page-link" href="#">3</a></li>
+                <li class="page-item">
+                    <a class="page-link" href="#" aria-label="Next">
+                        <span aria-hidden="true">&raquo;</span>
+                    </a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</div>
+
+<!-- Report Lost Bike Modal -->
+<div class="modal fade" id="reportLostModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Report Lost Bike</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="reportLostForm">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Registration Number *</label>
+                                <input type="text" class="form-control" name="registration" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">NTSA Verification</label>
+                                <button type="button" class="btn btn-outline-primary" onclick="verifyNTSA()">
+                                    <i class="fas fa-shield-alt"></i> Verify with NTSA
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">Date & Time Lost *</label>
+                                <input type="datetime-local" class="form-control" name="lost_datetime" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label class="form-label">County *</label>
+                                <select class="form-select" name="county" required>
+                                    <option value="">Select County</option>
+                                    <option value="baringo">Baringo</option>
+                                    <option value="bomet">Bomet</option>
+                                    <option value="bungoma">Bungoma</option>
+                                    <option value="busia">Busia</option>
+                                    <option value="elgeyo_marakwet">Elgeyo-Marakwet</option>
+                                    <option value="embu">Embu</option>
+                                    <option value="garissa">Garissa</option>
+                                    <option value="homa_bay">Homa Bay</option>
+                                    <option value="isiolo">Isiolo</option>
+                                    <option value="kajiado">Kajiado</option>
+                                    <option value="kakamega">Kakamega</option>
+                                    <option value="kericho">Kericho</option>
+                                    <option value="kiambu">Kiambu</option>
+                                    <option value="kilifi">Kilifi</option>
+                                    <option value="kirinyaga">Kirinyaga</option>
+                                    <option value="kisii">Kisii</option>
+                                    <option value="kisumu">Kisumu</option>
+                                    <option value="kitui">Kitui</option>
+                                    <option value="kwale">Kwale</option>
+                                    <option value="laikipia">Laikipia</option>
+                                    <option value="lamu">Lamu</option>
+                                    <option value="machakos">Machakos</option>
+                                    <option value="makueni">Makueni</option>
+                                    <option value="mandera">Mandera</option>
+                                    <option value="marsabit">Marsabit</option>
+                                    <option value="meru">Meru</option>
+                                    <option value="migori">Migori</option>
+                                    <option value="mombasa">Mombasa</option>
+                                    <option value="muranga">Murang'a</option>
+                                    <option value="nairobi">Nairobi</option>
+                                    <option value="nakuru">Nakuru</option>
+                                    <option value="nandi">Nandi</option>
+                                    <option value="narok">Narok</option>
+                                    <option value="nyamira">Nyamira</option>
+                                    <option value="nyandarua">Nyandarua</option>
+                                    <option value="nyeri">Nyeri</option>
+                                    <option value="samburu">Samburu</option>
+                                    <option value="siaya">Siaya</option>
+                                    <option value="taita_taveta">Taita-Taveta</option>
+                                    <option value="tana_river">Tana River</option>
+                                    <option value="tharaka_nithi">Tharaka-Nithi</option>
+                                    <option value="trans_nzoia">Trans Nzoia</option>
+                                    <option value="turkana">Turkana</option>
+                                    <option value="uasin_gishu">Uasin Gishu</option>
+                                    <option value="vihiga">Vihiga</option>
+                                    <option value="wajir">Wajir</option>
+                                    <option value="west_pokot">West Pokot</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Exact Location Lost *</label>
+                        <input type="text" class="form-control" name="location" 
+                               placeholder="e.g., Outside Nakumatt Junction, Kikuyu" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Circumstances *</label>
+                        <textarea class="form-control" name="circumstances" rows="3" 
+                                  placeholder="Describe how the bike was lost/stolen..." required></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Police Report Filed?</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="police_report" value="yes" id="policeYes">
+                            <label class="form-check-label" for="policeYes">Yes</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="police_report" value="no" id="policeNo">
+                            <label class="form-check-label" for="policeNo">No</label>
+                        </div>
+                    </div>
+
+                    <div class="mb-3" id="policeDetails" style="display: none;">
+                        <label class="form-label">Police Station & OB Number</label>
+                        <input type="text" class="form-control" name="police_details" 
+                               placeholder="e.g., Kikuyu Police Station - OB/123/2025">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-danger">Report Lost Bike</button>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Bike Detail Modal -->
+<div class="modal fade" id="bikeDetailModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lost Bike Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <!-- Bike details will be loaded dynamically -->
+                <p>Loading bike details...</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.lost-bike-item {
+    display: flex;
+    background: #fff;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bike-image {
+    flex: 0 0 150px;
+    margin-right: 20px;
+    position: relative;
+}
+
+.bike-image img {
+    width: 100%;
+    height: 120px;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+.status-badge {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    color: white;
+}
+
+.bike-details {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.bike-details h6 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.bike-details p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.bike-owner {
+    flex: 1;
+    margin-right: 20px;
+}
+
+.bike-owner h6 {
+    margin-bottom: 10px;
+    color: #333;
+}
+
+.bike-owner p {
+    margin-bottom: 5px;
+    font-size: 0.9rem;
+}
+
+.bike-actions {
+    flex: 0 0 200px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 15px 0;
+    border-bottom: 1px solid #eee;
+}
+
+.stat-item:last-child {
+    border-bottom: none;
+}
+
+.stat-number {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.stat-label {
+    font-size: 0.85rem;
+    color: #666;
+}
+
+.view-toggle .btn.active {
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+    color: white;
+}
+
+@media (max-width: 768px) {
+    .lost-bike-item {
+        flex-direction: column;
+    }
+    
+    .bike-image {
+        flex: none;
+        margin-right: 0;
+        margin-bottom: 15px;
+    }
+    
+    .bike-actions {
+        flex: none;
+        margin-top: 15px;
+    }
+}
+</style>
+
+<script>
+function toggleView(viewType) {
+    // Toggle view between list and grid
+    const buttons = document.querySelectorAll('.view-toggle .btn');
+    buttons.forEach(btn => btn.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    if (viewType === 'grid') {
+        // Implement grid view transformation
+        console.log('Switch to grid view');
+    } else {
+        // Keep list view
+        console.log('Switch to list view');
+    }
+}
+
+function reportSighting(bikeId) {
+    // Open sighting report modal
+    alert('Report sighting for bike ID: ' + bikeId);
+}
+
+function shareAlert(bikeId) {
+    // Share bike alert on social media or WhatsApp
+    const shareText = 'LOST BIKE ALERT - Help us find this motorcycle. Share to spread awareness.';
+    if (navigator.share) {
+        navigator.share({
+            title: 'Lost Bike Alert',
+            text: shareText,
+            url: window.location.href
+        });
+    } else {
+        // Fallback for browsers without Web Share API
+        alert('Share this alert: ' + shareText);
+    }
+}
+
+function viewRecovery(bikeId) {
+    // Show recovery details
+    alert('Show recovery details for bike ID: ' + bikeId);
+}
+
+function verifyNTSA() {
+    const registration = document.querySelector('input[name="registration"]').value;
+    if (!registration) {
+        alert('Please enter registration number first');
+        return;
+    }
+    
+    // Simulate NTSA verification
+    alert('Verifying ' + registration + ' with NTSA database...');
+    
+    // Mock verification result
+    setTimeout(() => {
+        alert('NTSA Verification: Bike found in database\nOwner: John Kamau\nMake: Honda CB 150R\nYear: 2022');
+    }, 2000);
+}
+
+// Show/hide police details based on selection
+document.addEventListener('DOMContentLoaded', function() {
+    const policeYes = document.getElementById('policeYes');
+    const policeNo = document.getElementById('policeNo');
+    const policeDetails = document.getElementById('policeDetails');
+    
+    policeYes.addEventListener('change', function() {
+        if (this.checked) {
+            policeDetails.style.display = 'block';
+        }
+    });
+    
+    policeNo.addEventListener('change', function() {
+        if (this.checked) {
+            policeDetails.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}

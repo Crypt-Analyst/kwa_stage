@@ -1,0 +1,356 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home - KwaStage{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Landing page specific styles */
+    .hero-section {
+        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        color: white;
+        padding: 100px 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='m0 40l40-40h-40v40zm40 0v-40h-40l40 40z'/%3E%3C/g%3E%3C/svg%3E");
+    }
+    
+    .hero-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .hero-title {
+        font-size: 4rem;
+        font-weight: 800;
+        margin-bottom: 1.5rem;
+        line-height: 1.2;
+        color: #FFD700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+    }
+    
+    .hero-subtitle {
+        font-size: 1.4rem;
+        margin-bottom: 2rem;
+        opacity: 0.9;
+        font-weight: 400;
+    }
+    
+    .hero-slogan {
+        font-size: 1.5rem;
+        font-style: italic;
+        color: var(--secondary-color);
+        margin-bottom: 3rem;
+        font-weight: 600;
+    }
+    
+    .btn-cta {
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        border: none;
+        color: white;
+        padding: 15px 40px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        border-radius: 50px;
+        transition: all 0.3s;
+        text-decoration: none;
+        display: inline-block;
+        margin: 0 10px;
+    }
+    
+    .btn-cta:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 25px rgba(44, 90, 160, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-cta-secondary {
+        background: white;
+        color: var(--primary-color);
+        border: 2px solid var(--primary-color);
+    }
+    
+    .btn-cta-secondary:hover {
+        background: var(--primary-color);
+        color: white;
+    }
+    
+    .stats-section {
+        background: white;
+        padding: 80px 0;
+        margin-top: -50px;
+        position: relative;
+        z-index: 3;
+    }
+    
+    .stat-card {
+        background: white;
+        border-radius: 20px;
+        padding: 2rem;
+        text-align: center;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+        border: 1px solid #f0f0f0;
+        height: 100%;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-icon {
+        font-size: 3rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        color: #666;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+    
+    @media (max-width: 768px) {
+        .hero-title {
+            font-size: 2.5rem;
+        }
+        
+        .hero-subtitle {
+            font-size: 1.1rem;
+        }
+        
+        .stats-section {
+            padding: 50px 0;
+            margin-top: -30px;
+        }
+        
+        .btn-cta {
+            display: block;
+            margin: 10px 0;
+            width: 80%;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="hero-content text-center">
+            <h1 class="hero-title">KwaStage</h1>
+            <p class="hero-subtitle">
+                The Premier Boda Boda Welfare & Emergency Support Platform
+            </p>
+            <p class="hero-slogan">Boda Boda is Family - Don't Forget That</p>
+            <div class="hero-buttons">
+                <a href="{% url 'authentication:login' %}" class="btn-cta">
+                    <i class="fas fa-sign-in-alt me-2"></i>Login to System
+                </a>
+                <a href="{% url 'about' %}" class="btn-cta btn-cta-secondary">
+                    <i class="fas fa-info-circle me-2"></i>Learn More
+                </a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Statistics Section -->
+<section class="stats-section">
+    <div class="container">
+        <div class="row g-4">
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-number">1,250</div>
+                    <div class="stat-label">Active Members</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-map-marker-alt"></i>
+                    </div>
+                    <div class="stat-number">45</div>
+                    <div class="stat-label">Active Stages</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <div class="stat-number">890</div>
+                    <div class="stat-label">Bikes Registered</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="stat-number">2.5M</div>
+                    <div class="stat-label">Welfare Fund (KSh)</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-money-bill-wave"></i>
+                    </div>
+                    <div class="stat-number">156</div>
+                    <div class="stat-label">Active Loans</div>
+                </div>
+            </div>
+            <div class="col-lg-2 col-md-4 col-sm-6">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="stat-number">89</div>
+                    <div class="stat-label">Families Helped</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Quick Features Section -->
+<section class="py-5" style="background: #f8f9fa;">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-primary mb-3">Why Choose KwaStage?</h2>
+            <p class="lead text-muted">Built by riders, for riders - with security and community at its core</p>
+        </div>
+        
+        <div class="row g-4">
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
+                    <i class="fas fa-shield-alt fa-3x text-primary mb-3"></i>
+                    <h5>2FA Security</h5>
+                    <p class="text-muted">Bank-level security with two-factor authentication</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
+                    <i class="fas fa-mobile-alt fa-3x text-success mb-3"></i>
+                    <h5>Mobile Ready</h5>
+                    <p class="text-muted">Access anywhere, anytime from your smartphone</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
+                    <i class="fas fa-heart fa-3x text-danger mb-3"></i>
+                    <h5>Community First</h5>
+                    <p class="text-muted">Built for the boda boda family, by the family</p>
+                </div>
+            </div>
+            <div class="col-lg-3 col-md-6">
+                <div class="text-center p-4 bg-white rounded-3 shadow-sm h-100">
+                    <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
+                    <h5>Real-time Reports</h5>
+                    <p class="text-muted">Track contributions, loans, and emergency fund usage</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Call to Action Section -->
+<section class="py-5" style="background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%); color: white;">
+    <div class="container text-center">
+        <h2 class="display-5 fw-bold mb-3">Ready to Join KwaStage?</h2>
+        <p class="lead mb-4">
+            Be part of Kenya's most trusted boda boda welfare network. Support and be supported.
+        </p>
+        <div class="d-flex justify-content-center gap-3 flex-wrap">
+            <a href="{% url 'register' %}" class="btn btn-warning btn-lg px-4">
+                <i class="fas fa-user-plus me-2"></i>Join Now
+            </a>
+            <a href="{% url 'about' %}" class="btn btn-outline-light btn-lg px-4">
+                <i class="fas fa-info-circle me-2"></i>Learn More
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Animate numbers on scroll
+    const observerOptions = {
+        threshold: 0.5,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver(function(entries) {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                const numberElement = entry.target.querySelector('.stat-number');
+                if (numberElement && !numberElement.classList.contains('animated')) {
+                    animateNumber(numberElement);
+                    numberElement.classList.add('animated');
+                }
+            }
+        });
+    }, observerOptions);
+    
+    document.querySelectorAll('.stat-card').forEach(card => {
+        observer.observe(card);
+    });
+    
+    function animateNumber(element) {
+        const finalText = element.textContent;
+        const finalNumber = parseFloat(finalText.replace(/[^\d.]/g, ''));
+        if (!finalNumber) return;
+        
+        const duration = 2000;
+        const increment = finalNumber / (duration / 16);
+        let current = 0;
+        
+        const timer = setInterval(() => {
+            current += increment;
+            if (current >= finalNumber) {
+                current = finalNumber;
+                clearInterval(timer);
+            }
+            
+            // Format the number based on original text
+            if (finalText.includes('M')) {
+                element.textContent = (current / 1000000).toFixed(1) + 'M';
+            } else if (finalText.includes('K')) {
+                element.textContent = (current / 1000).toFixed(1) + 'K';
+            } else {
+                element.textContent = Math.floor(current).toLocaleString();
+            }
+        }, 16);
+    }
+});
+</script>
+{% endblock %}

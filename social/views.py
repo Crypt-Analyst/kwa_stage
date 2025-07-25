@@ -360,38 +360,38 @@ def group_chats(request):
         # Get member's group chats
         group_chats = GroupChat.objects.filter(
             Q(members=member) | Q(stage=member.stage, allow_all_members=True)
-        ).distinct().select_related('stage', 'created_by__user').prefetch_related('members')
+        ).distinct().select_related('stage').prefetch_related('members')
         
-        # Get direct messages (conversations between two people)
-        direct_chats = GroupChat.objects.filter(
-            members=member,
-            is_direct=True
-        ).distinct().select_related('created_by__user').prefetch_related('members')
-        
-        # Add last message and unread count to each chat
+        # Add last message, unread count, and online members to each chat
         for chat in group_chats:
             chat.last_message = chat.messages.filter(is_deleted=False).order_by('-created_at').first()
             chat.unread_count = chat.messages.filter(
                 is_deleted=False
             ).exclude(read_receipts__user=member).count()
-        
-        for chat in direct_chats:
-            chat.last_message = chat.messages.filter(is_deleted=False).order_by('-created_at').first()
-            chat.unread_count = chat.messages.filter(
-                is_deleted=False
-            ).exclude(read_receipts__user=member).count()
             
-            # Get the other member for direct chats
-            other_members = chat.members.exclude(id=member.id)
-            chat.other_member = other_members.first() if other_members.exists() else None
-        
+            # Count online members (active in last 5 minutes)
+            from django.utils import timezone
+            from datetime import timedelta
+            five_minutes_ago = timezone.now() - timedelta(minutes=5)
+            chat.online_count = chat.members.filter(
+                is_online=True,
+                last_activity__gte=five_minutes_ago
+            ).count()
+            
+            # Get online members list
+            chat.online_members = chat.members.filter(
+                is_online=True,
+                last_activity__gte=five_minutes_ago
+            ).select_related('user')[:10]  # Limit to 10 for performance
+            
         # Get stage's default group
         stage_group, created = GroupChat.objects.get_or_create(
             stage=member.stage,
             name=f"{member.stage.name} Main Chat",
             defaults={
                 'description': f"Main group chat for {member.stage.name} stage",
-                'allow_all_members': True
+                'allow_all_members': True,
+                'created_by': member
             }
         )
         
@@ -405,7 +405,6 @@ def group_chats(request):
 
         context = {
             'group_chats': group_chats,
-            'direct_chats': direct_chats,
             'available_members': available_members,
             'stage_group': stage_group,
             'member': member,
@@ -484,6 +483,51 @@ def chat_detail(request, chat_id):
     except Member.DoesNotExist:
         messages.error(request, "Please complete your member profile first.")
         return redirect('members:profile_setup')
+
+@login_required
+def create_chat(request):
+    """
+    Create a new group chat
+    """
+    if request.method != 'POST':
+        return JsonResponse({'error': 'POST required'}, status=405)
+    
+    try:
+        member = request.user.member
+        
+        # Get form data
+        chat_name = request.POST.get('name', '').strip()
+        description = request.POST.get('description', '').strip()
+        member_ids = request.POST.getlist('members[]')
+        
+        if not chat_name:
+            return JsonResponse({'error': 'Chat name is required'}, status=400)
+        
+        # Create the group chat
+        chat = GroupChat.objects.create(
+            name=chat_name,
+            description=description,
+            created_by=member,
+            stage=member.stage if request.POST.get('stage_only') else None,
+            allow_all_members=bool(request.POST.get('allow_all_members'))
+        )
+        
+        # Add members
+        chat.members.add(member)  # Add creator
+        if member_ids:
+            valid_members = Member.objects.filter(id__in=member_ids)
+            chat.members.add(*valid_members)
+        
+        return JsonResponse({
+            'success': True,
+            'chat_id': chat.id,
+            'message': 'Group chat created successfully!'
+        })
+        
+    except Member.DoesNotExist:
+        return JsonResponse({'error': 'Please complete your member profile first.'}, status=400)
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)
 
 @login_required
 def notifications(request):

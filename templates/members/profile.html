@@ -1,0 +1,336 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Member Profile - {{ member.user.get_full_name|default:member.user.username }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-header {
+        background: linear-gradient(135deg, #2c5aa0 0%, #1e3d72 100%);
+        color: white;
+        padding: 2rem 0;
+        margin-bottom: 2rem;
+        border-radius: 0.5rem;
+    }
+    
+    .profile-avatar {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        border: 4px solid rgba(255, 255, 255, 0.2);
+        object-fit: cover;
+    }
+    
+    .profile-info-card {
+        background: white;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        border: none;
+        margin-bottom: 1.5rem;
+    }
+    
+    .profile-info-card .card-header {
+        background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+        border-bottom: 2px solid #dee2e6;
+        font-weight: 600;
+    }
+    
+    .info-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.25rem;
+    }
+    
+    .info-value {
+        color: #6c757d;
+        margin-bottom: 1rem;
+    }
+    
+    .status-badge {
+        padding: 0.375rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.875rem;
+        font-weight: 500;
+    }
+    
+    .status-active {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-inactive {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .status-suspended {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .online-indicator {
+        display: inline-block;
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        margin-right: 0.5rem;
+    }
+    
+    .online-indicator.online {
+        background-color: #28a745;
+        box-shadow: 0 0 0 2px rgba(40, 167, 69, 0.3);
+    }
+    
+    .online-indicator.offline {
+        background-color: #6c757d;
+    }
+    
+    .edit-profile-btn {
+        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        border: none;
+        padding: 0.75rem 2rem;
+        border-radius: 50px;
+        color: white;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+    
+    .edit-profile-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+        color: white;
+    }
+    
+    .member-number {
+        font-family: 'Courier New', monospace;
+        font-weight: bold;
+        color: #2c5aa0;
+        background: #f8f9fa;
+        padding: 0.25rem 0.5rem;
+        border-radius: 0.25rem;
+        border: 1px solid #dee2e6;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Profile Header -->
+    <div class="profile-header text-center">
+        <div class="row align-items-center">
+            <div class="col-md-3">
+                {% if member.profile_photo %}
+                    <img src="{{ member.profile_photo.url }}" alt="Profile Photo" class="profile-avatar">
+                {% else %}
+                    <img src="{% static 'images/default-avatar.svg' %}" alt="Default Avatar" class="profile-avatar">
+                {% endif %}
+            </div>
+            <div class="col-md-6">
+                <h2 class="mb-2">
+                    {{ member.user.get_full_name|default:member.user.username }}
+                    <span class="online-indicator {% if member.is_online %}online{% else %}offline{% endif %}"></span>
+                </h2>
+                <p class="mb-2">Member #<span class="member-number">{{ member.member_number }}</span></p>
+                <span class="status-badge status-{{ member.status }}">
+                    {% if member.status == 'active' %}
+                        <i class="fas fa-check-circle me-1"></i>
+                    {% elif member.status == 'inactive' %}
+                        <i class="fas fa-pause-circle me-1"></i>
+                    {% elif member.status == 'suspended' %}
+                        <i class="fas fa-exclamation-triangle me-1"></i>
+                    {% endif %}
+                    {{ member.get_status_display }}
+                </span>
+            </div>
+            <div class="col-md-3">
+                <a href="{% url 'profile_settings' %}" class="btn edit-profile-btn">
+                    <i class="fas fa-edit me-2"></i>Edit Profile
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Personal Information -->
+        <div class="col-md-6">
+            <div class="card profile-info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user me-2"></i>Personal Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-label">Full Name</div>
+                            <div class="info-value">{{ member.user.get_full_name|default:"Not provided" }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-label">Email</div>
+                            <div class="info-value">{{ member.user.email|default:"Not provided" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-label">National ID</div>
+                            <div class="info-value">{{ member.national_id }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value">{{ member.phone_number }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-label">Date of Birth</div>
+                            <div class="info-value">{{ member.date_of_birth|date:"F d, Y" }}</div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-label">Member Since</div>
+                            <div class="info-value">{{ member.date_joined|date:"F d, Y" }}</div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-label">Address</div>
+                    <div class="info-value">{{ member.address|default:"Not provided" }}</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stage & Zone Information -->
+        <div class="col-md-6">
+            <div class="card profile-info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-map-marker-alt me-2"></i>Stage & Zone Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-label">Stage</div>
+                            <div class="info-value">
+                                <strong>{{ member.stage.name }}</strong>
+                                {% if member.stage.location %}
+                                    <br><small class="text-muted">{{ member.stage.location }}</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-label">Zone</div>
+                            <div class="info-value">{{ member.zone }}</div>
+                        </div>
+                    </div>
+                    
+                    {% if member.sacco %}
+                    <div class="info-label">SACCO Affiliation</div>
+                    <div class="info-value">{{ member.sacco }}</div>
+                    {% endif %}
+                    
+                    <div class="row">
+                        <div class="col-sm-6">
+                            <div class="info-label">Last Seen</div>
+                            <div class="info-value">
+                                {% if member.is_online %}
+                                    <span class="text-success">Online now</span>
+                                {% else %}
+                                    {{ member.last_seen|timesince }} ago
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-sm-6">
+                            <div class="info-label">Last Activity</div>
+                            <div class="info-value">{{ member.last_activity|timesince }} ago</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Next of Kin Information -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card profile-info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-users me-2"></i>Next of Kin Information
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="info-label">Name</div>
+                            <div class="info-value">{{ member.next_of_kin_name }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-label">Relationship</div>
+                            <div class="info-value">{{ member.next_of_kin_relationship }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-label">Phone Number</div>
+                            <div class="info-value">{{ member.next_of_kin_phone }}</div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="info-label">National ID</div>
+                            <div class="info-value">{{ member.next_of_kin_id }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card profile-info-card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-bolt me-2"></i>Quick Actions
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'contributions:make_payment' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-money-bill-wave me-2"></i>Make Payment
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'bikes:my_bikes' %}" class="btn btn-outline-success w-100">
+                                <i class="fas fa-motorcycle me-2"></i>My Bikes
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'loans:loan_status' %}" class="btn btn-outline-info w-100">
+                                <i class="fas fa-hand-holding-usd me-2"></i>Loan Status
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-3">
+                            <a href="{% url 'emergency:report_case' %}" class="btn btn-outline-danger w-100">
+                                <i class="fas fa-exclamation-triangle me-2"></i>Report Emergency
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add any JavaScript functionality here if needed
+    document.addEventListener('DOMContentLoaded', function() {
+        // Auto-refresh online status every 30 seconds
+        setInterval(function() {
+            // This could be implemented with AJAX to update online status
+            // without refreshing the entire page
+        }, 30000);
+    });
+</script>
+{% endblock %}

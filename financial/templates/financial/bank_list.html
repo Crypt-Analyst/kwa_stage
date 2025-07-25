@@ -1,0 +1,262 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Banks & Financial Institutions - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-university me-2"></i>
+                                Banks & Financial Institutions
+                            </h1>
+                            <p class="card-text mb-0">
+                                Access loans and financial services from banks that support boda boda operators
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:dashboard' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="loan_type" class="form-label">Loan Type</label>
+                            <select name="loan_type" id="loan_type" class="form-select">
+                                <option value="">All Loan Types</option>
+                                <option value="motorcycle_loan" {% if request.GET.loan_type == 'motorcycle_loan' %}selected{% endif %}>Motorcycle Loan</option>
+                                <option value="business_loan" {% if request.GET.loan_type == 'business_loan' %}selected{% endif %}>Business Loan</option>
+                                <option value="personal_loan" {% if request.GET.loan_type == 'personal_loan' %}selected{% endif %}>Personal Loan</option>
+                                <option value="asset_financing" {% if request.GET.loan_type == 'asset_financing' %}selected{% endif %}>Asset Financing</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search Banks</label>
+                            <input type="text" name="search" id="search" class="form-control" 
+                                   placeholder="Bank name or services" value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-success">
+                                    <i class="fas fa-search me-2"></i>Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bank Cards -->
+    <div class="row">
+        {% for bank in banks %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-sm bank-card">
+                <div class="card-header bg-success text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="mb-0">{{ bank.name }}</h6>
+                        </div>
+                        <div class="col-auto">
+                            {% if bank.is_featured %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-star"></i> Partner
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ bank.description|truncatewords:25 }}</p>
+                    
+                    <!-- Loan Products -->
+                    <div class="mb-3">
+                        <h6 class="text-success">Available Loan Products:</h6>
+                        <div class="row g-2">
+                            {% if bank.offers_motorcycle_loans %}
+                            <div class="col-12">
+                                <div class="badge bg-primary w-100 mb-2">
+                                    <i class="fas fa-motorcycle me-1"></i>Motorcycle Loans
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if bank.offers_business_loans %}
+                            <div class="col-12">
+                                <div class="badge bg-info w-100 mb-2">
+                                    <i class="fas fa-briefcase me-1"></i>Business Loans
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if bank.offers_personal_loans %}
+                            <div class="col-12">
+                                <div class="badge bg-warning text-dark w-100 mb-2">
+                                    <i class="fas fa-user me-1"></i>Personal Loans
+                                </div>
+                            </div>
+                            {% endif %}
+                            {% if bank.offers_asset_financing %}
+                            <div class="col-12">
+                                <div class="badge bg-secondary w-100 mb-2">
+                                    <i class="fas fa-chart-line me-1"></i>Asset Financing
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Interest Rate Range -->
+                    {% if bank.min_interest_rate and bank.max_interest_rate %}
+                    <div class="mb-3">
+                        <h6 class="text-secondary">Interest Rate Range:</h6>
+                        <div class="progress interest-rate-bar">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 title="Interest rate: {{ bank.min_interest_rate }}% - {{ bank.max_interest_rate }}%"
+                                 aria-label="Interest rate range">
+                                {{ bank.min_interest_rate }}% - {{ bank.max_interest_rate }}%
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    <!-- Key Features -->
+                    <div class="mb-3">
+                        <h6 class="text-secondary">Key Features:</h6>
+                        <ul class="list-unstyled small">{% for feature in bank.key_features_list %}<li class="mb-1">
+                                <i class="fas fa-check text-success me-1"></i>
+                                {{ feature }}
+                            </li>{% endfor %}</ul>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="mb-3">
+                        <div class="row g-2 text-center">
+                            {% if bank.phone %}
+                            <div class="col-6">
+                                <a href="tel:{{ bank.phone }}" class="btn btn-outline-success btn-sm w-100">
+                                    <i class="fas fa-phone me-1"></i>Call
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if bank.website %}
+                            <div class="col-6">
+                                <a href="{{ bank.website }}" target="_blank" class="btn btn-outline-info btn-sm w-100">
+                                    <i class="fas fa-globe me-1"></i>Website
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid">
+                        {% if bank.loan_application_url %}
+                        <a href="{{ bank.loan_application_url }}" target="_blank" class="btn btn-success">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Apply for Loan
+                        </a>
+                        {% elif bank.website %}
+                        <a href="{{ bank.website }}" target="_blank" class="btn btn-success">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Visit Bank Website
+                        </a>
+                        {% else %}
+                        <a href="{% url 'financial:apply_to_bank' bank.id %}" class="btn btn-success">
+                            <i class="fas fa-phone me-2"></i>
+                            Contact Bank
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No Banks Found</h4>
+                <p class="text-muted">Try adjusting your search criteria or browse all available banks.</p>
+                <a href="{% url 'financial:bank_providers' %}" class="btn btn-success">
+                    View All Banks
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Loan Calculator CTA -->
+    <div class="row mt-5">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body text-center">
+                    <h5 class="card-title">
+                        <i class="fas fa-calculator me-2"></i>
+                        Not sure how much you can afford?
+                    </h5>
+                    <p class="card-text">Use our loan calculator to estimate your monthly payments and find the right loan for you.</p>
+                    <a href="{% url 'financial:loan_calculator' %}" class="btn btn-primary">
+                        <i class="fas fa-calculator me-2"></i>
+                        Use Loan Calculator
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="Bank pagination">
+                <ul class="pagination justify-content-center">{% if page_obj.has_previous %}<li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.loan_type %}&loan_type={{ request.GET.loan_type }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+                    </li><li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.loan_type %}&loan_type={{ request.GET.loan_type }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                    </li>{% endif %}<li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    </li>{% if page_obj.has_next %}<li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.loan_type %}&loan_type={{ request.GET.loan_type }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                    </li><li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.loan_type %}&loan_type={{ request.GET.loan_type }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+                    </li>{% endif %}</ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.bank-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.bank-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+.interest-rate-bar {
+    height: 20px;
+}
+.interest-rate-bar .progress-bar {
+    width: 50%;
+}
+</style>
+{% endblock %}

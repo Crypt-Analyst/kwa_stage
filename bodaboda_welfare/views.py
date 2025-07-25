@@ -93,7 +93,7 @@ def home(request):
         'stats': stats,
         'features': features,
         'testimonials': testimonials,
-        'slogan': 'Boda Boda is Family - Don\'t Forget That',
+        'slogan': 'Stage ni yetu, sauti ni yao — we just build the mic',
     }
     return render(request, 'home.html', context)
 
@@ -110,7 +110,7 @@ def dashboard(request):
     """
     try:
         member = request.user.member
-    except:
+    except Member.DoesNotExist:
         member = None
     
     # Dashboard statistics
@@ -163,9 +163,19 @@ def user_logout(request):
 
 def register(request):
     """
-    New member registration with email verification
+    New member registration with email verification and Turnstile protection
     """
     if request.method == 'POST':
+        # Verify Turnstile first
+        from authentication.turnstile import verify_turnstile, get_turnstile_site_key
+        turnstile_result = verify_turnstile(request)
+        if not turnstile_result['success']:
+            if not turnstile_result.get('sandbox'):
+                messages.error(request, 'Security verification failed. Please try again.')
+                return render(request, 'auth/register.html', {
+                    'turnstile_site_key': get_turnstile_site_key()
+                })
+        
         # Handle user registration
         username = request.POST['username']
         email = request.POST['email']
@@ -175,11 +185,15 @@ def register(request):
         
         if User.objects.filter(username=username).exists():
             messages.error(request, 'Username already exists.')
-            return render(request, 'auth/register.html')
+            return render(request, 'auth/register.html', {
+                'turnstile_site_key': get_turnstile_site_key()
+            })
         
         if User.objects.filter(email=email).exists():
             messages.error(request, 'Email already exists.')
-            return render(request, 'auth/register.html')
+            return render(request, 'auth/register.html', {
+                'turnstile_site_key': get_turnstile_site_key()
+            })
         
         # Create user account (inactive until email is verified)
         user = User.objects.create_user(
@@ -240,13 +254,17 @@ def register(request):
         
         return redirect('authentication:login')
     
-    return render(request, 'auth/register.html')
+    from authentication.turnstile import get_turnstile_site_key
+    return render(request, 'auth/register.html', {
+        'turnstile_site_key': get_turnstile_site_key()
+    })
 
 @login_required
 def analytics(request):
     """Analytics view"""
     return render(request, 'analytics.html')
 
+@login_required
 @login_required
 def settings(request):
     """System settings view"""

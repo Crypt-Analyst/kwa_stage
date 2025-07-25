@@ -17,12 +17,22 @@ from django.core.mail import send_mail
 from django.conf import settings
 from django.utils import timezone
 from .models import EmailVerification, PasswordResetToken, GoogleAuth
+from .turnstile import verify_turnstile, get_turnstile_site_key
 import json
 
 
 def custom_login(request):
-    """Custom login view with 2FA support and email verification"""
+    """Custom login view with 2FA support, email verification, and Turnstile protection"""
     if request.method == 'POST':
+        # Verify Turnstile first
+        turnstile_result = verify_turnstile(request)
+        if not turnstile_result['success']:
+            if not turnstile_result.get('sandbox'):
+                messages.error(request, 'Security verification failed. Please try again.')
+                return render(request, 'authentication/login.html', {
+                    'turnstile_site_key': get_turnstile_site_key()
+                })
+        
         username = request.POST.get('username')
         password = request.POST.get('password')
         
@@ -35,15 +45,25 @@ def custom_login(request):
                 # Check if they just need email verification
                 if not hasattr(user, 'email_verifications') or not user.email_verifications.filter(is_verified=True).exists():
                     messages.error(request, 'Your email address is not verified. Please check your email for the verification link or request a new one.')
-                    return render(request, 'authentication/login.html', {'show_resend_verification': True, 'email': user.email})
+                    return render(request, 'authentication/login.html', {
+                        'show_resend_verification': True, 
+                        'email': user.email,
+                        'turnstile_site_key': get_turnstile_site_key()
+                    })
                 else:
                     messages.error(request, 'Your account is inactive. Please contact support.')
-                    return render(request, 'authentication/login.html')
+                    return render(request, 'authentication/login.html', {
+                        'turnstile_site_key': get_turnstile_site_key()
+                    })
             
             # Double-check email verification for active users (belt and suspenders)
             if not hasattr(user, 'email_verifications') or not user.email_verifications.filter(is_verified=True).exists():
                 messages.error(request, 'Your email address is not verified. Please check your email for the verification link.')
-                return render(request, 'authentication/login.html', {'show_resend_verification': True, 'email': user.email})
+                return render(request, 'authentication/login.html', {
+                    'show_resend_verification': True, 
+                    'email': user.email,
+                    'turnstile_site_key': get_turnstile_site_key()
+                })
             
             # Check if user has 2FA enabled
             if user.totpdevice_set.filter(confirmed=True).exists():
@@ -58,7 +78,9 @@ def custom_login(request):
         else:
             messages.error(request, 'Invalid username or password.')
     
-    return render(request, 'authentication/login.html')
+    return render(request, 'authentication/login.html', {
+        'turnstile_site_key': get_turnstile_site_key()
+    })
 
 
 def two_factor_verify(request):

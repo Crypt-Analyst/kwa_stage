@@ -1,0 +1,509 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add License - {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-section {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #007bff;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.form-help {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.required-field::after {
+    content: ' *';
+    color: #dc3545;
+}
+
+.license-class-info {
+    background: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.restriction-badge {
+    background: #ffeaa7;
+    color: #2d3436;
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 0.85rem;
+    margin: 2px;
+    display: inline-block;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-id-card me-3"></i>Add Driving License</h1>
+        <div>
+            <a href="{% url 'safety:license_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Licenses
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-card">
+            <div class="card-body">
+                <div class="form-help">
+                    <h6><i class="fas fa-info-circle me-2"></i>Driving License Information</h6>
+                    <p class="mb-0">
+                        Keep your driving license information up to date. This helps in tracking renewal dates and 
+                        ensures you're always legally compliant while operating your motorcycle.
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="licenseForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="license_number" class="form-label required-field">License Number</label>
+                                <input type="text" class="form-control" id="license_number" name="license_number" 
+                                       placeholder="Enter license number" required style="text-transform: uppercase;">
+                                <div class="form-text">Your official driving license number</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="license_class" class="form-label required-field">License Class</label>
+                                <select class="form-select" id="license_class" name="license_class" required>
+                                    <option value="">Select license class</option>
+                                    <option value="A">Class A - Motorcycles (All)</option>
+                                    <option value="A1">Class A1 - Light Motorcycles (≤125cc)</option>
+                                    <option value="A2">Class A2 - Medium Motorcycles (≤35kW)</option>
+                                    <option value="B">Class B - Motor Cars</option>
+                                    <option value="B1">Class B1 - Light Motor Vehicles</option>
+                                    <option value="C">Class C - Medium Goods Vehicles</option>
+                                    <option value="D">Class D - Passenger Vehicles</option>
+                                    <option value="E">Class E - Heavy Goods Vehicles</option>
+                                </select>
+                                <div id="licenseClassInfo" class="license-class-info d-none">
+                                    <small id="classDescription"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="issuing_authority" class="form-label required-field">Issuing Authority</label>
+                                <select class="form-select" id="issuing_authority" name="issuing_authority" required>
+                                    <option value="">Select authority</option>
+                                    <option value="NTSA">NTSA (National Transport and Safety Authority)</option>
+                                    <option value="County_Government">County Government</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3" id="otherAuthorityDiv" style="display: none;">
+                                <label for="other_authority" class="form-label">Specify Authority</label>
+                                <input type="text" class="form-control" id="other_authority" name="other_authority" 
+                                       placeholder="Enter issuing authority">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-calendar"></i>
+                            License Dates
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="issue_date" class="form-label required-field">Issue Date</label>
+                                <input type="date" class="form-control" id="issue_date" name="issue_date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="expiry_date" class="form-label required-field">Expiry Date</label>
+                                <input type="date" class="form-control" id="expiry_date" name="expiry_date" required>
+                                <div class="form-text">We'll remind you before expiry</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="test_center" class="form-label">Test Center</label>
+                                <input type="text" class="form-control" id="test_center" name="test_center" 
+                                       placeholder="Where you took your driving test">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="examiner" class="form-label">Examiner</label>
+                                <input type="text" class="form-control" id="examiner" name="examiner" 
+                                       placeholder="Driving test examiner name">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Restrictions & Endorsements -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            Restrictions & Endorsements
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label class="form-label">License Restrictions</label>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="glasses_required" name="restrictions" value="glasses">
+                                        <label class="form-check-label" for="glasses_required">
+                                            Must wear corrective lenses
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="daylight_only" name="restrictions" value="daylight">
+                                        <label class="form-check-label" for="daylight_only">
+                                            Daylight driving only
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="automatic_only" name="restrictions" value="automatic">
+                                        <label class="form-check-label" for="automatic_only">
+                                            Automatic transmission only
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="medical_condition" name="restrictions" value="medical">
+                                        <label class="form-check-label" for="medical_condition">
+                                            Medical condition restrictions
+                                        </label>
+                                    </div>
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" id="probationary" name="restrictions" value="probationary">
+                                        <label class="form-check-label" for="probationary">
+                                            Probationary license
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="endorsements" class="form-label">Endorsements/Points</label>
+                            <textarea class="form-control" id="endorsements" name="endorsements" rows="3" 
+                                      placeholder="Any endorsements, penalty points, or violations on your license"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-file-upload"></i>
+                            License Documents
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="front_image" class="form-label">License Front Image</label>
+                                <div class="upload-area" id="frontUploadArea">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <h6>Upload front of license</h6>
+                                    <p class="text-muted mb-3">Clear photo of license front</p>
+                                    <input type="file" class="form-control d-none" id="front_image" name="front_image" 
+                                           accept=".jpg,.jpeg,.png">
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('front_image').click()">
+                                        Choose File
+                                    </button>
+                                </div>
+                                <div id="frontFileInfo" class="mt-2 d-none">
+                                    <div class="alert alert-info d-flex align-items-center">
+                                        <i class="fas fa-file-image me-2"></i>
+                                        <span id="frontFileName"></span>
+                                        <button type="button" class="btn-close ms-auto" onclick="clearFrontFile()"></button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-6 mb-3">
+                                <label for="back_image" class="form-label">License Back Image</label>
+                                <div class="upload-area" id="backUploadArea">
+                                    <div class="upload-icon">
+                                        <i class="fas fa-id-card"></i>
+                                    </div>
+                                    <h6>Upload back of license</h6>
+                                    <p class="text-muted mb-3">Clear photo of license back</p>
+                                    <input type="file" class="form-control d-none" id="back_image" name="back_image" 
+                                           accept=".jpg,.jpeg,.png">
+                                    <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('back_image').click()">
+                                        Choose File
+                                    </button>
+                                </div>
+                                <div id="backFileInfo" class="mt-2 d-none">
+                                    <div class="alert alert-info d-flex align-items-center">
+                                        <i class="fas fa-file-image me-2"></i>
+                                        <span id="backFileName"></span>
+                                        <button type="button" class="btn-close ms-auto" onclick="clearBackFile()"></button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-text mb-3">
+                            <i class="fas fa-info-circle me-1"></i>
+                            Upload clear, high-quality photos. Images should be readable and not blurry.
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-sticky-note"></i>
+                            Additional Information
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="previous_license" class="form-label">Previous License Number</label>
+                            <input type="text" class="form-control" id="previous_license" name="previous_license" 
+                                   placeholder="If this is a renewal, enter previous license number">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any additional notes about your license"></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="verified" name="verified">
+                            <label class="form-check-label" for="verified">
+                                License details have been verified with NTSA
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between pt-3">
+                        <a href="{% url 'safety:license_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save License
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // License class information
+    const licenseClassSelect = document.getElementById('license_class');
+    const licenseClassInfo = document.getElementById('licenseClassInfo');
+    const classDescription = document.getElementById('classDescription');
+
+    const classDescriptions = {
+        'A': 'Allows you to drive all types of motorcycles without power or weight restrictions.',
+        'A1': 'Light motorcycles up to 125cc with maximum power of 11kW.',
+        'A2': 'Medium power motorcycles up to 35kW (not derived from vehicle exceeding 70kW).',
+        'B': 'Motor cars with maximum authorized mass not exceeding 3,500kg.',
+        'B1': 'Light motor vehicles (quadricycles) with maximum mass of 400kg.',
+        'C': 'Medium goods vehicles exceeding 3,500kg but not exceeding 16,000kg.',
+        'D': 'Passenger vehicles with more than 8 passenger seats.',
+        'E': 'Heavy goods vehicles exceeding 16,000kg maximum authorized mass.'
+    };
+
+    licenseClassSelect.addEventListener('change', function() {
+        if (this.value && classDescriptions[this.value]) {
+            classDescription.textContent = classDescriptions[this.value];
+            licenseClassInfo.classList.remove('d-none');
+        } else {
+            licenseClassInfo.classList.add('d-none');
+        }
+    });
+
+    // Issuing authority handling
+    const authoritySelect = document.getElementById('issuing_authority');
+    const otherAuthorityDiv = document.getElementById('otherAuthorityDiv');
+
+    authoritySelect.addEventListener('change', function() {
+        if (this.value === 'Other') {
+            otherAuthorityDiv.style.display = 'block';
+            document.getElementById('other_authority').required = true;
+        } else {
+            otherAuthorityDiv.style.display = 'none';
+            document.getElementById('other_authority').required = false;
+        }
+    });
+
+    // File upload handling for front image
+    setupFileUpload('front_image', 'frontUploadArea', 'frontFileInfo', 'frontFileName');
+    
+    // File upload handling for back image
+    setupFileUpload('back_image', 'backUploadArea', 'backFileInfo', 'backFileName');
+
+    function setupFileUpload(inputId, uploadAreaId, fileInfoId, fileNameId) {
+        const uploadArea = document.getElementById(uploadAreaId);
+        const fileInput = document.getElementById(inputId);
+        const fileInfo = document.getElementById(fileInfoId);
+        const fileName = document.getElementById(fileNameId);
+
+        // Drag and drop events
+        uploadArea.addEventListener('dragover', function(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+
+        uploadArea.addEventListener('dragleave', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        });
+
+        uploadArea.addEventListener('drop', function(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                fileInput.files = files;
+                showFileInfo(files[0], fileInfo, fileName);
+            }
+        });
+
+        // File input change
+        fileInput.addEventListener('change', function(e) {
+            if (e.target.files.length > 0) {
+                showFileInfo(e.target.files[0], fileInfo, fileName);
+            }
+        });
+    }
+
+    function showFileInfo(file, fileInfoElement, fileNameElement) {
+        fileNameElement.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+        fileInfoElement.classList.remove('d-none');
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Date validation
+    const issueDate = document.getElementById('issue_date');
+    const expiryDate = document.getElementById('expiry_date');
+
+    issueDate.addEventListener('change', function() {
+        expiryDate.min = this.value;
+        if (expiryDate.value && expiryDate.value < this.value) {
+            expiryDate.value = '';
+        }
+    });
+
+    expiryDate.addEventListener('change', function() {
+        if (issueDate.value && this.value < issueDate.value) {
+            alert('Expiry date cannot be before issue date');
+            this.value = '';
+        }
+    });
+
+    // Form validation
+    document.getElementById('licenseForm').addEventListener('submit', function(e) {
+        const licenseNumber = document.getElementById('license_number').value.trim();
+        const licenseClass = document.getElementById('license_class').value;
+        const authority = document.getElementById('issuing_authority').value;
+        
+        if (!licenseNumber || !licenseClass || !authority) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+
+        // Validate license number format (basic)
+        if (licenseNumber.length < 5) {
+            e.preventDefault();
+            alert('License number seems too short. Please check and try again.');
+            return false;
+        }
+    });
+});
+
+function clearFrontFile() {
+    document.getElementById('front_image').value = '';
+    document.getElementById('frontFileInfo').classList.add('d-none');
+}
+
+function clearBackFile() {
+    document.getElementById('back_image').value = '';
+    document.getElementById('backFileInfo').classList.add('d-none');
+}
+</script>
+{% endblock %}

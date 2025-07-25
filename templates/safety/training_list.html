@@ -1,0 +1,322 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Safety Training Records - {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.training-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    transition: all 0.3s ease;
+    border-left: 4px solid #28a745;
+}
+
+.training-card:hover {
+    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+    transform: translateY(-2px);
+}
+
+.training-card.expired {
+    border-left-color: #dc3545;
+}
+
+.training-card.expiring-soon {
+    border-left-color: #ffc107;
+}
+
+.certificate-badge {
+    background: #28a745;
+    color: white;
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+    border-radius: 6px;
+    text-transform: uppercase;
+}
+
+.filter-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: #6c757d;
+}
+
+.empty-state i {
+    font-size: 4rem;
+    margin-bottom: 20px;
+    opacity: 0.5;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-graduation-cap me-3"></i>Safety Training Records</h1>
+        <div>
+            <a href="{% url 'safety:add_training' %}" class="btn btn-success me-2">
+                <i class="fas fa-plus me-2"></i>Add Training
+            </a>
+            <a href="{% url 'safety:dashboard' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Safety
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <!-- Filters -->
+        <div class="filter-card">
+            <div class="card-body">
+                <form method="get" class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Search</label>
+                        <input type="text" name="search" class="form-control" placeholder="Search training records..." 
+                               value="{{ search_query|default:'' }}">
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Status</label>
+                        <select name="status" class="form-select">
+                            <option value="">All Status</option>
+                            <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                            <option value="in_progress" {% if status_filter == 'in_progress' %}selected{% endif %}>In Progress</option>
+                            <option value="expired" {% if status_filter == 'expired' %}selected{% endif %}>Expired</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Type</label>
+                        <select name="type" class="form-select">
+                            <option value="">All Types</option>
+                            <option value="defensive_driving" {% if type_filter == 'defensive_driving' %}selected{% endif %}>Defensive Driving</option>
+                            <option value="first_aid" {% if type_filter == 'first_aid' %}selected{% endif %}>First Aid</option>
+                            <option value="road_safety" {% if type_filter == 'road_safety' %}selected{% endif %}>Road Safety</option>
+                            <option value="bike_maintenance" {% if type_filter == 'bike_maintenance' %}selected{% endif %}>Bike Maintenance</option>
+                            <option value="customer_service" {% if type_filter == 'customer_service' %}selected{% endif %}>Customer Service</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">&nbsp;</label>
+                        <div class="d-flex gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-search me-2"></i>Filter
+                            </button>
+                            <a href="{% url 'safety:training_list' %}" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>Clear
+                            </a>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Training Records -->
+        {% if page_obj %}
+            <div class="row">
+                {% for training in page_obj %}
+                <div class="col-md-6 mb-4">
+                    <div class="training-card{% if training.status == 'expired' %} expired{% endif %}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <div class="flex-grow-1">
+                                    <h5 class="card-title mb-2">{{ training.training_title }}</h5>
+                                    <div class="d-flex gap-2 mb-2">
+                                        <span class="certificate-badge">
+                                            {{ training.get_training_type_display }}
+                                        </span>
+                                        {% if training.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif training.status == 'in_progress' %}
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                        {% elif training.status == 'expired' %}
+                                        <span class="badge bg-danger">Expired</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="mb-3">
+                                <div class="row text-sm">
+                                    <div class="col-6">
+                                        <i class="fas fa-calendar text-muted me-2"></i>
+                                        <small>{{ training.training_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    <div class="col-6">
+                                        <i class="fas fa-building text-muted me-2"></i>
+                                        <small>{{ training.training_institution|truncatechars:20 }}</small>
+                                    </div>
+                                </div>
+                                {% if training.expiry_date %}
+                                <div class="row text-sm mt-2">
+                                    <div class="col-6">
+                                        <i class="fas fa-clock text-muted me-2"></i>
+                                        <small>Expires: {{ training.expiry_date|date:"M d, Y" }}</small>
+                                    </div>
+                                    {% if training.certificate_number %}
+                                    <div class="col-6">
+                                        <i class="fas fa-certificate text-muted me-2"></i>
+                                        <small>{{ training.certificate_number }}</small>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            {% if training.trainer_name %}
+                            <p class="text-muted mb-2">
+                                <i class="fas fa-user me-2"></i>Trainer: {{ training.trainer_name }}
+                            </p>
+                            {% endif %}
+
+                            <div class="d-flex justify-content-between align-items-center">
+                                <small class="text-muted">
+                                    Added {{ training.created_at|timesince }} ago
+                                </small>
+                                <div>
+                                    {% if training.certificate_file %}
+                                    <a href="{{ training.certificate_file.url }}" target="_blank" class="btn btn-sm btn-outline-success">
+                                        <i class="fas fa-download me-1"></i>Certificate
+                                    </a>
+                                    {% endif %}
+                                    <button class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" 
+                                            data-bs-target="#trainingModal{{ training.id }}">
+                                        <i class="fas fa-eye me-1"></i>Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Training Details Modal -->
+                <div class="modal fade" id="trainingModal{{ training.id }}" tabindex="-1">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">
+                                    <i class="fas fa-graduation-cap me-2"></i>
+                                    {{ training.training_title }}
+                                </h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Type:</strong>
+                                        <p class="mb-0">{{ training.get_training_type_display }}</p>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Status:</strong>
+                                        {% if training.status == 'completed' %}
+                                        <span class="badge bg-success">Completed</span>
+                                        {% elif training.status == 'in_progress' %}
+                                        <span class="badge bg-warning text-dark">In Progress</span>
+                                        {% elif training.status == 'expired' %}
+                                        <span class="badge bg-danger">Expired</span>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Training Date:</strong>
+                                        <p class="mb-0">{{ training.training_date|date:"F d, Y" }}</p>
+                                    </div>
+                                    {% if training.expiry_date %}
+                                    <div class="col-md-6">
+                                        <strong>Expiry Date:</strong>
+                                        <p class="mb-0">{{ training.expiry_date|date:"F d, Y" }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                <div class="row mb-3">
+                                    <div class="col-md-6">
+                                        <strong>Institution:</strong>
+                                        <p class="mb-0">{{ training.training_institution }}</p>
+                                    </div>
+                                    {% if training.trainer_name %}
+                                    <div class="col-md-6">
+                                        <strong>Trainer:</strong>
+                                        <p class="mb-0">{{ training.trainer_name }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+
+                                {% if training.certificate_number %}
+                                <div class="mb-3">
+                                    <strong>Certificate Number:</strong>
+                                    <p class="mb-0">{{ training.certificate_number }}</p>
+                                </div>
+                                {% endif %}
+
+                                {% if training.notes %}
+                                <div class="mb-3">
+                                    <strong>Notes:</strong>
+                                    <p class="mt-2">{{ training.notes }}</p>
+                                </div>
+                                {% endif %}
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                {% if training.certificate_file %}
+                                <a href="{{ training.certificate_file.url }}" target="_blank" class="btn btn-success">
+                                    <i class="fas fa-download me-1"></i>Download Certificate
+                                </a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Training pagination">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&search={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if type_filter %}&type={{ type_filter }}{% endif %}">Next</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-graduation-cap"></i>
+                <h3>No Training Records</h3>
+                <p>No safety training records found. Start building your safety credentials!</p>
+                <a href="{% url 'safety:add_training' %}" class="btn btn-success">
+                    <i class="fas fa-plus me-2"></i>Add Training Record
+                </a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

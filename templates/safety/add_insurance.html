@@ -1,0 +1,379 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Insurance - {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-section {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #007bff;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.form-help {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.required-field::after {
+    content: ' *';
+    color: #dc3545;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-shield-alt me-3"></i>Add Insurance Policy</h1>
+        <div>
+            <a href="{% url 'safety:insurance_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Insurance
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-card">
+            <div class="card-body">
+                <div class="form-help">
+                    <h6><i class="fas fa-info-circle me-2"></i>Insurance Policy Information</h6>
+                    <p class="mb-0">
+                        Add your insurance policy details to keep track of coverage and ensure you're protected on the road. 
+                        Upload policy documents for easy access and verification.
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="insuranceForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="policy_number" class="form-label required-field">Policy Number</label>
+                                <input type="text" class="form-control" id="policy_number" name="policy_number" 
+                                       placeholder="Enter policy number" required>
+                                <div class="form-text">The unique policy number from your insurance company</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="insurance_company" class="form-label required-field">Insurance Company</label>
+                                <input type="text" class="form-control" id="insurance_company" name="insurance_company" 
+                                       placeholder="Enter insurance company name" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="policy_type" class="form-label required-field">Policy Type</label>
+                                <select class="form-select" id="policy_type" name="policy_type" required>
+                                    <option value="">Select policy type</option>
+                                    <option value="comprehensive">Comprehensive</option>
+                                    <option value="third_party">Third Party</option>
+                                    <option value="personal_accident">Personal Accident</option>
+                                    <option value="medical">Medical Insurance</option>
+                                    <option value="life">Life Insurance</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="coverage_amount" class="form-label">Coverage Amount (KES)</label>
+                                <input type="number" class="form-control" id="coverage_amount" name="coverage_amount" 
+                                       placeholder="0.00" step="0.01" min="0">
+                                <div class="form-text">Maximum coverage amount provided by the policy</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-calendar"></i>
+                            Policy Dates
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="start_date" class="form-label required-field">Start Date</label>
+                                <input type="date" class="form-control" id="start_date" name="start_date" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="end_date" class="form-label required-field">End Date</label>
+                                <input type="date" class="form-control" id="end_date" name="end_date" required>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="premium_amount" class="form-label">Premium Amount (KES)</label>
+                                <input type="number" class="form-control" id="premium_amount" name="premium_amount" 
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="payment_frequency" class="form-label">Payment Frequency</label>
+                                <select class="form-select" id="payment_frequency" name="payment_frequency">
+                                    <option value="">Select frequency</option>
+                                    <option value="monthly">Monthly</option>
+                                    <option value="quarterly">Quarterly</option>
+                                    <option value="annually">Annually</option>
+                                    <option value="one_time">One Time</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-phone"></i>
+                            Contact Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="agent_name" class="form-label">Agent Name</label>
+                                <input type="text" class="form-control" id="agent_name" name="agent_name" 
+                                       placeholder="Insurance agent name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="agent_phone" class="form-label">Agent Phone</label>
+                                <input type="tel" class="form-control" id="agent_phone" name="agent_phone" 
+                                       placeholder="0700123456">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="agent_email" class="form-label">Agent Email</label>
+                                <input type="email" class="form-control" id="agent_email" name="agent_email" 
+                                       placeholder="agent@insurance.com">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="customer_service_phone" class="form-label">Customer Service Phone</label>
+                                <input type="tel" class="form-control" id="customer_service_phone" name="customer_service_phone" 
+                                       placeholder="Company customer service number">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-file-upload"></i>
+                            Policy Documents
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="policy_document" class="form-label">Policy Document</label>
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-cloud-upload-alt"></i>
+                                </div>
+                                <h6>Drop your policy document here</h6>
+                                <p class="text-muted mb-3">or click to browse and select file</p>
+                                <input type="file" class="form-control d-none" id="policy_document" name="policy_document" 
+                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('policy_document').click()">
+                                    Choose File
+                                </button>
+                            </div>
+                            <div class="form-text">Upload PDF, Word document, or image file (Max: 10MB)</div>
+                            <div id="fileInfo" class="mt-2 d-none">
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="btn-close ms-auto" onclick="clearFile()"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-sticky-note"></i>
+                            Additional Information
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="beneficiaries" class="form-label">Beneficiaries</label>
+                            <textarea class="form-control" id="beneficiaries" name="beneficiaries" rows="3" 
+                                      placeholder="List policy beneficiaries and their relationship to you"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any additional notes about this policy"></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="auto_renewal" name="auto_renewal">
+                            <label class="form-check-label" for="auto_renewal">
+                                Auto-renewal enabled
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between pt-3">
+                        <a href="{% url 'safety:insurance_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save Insurance Policy
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // File upload handling
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('policy_document');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+
+    // Drag and drop events
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            showFileInfo(files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            showFileInfo(e.target.files[0]);
+        }
+    });
+
+    function showFileInfo(file) {
+        fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+        fileInfo.classList.remove('d-none');
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Date validation
+    const startDate = document.getElementById('start_date');
+    const endDate = document.getElementById('end_date');
+
+    startDate.addEventListener('change', function() {
+        endDate.min = this.value;
+        if (endDate.value && endDate.value < this.value) {
+            endDate.value = '';
+        }
+    });
+
+    endDate.addEventListener('change', function() {
+        if (startDate.value && this.value < startDate.value) {
+            alert('End date cannot be before start date');
+            this.value = '';
+        }
+    });
+
+    // Form validation
+    document.getElementById('insuranceForm').addEventListener('submit', function(e) {
+        const policyNumber = document.getElementById('policy_number').value.trim();
+        const company = document.getElementById('insurance_company').value.trim();
+        const policyType = document.getElementById('policy_type').value;
+        
+        if (!policyNumber || !company || !policyType) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+    });
+});
+
+function clearFile() {
+    document.getElementById('policy_document').value = '';
+    document.getElementById('fileInfo').classList.add('d-none');
+}
+</script>
+{% endblock %}

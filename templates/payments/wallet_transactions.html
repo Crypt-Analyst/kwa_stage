@@ -1,0 +1,325 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Wallet Transactions - Boda Boda Welfare{% endblock %}
+
+{% block extra_css %}
+<style>
+    .transaction-card {
+        border-radius: 15px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        border: none;
+        margin-bottom: 1rem;
+    }
+    
+    .transaction-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px 15px 0 0;
+        text-align: center;
+    }
+    
+    .wallet-balance {
+        background: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-top: 1rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .transaction-item {
+        border-bottom: 1px solid #eee;
+        padding: 1rem;
+        transition: background-color 0.3s;
+    }
+    
+    .transaction-item:hover {
+        background-color: #f8f9fa;
+    }
+    
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+    
+    .transaction-amount {
+        font-weight: bold;
+        font-size: 1.1rem;
+    }
+    
+    .transaction-credit {
+        color: #28a745;
+    }
+    
+    .transaction-debit {
+        color: #dc3545;
+    }
+    
+    .transaction-status {
+        font-size: 0.8rem;
+        padding: 0.2rem 0.5rem;
+        border-radius: 20px;
+        text-transform: uppercase;
+    }
+    
+    .status-completed {
+        background-color: #d4edda;
+        color: #155724;
+    }
+    
+    .status-pending {
+        background-color: #fff3cd;
+        color: #856404;
+    }
+    
+    .status-failed {
+        background-color: #f8d7da;
+        color: #721c24;
+    }
+    
+    .filter-section {
+        background: white;
+        padding: 1.5rem;
+        border-radius: 15px;
+        margin-bottom: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <!-- Header -->
+            <div class="transaction-header">
+                <h1><i class="fas fa-wallet me-2"></i>Wallet Transactions</h1>
+                <p class="mb-0">View all your e-wallet transaction history</p>
+                
+                {% if ewallet %}
+                <div class="wallet-balance">
+                    <div class="row text-center">
+                        <div class="col-md-3">
+                            <h5 class="text-muted mb-1">Current Balance</h5>
+                            <h3 class="text-success mb-0">KES {{ ewallet.balance }}</h3>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-muted mb-1">Total Deposits</h5>
+                            <h4 class="text-primary mb-0">KES {{ ewallet.total_deposits|default:0 }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-muted mb-1">Total Withdrawals</h5>
+                            <h4 class="text-warning mb-0">KES {{ ewallet.total_withdrawals|default:0 }}</h4>
+                        </div>
+                        <div class="col-md-3">
+                            <h5 class="text-muted mb-1">Total Transactions</h5>
+                            <h4 class="text-info mb-0">{{ page_obj.paginator.count }}</h4>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- Filters -->
+    <div class="filter-section">
+        <form method="get" class="row g-3">
+            <div class="col-md-3">
+                <label for="type" class="form-label">Transaction Type</label>
+                <select name="type" id="type" class="form-select">
+                    <option value="">All Types</option>
+                    <option value="deposit" {% if type_filter == 'deposit' %}selected{% endif %}>Deposit</option>
+                    <option value="withdrawal" {% if type_filter == 'withdrawal' %}selected{% endif %}>Withdrawal</option>
+                    <option value="transfer" {% if type_filter == 'transfer' %}selected{% endif %}>Transfer</option>
+                    <option value="payment" {% if type_filter == 'payment' %}selected{% endif %}>Payment</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label for="status" class="form-label">Status</label>
+                <select name="status" id="status" class="form-select">
+                    <option value="">All Status</option>
+                    <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                    <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                    <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                </select>
+            </div>
+            <div class="col-md-4">
+                <label for="search" class="form-label">Search</label>
+                <input type="text" name="search" id="search" class="form-control" 
+                       placeholder="Search by ID, description, or reference..." 
+                       value="{{ search_query }}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label">&nbsp;</label>
+                <div>
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search me-1"></i>Filter
+                    </button>
+                </div>
+            </div>
+        </form>
+        
+        {% if type_filter or status_filter or search_query %}
+        <div class="mt-2">
+            <a href="{% url 'payments:wallet_transactions' %}" class="btn btn-outline-secondary btn-sm">
+                <i class="fas fa-times me-1"></i>Clear Filters
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Transactions List -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card transaction-card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Transaction History</h5>
+                </div>
+                <div class="card-body p-0">
+                    {% if page_obj %}
+                        {% for transaction in page_obj %}
+                        <div class="transaction-item">
+                            <div class="row align-items-center">
+                                <div class="col-md-2">
+                                    <div class="transaction-icon text-center">
+                                        {% if transaction.transaction_type == 'deposit' %}
+                                            <i class="fas fa-arrow-down text-success fa-2x"></i>
+                                        {% elif transaction.transaction_type == 'withdrawal' %}
+                                            <i class="fas fa-arrow-up text-danger fa-2x"></i>
+                                        {% elif transaction.transaction_type == 'transfer' %}
+                                            <i class="fas fa-exchange-alt text-warning fa-2x"></i>
+                                        {% else %}
+                                            <i class="fas fa-credit-card text-info fa-2x"></i>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <h6 class="mb-1">{{ transaction.description }}</h6>
+                                    <small class="text-muted">
+                                        ID: {{ transaction.transaction_id }}<br>
+                                        {% if transaction.reference %}Ref: {{ transaction.reference }}{% endif %}
+                                    </small>
+                                </div>
+                                <div class="col-md-2">
+                                    <div class="transaction-amount {% if transaction.transaction_type == 'deposit' %}transaction-credit{% else %}transaction-debit{% endif %}">
+                                        {% if transaction.transaction_type == 'deposit' %}+{% else %}-{% endif %}KES {{ transaction.amount }}
+                                    </div>
+                                </div>
+                                <div class="col-md-2">
+                                    <span class="transaction-status status-{{ transaction.status }}">
+                                        {{ transaction.get_status_display }}
+                                    </span>
+                                </div>
+                                <div class="col-md-2 text-end">
+                                    <small class="text-muted">
+                                        {{ transaction.created_at|date:"M d, Y" }}<br>
+                                        {{ transaction.created_at|time:"g:i A" }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                        {% empty %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Transactions Found</h5>
+                            <p class="text-muted">
+                                {% if type_filter or status_filter or search_query %}
+                                    No transactions match your current filters.
+                                {% else %}
+                                    You haven't made any wallet transactions yet.
+                                {% endif %}
+                            </p>
+                            <a href="{% url 'payments:topup_wallet' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Top Up Wallet
+                            </a>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5">
+                            <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">No Transactions Found</h5>
+                            <p class="text-muted">You haven't made any wallet transactions yet.</p>
+                            <a href="{% url 'payments:topup_wallet' %}" class="btn btn-primary">
+                                <i class="fas fa-plus me-1"></i>Top Up Wallet
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+            
+            <!-- Pagination -->
+            {% if page_obj.has_other_pages %}
+            <nav aria-label="Transaction pagination" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    {% if page_obj.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page=1{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">First</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Previous</a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for num in page_obj.paginator.page_range %}
+                        {% if page_obj.number == num %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ num }}</span>
+                            </li>
+                        {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
+                            <li class="page-item">
+                                <a class="page-link" href="?page={{ num }}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">{{ num }}</a>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if page_obj.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Next</a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if type_filter %}&type={{ type_filter }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}{% if search_query %}&search={{ search_query }}{% endif %}">Last</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+            {% endif %}
+        </div>
+    </div>
+    
+    <!-- Quick Actions -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Quick Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'payments:topup_wallet' %}" class="btn btn-success w-100">
+                                <i class="fas fa-plus me-1"></i>Top Up Wallet
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'payments:withdraw_funds' %}" class="btn btn-warning w-100">
+                                <i class="fas fa-minus me-1"></i>Withdraw Funds
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'payments:transfer_funds' %}" class="btn btn-info w-100">
+                                <i class="fas fa-exchange-alt me-1"></i>Transfer Funds
+                            </a>
+                        </div>
+                        <div class="col-md-3 mb-2">
+                            <a href="{% url 'payments:dashboard' %}" class="btn btn-outline-primary w-100">
+                                <i class="fas fa-tachometer-alt me-1"></i>Payment Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

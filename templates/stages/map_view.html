@@ -438,7 +438,7 @@ window.onload = function() {
 
 <!-- Google Maps API -->
 <script async defer 
-    src="https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&callback=initMap">
+    src="https://maps.googleapis.com/maps/api/js?key={% if GOOGLE_MAPS_API_KEY %}{{ GOOGLE_MAPS_API_KEY }}{% else %}AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw{% endif %}&callback=initMap">
 </script>
 
 <script>

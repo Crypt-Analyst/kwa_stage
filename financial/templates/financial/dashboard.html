@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Financial Services Dashboard - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header Section -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-university me-2"></i>
+                                Financial Services Dashboard
+                            </h1>
+                            <p class="card-text mb-0">
+                                Access SACCOs, banks, and financial opportunities designed for Boda Boda riders
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <div class="d-flex justify-content-end align-items-center">
+                                <div class="me-3">
+                                    <small>Welcome</small><br>
+                                    <strong>{{ user.get_full_name|default:user.username }}</strong>
+                                </div>
+                                <i class="fas fa-motorcycle fa-3x"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Stats -->
+    <div class="row mb-4">
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-primary mb-2">
+                        <i class="fas fa-handshake fa-2x"></i>
+                    </div>
+                    <h3 class="text-primary">{{ stats.total_saccos }}</h3>
+                    <p class="mb-0">Available SACCOs</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-success mb-2">
+                        <i class="fas fa-university fa-2x"></i>
+                    </div>
+                    <h3 class="text-success">{{ stats.total_banks }}</h3>
+                    <p class="mb-0">Partner Banks</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-warning mb-2">
+                        <i class="fas fa-file-alt fa-2x"></i>
+                    </div>
+                    <h3 class="text-warning">{{ stats.user_applications }}</h3>
+                    <p class="mb-0">Your Applications</p>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 col-sm-6 mb-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body text-center">
+                    <div class="text-info mb-2">
+                        <i class="fas fa-calculator fa-2x"></i>
+                    </div>
+                    <h3 class="text-info">Calculator</h3>
+                    <p class="mb-0">Loan Calculator</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Services -->
+    <div class="row">
+        <!-- SACCOs Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-handshake me-2"></i>
+                        SACCOs for Boda Boda Riders
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Join a SACCO designed specifically for transport operators and boda boda riders. 
+                        Access savings, credit, and financial services tailored to your needs.
+                    </p>
+                    <div class="mb-3">
+                        <small class="text-muted">Featured SACCOs:</small>
+                        <ul class="list-unstyled mt-2">{% for sacco in featured_saccos %}<li class="mb-1">
+                                <i class="fas fa-star text-warning me-1"></i>
+                                {{ sacco.name }}
+                            </li>{% endfor %}</ul>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'financial:sacco_list' %}" class="btn btn-primary">
+                            <i class="fas fa-list me-2"></i>
+                            Browse All SACCOs
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Banks Section -->
+        <div class="col-md-6 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-university me-2"></i>
+                        Bank Loans & Services
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">
+                        Apply for motorcycle loans, business loans, and other financial products 
+                        from banks that understand the boda boda industry.
+                    </p>
+                    <div class="mb-3">
+                        <small class="text-muted">Partner Banks:</small>
+                        <ul class="list-unstyled mt-2">{% for bank in featured_banks %}<li class="mb-1">
+                                <i class="fas fa-university text-success me-1"></i>
+                                {{ bank.name }}
+                            </li>{% endfor %}</ul>
+                    </div>
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'financial:bank_providers' %}" class="btn btn-success">
+                            <i class="fas fa-university me-2"></i>
+                            View Bank Services
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tools Section -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-info text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-tools me-2"></i>
+                        Financial Tools & Resources
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="mb-2">
+                                    <i class="fas fa-calculator fa-2x text-info"></i>
+                                </div>
+                                <h6>Loan Calculator</h6>
+                                <p class="text-muted small">Calculate loan payments and interest</p>
+                                <a href="{% url 'financial:loan_calculator' %}" class="btn btn-outline-info btn-sm">
+                                    Use Calculator
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="mb-2">
+                                    <i class="fas fa-chart-line fa-2x text-warning"></i>
+                                </div>
+                                <h6>Application Status</h6>
+                                <p class="text-muted small">Track your loan and SACCO applications</p>
+                                <a href="{% url 'financial:my_applications' %}" class="btn btn-outline-warning btn-sm">
+                                    View Applications
+                                </a>
+                            </div>
+                        </div>
+                        <div class="col-md-4 mb-3">
+                            <div class="text-center">
+                                <div class="mb-2">
+                                    <i class="fas fa-graduation-cap fa-2x text-success"></i>
+                                </div>
+                                <h6>Financial Education</h6>
+                                <p class="text-muted small">Learn about savings and investments</p>
+                                <a href="#" class="btn btn-outline-success btn-sm">
+                                    Coming Soon
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Applications -->
+    {% if recent_applications %}
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-history me-2"></i>
+                        Recent Applications
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Provider</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for application in recent_applications %}
+                                <tr>
+                                    <td>{{ application.created_at|date:"M d, Y" }}</td>
+                                    <td>
+                                        {% if application.sacco %}
+                                            {{ application.sacco.name }}
+                                        {% else %}
+                                            {{ application.bank.name }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ application.get_application_type_display }}</td>
+                                    <td>KES {{ application.requested_amount|floatformat:0 }}</td>
+                                    <td>
+                                        <span class="badge bg-{{ application.status|lower }}">
+                                            {{ application.get_status_display }}
+                                        </span>
+                                    </td>
+                                    <td>
+                                        {% if application.sacco %}
+                                            <a href="{% url 'financial:sacco_application_detail' application.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                View
+                                            </a>
+                                        {% else %}
+                                            <a href="{% url 'financial:bank_application_detail' application.id %}" 
+                                               class="btn btn-sm btn-outline-primary">
+                                                View
+                                            </a>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.card {
+    transition: transform 0.2s;
+}
+.card:hover {
+    transform: translateY(-2px);
+}
+.bg-pending { background-color: #ffc107 !important; }
+.bg-approved { background-color: #198754 !important; }
+.bg-rejected { background-color: #dc3545 !important; }
+.bg-under_review { background-color: #0dcaf0 !important; }
+</style>
+{% endblock %}

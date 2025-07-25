@@ -4,7 +4,7 @@
 [![Python](https://img.shields.io/badge/Python-3.13-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
-> *"Boda Boda is Family - Don't Forget That"*
+> *"Stage ni yetu, sauti ni yao — we just build the mic"*
 
 A comprehensive Django web application for managing Boda Boda (motorcycle taxi) welfare, emergency support, and community management system. This system provides complete support for riders and their families with modern security features and mobile-responsive design.
 

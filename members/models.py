@@ -43,6 +43,11 @@ class Member(models.Model):
     date_joined = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=20, choices=MEMBER_STATUS_CHOICES, default='active')
     
+    # Online status tracking
+    is_online = models.BooleanField(default=False)
+    last_seen = models.DateTimeField(auto_now=True)
+    last_activity = models.DateTimeField(auto_now=True)
+    
     # Dependents information
     dependents_count = models.PositiveIntegerField(default=0)
     dependents_details = models.JSONField(default=list, blank=True, help_text="List of dependents with their details")
@@ -92,3 +97,37 @@ class MemberDocument(models.Model):
     
     def __str__(self):
         return f"{self.member.user.get_full_name()} - {self.get_document_type_display()}"
+
+
+class SaccoAffiliation(models.Model):
+    """
+    SACCO (Savings and Credit Cooperative) organizations that support boda boda riders
+    """
+    name = models.CharField(max_length=200, unique=True)
+    coverage_area = models.CharField(max_length=100, help_text="Geographic coverage area")
+    description = models.TextField(blank=True, help_text="Description of SACCO services")
+    supports_bodaboda = models.BooleanField(default=True, help_text="Whether this SACCO specifically supports boda boda riders")
+    is_active = models.BooleanField(default=True)
+    
+    # Contact information
+    phone_number = models.CharField(max_length=15, blank=True)
+    email = models.EmailField(blank=True)
+    website = models.URLField(blank=True)
+    physical_address = models.TextField(blank=True)
+    
+    # Services offered
+    offers_motorcycle_loans = models.BooleanField(default=False)
+    offers_insurance = models.BooleanField(default=False)
+    offers_savings_accounts = models.BooleanField(default=False)
+    offers_emergency_fund = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['name']
+        verbose_name = "SACCO Affiliation"
+        verbose_name_plural = "SACCO Affiliations"
+    
+    def __str__(self):
+        return self.name

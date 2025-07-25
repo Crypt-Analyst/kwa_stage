@@ -1,0 +1,412 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply for Loan at {{ bank.name }} - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-university me-2"></i>
+                                Apply for Loan at {{ bank.name }}
+                            </h1>
+                            <p class="card-text mb-0">
+                                Complete your loan application form
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:bank_providers' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Banks
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Bank Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">{{ bank.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ bank.description }}</p>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-success">Available Loans:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if bank.offers_motorcycle_loans %}
+                            <span class="badge bg-primary">Motorcycle Loans</span>
+                            {% endif %}
+                            {% if bank.offers_business_loans %}
+                            <span class="badge bg-info">Business Loans</span>
+                            {% endif %}
+                            {% if bank.offers_personal_loans %}
+                            <span class="badge bg-warning text-dark">Personal Loans</span>
+                            {% endif %}
+                            {% if bank.offers_asset_financing %}
+                            <span class="badge bg-secondary">Asset Financing</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if bank.min_interest_rate and bank.max_interest_rate %}
+                    <div class="mb-3">
+                        <h6 class="text-success">Interest Rate:</h6>
+                        <p class="mb-0">{{ bank.min_interest_rate }}% - {{ bank.max_interest_rate }}% per annum</p>
+                    </div>
+                    {% endif %}
+
+                    <div class="mb-3">
+                        <h6 class="text-success">Key Features:</h6>
+                        <ul class="list-unstyled small">{% for feature in bank.key_features_list %}<li class="mb-1">
+                                <i class="fas fa-check text-success me-1"></i>
+                                {{ feature }}
+                            </li>{% endfor %}</ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-success">Contact:</h6>
+                        {% if bank.phone %}
+                        <p class="mb-1">
+                            <i class="fas fa-phone me-1"></i>
+                            <a href="tel:{{ bank.phone }}">{{ bank.phone }}</a>
+                        </p>
+                        {% endif %}
+                        {% if bank.website %}
+                        <p class="mb-1">
+                            <i class="fas fa-globe me-1"></i>
+                            <a href="{{ bank.website }}" target="_blank">{{ bank.website }}</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Loan Application Form
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Loan Details -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Loan Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="loan_type" class="form-label">Loan Type *</label>
+                                <select class="form-select" id="loan_type" name="loan_type" required>
+                                    <option value="">Select Loan Type</option>
+                                    {% if bank.offers_motorcycle_loans %}
+                                    <option value="motorcycle_loan">Motorcycle Loan</option>
+                                    {% endif %}
+                                    {% if bank.offers_business_loans %}
+                                    <option value="business_loan">Business Loan</option>
+                                    {% endif %}
+                                    {% if bank.offers_personal_loans %}
+                                    <option value="personal_loan">Personal Loan</option>
+                                    {% endif %}
+                                    {% if bank.offers_asset_financing %}
+                                    <option value="asset_financing">Asset Financing</option>
+                                    {% endif %}
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="requested_amount" class="form-label">Loan Amount (KES) *</label>
+                                <input type="number" class="form-control" id="requested_amount" 
+                                       name="requested_amount" min="10000" max="5000000" 
+                                       step="1000" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="loan_term" class="form-label">Loan Term *</label>
+                                <select class="form-select" id="loan_term" name="loan_term" required>
+                                    <option value="">Select Term</option>
+                                    <option value="6">6 months</option>
+                                    <option value="12">12 months (1 year)</option>
+                                    <option value="18">18 months</option>
+                                    <option value="24">24 months (2 years)</option>
+                                    <option value="36">36 months (3 years)</option>
+                                    <option value="48">48 months (4 years)</option>
+                                    <option value="60">60 months (5 years)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="loan_purpose" class="form-label">Purpose of Loan *</label>
+                                <select class="form-select" id="loan_purpose" name="loan_purpose" required>
+                                    <option value="">Select Purpose</option>
+                                    <option value="new_motorcycle">Purchase New Motorcycle</option>
+                                    <option value="used_motorcycle">Purchase Used Motorcycle</option>
+                                    <option value="business_expansion">Business Expansion</option>
+                                    <option value="working_capital">Working Capital</option>
+                                    <option value="emergency_funds">Emergency Funds</option>
+                                    <option value="motorcycle_repair">Motorcycle Repair/Maintenance</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" 
+                                       value="{{ user.get_full_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_number" class="form-label">ID Number *</label>
+                                <input type="text" class="form-control" id="id_number" name="id_number" 
+                                       pattern="[0-9]{7,8}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       pattern="[0-9]{10}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="date_of_birth" class="form-label">Date of Birth *</label>
+                                <input type="date" class="form-control" id="date_of_birth" 
+                                       name="date_of_birth" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="marital_status" class="form-label">Marital Status *</label>
+                                <select class="form-select" id="marital_status" name="marital_status" required>
+                                    <option value="">Select Status</option>
+                                    <option value="single">Single</option>
+                                    <option value="married">Married</option>
+                                    <option value="divorced">Divorced</option>
+                                    <option value="widowed">Widowed</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Address Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="county" class="form-label">County *</label>
+                                <input type="text" class="form-control" id="county" name="county" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="town" class="form-label">Town/City *</label>
+                                <input type="text" class="form-control" id="town" name="town" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="physical_address" class="form-label">Physical Address *</label>
+                                <textarea class="form-control" id="physical_address" name="physical_address" 
+                                          rows="2" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Employment & Income -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Employment & Income Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="occupation" class="form-label">Occupation *</label>
+                                <select class="form-select" id="occupation" name="occupation" required>
+                                    <option value="">Select Occupation</option>
+                                    <option value="boda_boda_rider">Boda Boda Rider</option>
+                                    <option value="transport_operator">Transport Operator</option>
+                                    <option value="motorcycle_mechanic">Motorcycle Mechanic</option>
+                                    <option value="spare_parts_dealer">Spare Parts Dealer</option>
+                                    <option value="other_transport">Other Transport Related</option>
+                                    <option value="employed">Employed (Other)</option>
+                                    <option value="self_employed">Self Employed</option>
+                                    <option value="business_owner">Business Owner</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="monthly_income" class="form-label">Monthly Income (KES) *</label>
+                                <input type="number" class="form-control" id="monthly_income" 
+                                       name="monthly_income" min="5000" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="years_experience" class="form-label">Years of Experience *</label>
+                                <input type="number" class="form-control" id="years_experience" 
+                                       name="years_experience" min="0" max="50" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="employer_name" class="form-label">Employer/Business Name</label>
+                                <input type="text" class="form-control" id="employer_name" name="employer_name">
+                            </div>
+                        </div>
+
+                        <!-- Collateral/Security -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Collateral/Security Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="collateral_type" class="form-label">Collateral Type</label>
+                                <select class="form-select" id="collateral_type" name="collateral_type">
+                                    <option value="">None/Not Applicable</option>
+                                    <option value="motorcycle">Motorcycle</option>
+                                    <option value="land_title">Land Title</option>
+                                    <option value="salary">Salary/Income</option>
+                                    <option value="guarantor">Guarantor</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="collateral_value" class="form-label">Estimated Value (KES)</label>
+                                <input type="number" class="form-control" id="collateral_value" 
+                                       name="collateral_value" min="0">
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="collateral_description" class="form-label">Collateral Description</label>
+                                <textarea class="form-control" id="collateral_description" 
+                                          name="collateral_description" rows="2" 
+                                          placeholder="Provide details about your collateral/security..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- References -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">References</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="reference1_name" class="form-label">Reference 1 Name *</label>
+                                <input type="text" class="form-control" id="reference1_name" 
+                                       name="reference1_name" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="reference1_phone" class="form-label">Reference 1 Phone *</label>
+                                <input type="tel" class="form-control" id="reference1_phone" 
+                                       name="reference1_phone" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="reference2_name" class="form-label">Reference 2 Name</label>
+                                <input type="text" class="form-control" id="reference2_name" 
+                                       name="reference2_name">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="reference2_phone" class="form-label">Reference 2 Phone</label>
+                                <input type="tel" class="form-control" id="reference2_phone" 
+                                       name="reference2_phone">
+                            </div>
+                        </div>
+
+                        <!-- Document Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Required Documents</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_copy" class="form-label">ID Copy *</label>
+                                <input type="file" class="form-control" id="id_copy" name="id_copy" 
+                                       accept=".pdf,.jpg,.jpeg,.png" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="income_proof" class="form-label">Income Proof</label>
+                                <input type="file" class="form-control" id="income_proof" name="income_proof" 
+                                       accept=".pdf,.jpg,.jpeg,.png">
+                                <div class="form-text">Bank statements, payslips, etc.</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="collateral_documents" class="form-label">Collateral Documents</label>
+                                <input type="file" class="form-control" id="collateral_documents" 
+                                       name="collateral_documents" accept=".pdf,.jpg,.jpeg,.png">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="passport_photo" class="form-label">Passport Photo *</label>
+                                <input type="file" class="form-control" id="passport_photo" name="passport_photo" 
+                                       accept=".jpg,.jpeg,.png" required>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms_accepted" 
+                                           name="terms_accepted" required>
+                                    <label class="form-check-label" for="terms_accepted">
+                                        I agree to the bank's terms and conditions and authorize them to 
+                                        process my loan application and contact references *
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Submit Loan Application
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-calculate monthly payment when amount and term change
+document.addEventListener('DOMContentLoaded', function() {
+    const amountInput = document.getElementById('requested_amount');
+    const termSelect = document.getElementById('loan_term');
+    
+    function updateEstimate() {
+        const amount = parseFloat(amountInput.value);
+        const term = parseInt(termSelect.value);
+        
+        if (amount && term) {
+            // Rough estimate assuming 15% interest rate
+            const monthlyRate = 0.15 / 12;
+            const monthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, term)) / 
+                                  (Math.pow(1 + monthlyRate, term) - 1);
+            
+            // Show estimate near the amount field
+            let estimateDiv = document.getElementById('payment-estimate');
+            if (!estimateDiv) {
+                estimateDiv = document.createElement('div');
+                estimateDiv.id = 'payment-estimate';
+                estimateDiv.className = 'form-text text-info';
+                amountInput.parentNode.appendChild(estimateDiv);
+            }
+            estimateDiv.innerHTML = `Estimated monthly payment: KES ${monthlyPayment.toLocaleString('en-KE', {maximumFractionDigits: 0})}`;
+        }
+    }
+    
+    amountInput.addEventListener('input', updateEstimate);
+    termSelect.addEventListener('change', updateEstimate);
+});
+</script>
+{% endblock %}

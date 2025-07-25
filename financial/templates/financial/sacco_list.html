@@ -1,0 +1,219 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}SACCOs for Boda Boda Riders - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-handshake me-2"></i>
+                                SACCOs for Boda Boda Riders
+                            </h1>
+                            <p class="card-text mb-0">
+                                Discover SACCOs dedicated to transport operators and motorcycle riders across Kenya
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:dashboard' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filter and Search -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <form method="get" class="row g-3">
+                        <div class="col-md-4">
+                            <label for="county" class="form-label">County</label>
+                            <select name="county" id="county" class="form-select">
+                                <option value="">All Counties</option>
+                                {% for county in counties %}
+                                <option value="{{ county }}" {% if request.GET.county == county %}selected{% endif %}>
+                                    {{ county }}
+                                </option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="search" class="form-label">Search SACCOs</label>
+                            <input type="text" name="search" id="search" class="form-control" 
+                                   placeholder="SACCO name or description" value="{{ request.GET.search }}">
+                        </div>
+                        <div class="col-md-4">
+                            <label class="form-label">&nbsp;</label>
+                            <div class="d-grid">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search me-2"></i>Filter
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- SACCO Cards -->
+    <div class="row">
+        {% for sacco in saccos %}
+        <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="card h-100 shadow-sm sacco-card">
+                <div class="card-header bg-primary text-white">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h6 class="mb-0">{{ sacco.name }}</h6>
+                        </div>
+                        <div class="col-auto">
+                            {% if sacco.is_featured %}
+                            <span class="badge bg-warning">
+                                <i class="fas fa-star"></i> Featured
+                            </span>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <small class="text-muted">
+                            <i class="fas fa-map-marker-alt me-1"></i>
+                            {{ sacco.county }}, {{ sacco.town }}
+                        </small>
+                    </div>
+                    
+                    <p class="card-text">{{ sacco.description|truncatewords:25 }}</p>
+                    
+                    <!-- Services -->
+                    <div class="mb-3">
+                        <h6 class="text-primary">Services Offered:</h6>
+                        <div class="row g-2">
+                            {% if sacco.offers_savings %}
+                            <div class="col-6">
+                                <small class="badge bg-success">
+                                    <i class="fas fa-piggy-bank me-1"></i>Savings
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if sacco.offers_credit %}
+                            <div class="col-6">
+                                <small class="badge bg-info">
+                                    <i class="fas fa-credit-card me-1"></i>Credit
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if sacco.offers_insurance %}
+                            <div class="col-6">
+                                <small class="badge bg-warning text-dark">
+                                    <i class="fas fa-shield-alt me-1"></i>Insurance
+                                </small>
+                            </div>
+                            {% endif %}
+                            {% if sacco.offers_investment %}
+                            <div class="col-6">
+                                <small class="badge bg-secondary">
+                                    <i class="fas fa-chart-line me-1"></i>Investment
+                                </small>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <!-- Requirements -->
+                    <div class="mb-3">
+                        <h6 class="text-secondary">Membership Requirements:</h6>
+                        <ul class="list-unstyled small">{% for req in sacco.membership_requirements_list %}<li class="mb-1">
+                                <i class="fas fa-check text-success me-1"></i>
+                                {{ req }}
+                            </li>{% endfor %}</ul>
+                    </div>
+
+                    <!-- Contact Info -->
+                    <div class="mb-3">
+                        <div class="row g-2 text-center">
+                            {% if sacco.phone %}
+                            <div class="col-6">
+                                <a href="tel:{{ sacco.phone }}" class="btn btn-outline-success btn-sm w-100">
+                                    <i class="fas fa-phone me-1"></i>Call
+                                </a>
+                            </div>
+                            {% endif %}
+                            {% if sacco.email %}
+                            <div class="col-6">
+                                <a href="mailto:{{ sacco.email }}" class="btn btn-outline-info btn-sm w-100">
+                                    <i class="fas fa-envelope me-1"></i>Email
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="d-grid">
+                        <a href="{% url 'financial:sacco_apply' sacco.id %}" class="btn btn-primary">
+                            <i class="fas fa-file-alt me-2"></i>
+                            Apply for Membership
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="col-12">
+            <div class="text-center py-5">
+                <i class="fas fa-search fa-3x text-muted mb-3"></i>
+                <h4 class="text-muted">No SACCOs Found</h4>
+                <p class="text-muted">Try adjusting your search criteria or browse all available SACCOs.</p>
+                <a href="{% url 'financial:sacco_list' %}" class="btn btn-primary">
+                    View All SACCOs
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="row">
+        <div class="col-12">
+            <nav aria-label="SACCO pagination">
+                <ul class="pagination justify-content-center">{% if page_obj.has_previous %}<li class="page-item">
+                        <a class="page-link" href="?page=1{% if request.GET.county %}&county={{ request.GET.county }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">First</a>
+                    </li><li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if request.GET.county %}&county={{ request.GET.county }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Previous</a>
+                    </li>{% endif %}<li class="page-item active">
+                        <span class="page-link">{{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+                    </li>{% if page_obj.has_next %}<li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if request.GET.county %}&county={{ request.GET.county }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Next</a>
+                    </li><li class="page-item">
+                        <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if request.GET.county %}&county={{ request.GET.county }}{% endif %}{% if request.GET.search %}&search={{ request.GET.search }}{% endif %}">Last</a>
+                    </li>{% endif %}</ul>
+            </nav>
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.sacco-card {
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+.sacco-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(0,0,0,0.15) !important;
+}
+</style>
+{% endblock %}

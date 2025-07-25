@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Detailed Turnstile Debug</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .debug { background: #f8f9fa; border: 1px solid #dee2e6; padding: 15px; margin: 10px 0; border-radius: 5px; }
+        .error { background: #f8d7da; border-color: #f5c6cb; color: #721c24; }
+        .success { background: #d4edda; border-color: #c3e6cb; color: #155724; }
+        .info { background: #d1ecf1; border-color: #bee5eb; color: #0c5460; }
+        .widget-container { margin: 20px 0; padding: 20px; border: 2px solid #007bff; border-radius: 10px; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Detailed Cloudflare Turnstile Debug</h1>
+    
+    <div class="debug info">
+        <strong>Test Configuration:</strong><br>
+        Site Key: 1x00000000000000000000AA (Cloudflare Test Key)<br>
+        Expected Behavior: Widget should load and always pass verification<br>
+        Domain: file:// protocol (should work with test keys)
+    </div>
+    
+    <div class="widget-container">
+        <h3>Turnstile Widget:</h3>
+        <div id="turnstile-widget" class="cf-turnstile" 
+             data-sitekey="1x00000000000000000000AA"
+             data-theme="light"
+             data-callback="onSuccess"
+             data-error-callback="onError"
+             data-expired-callback="onExpired"
+             data-timeout-callback="onTimeout">
+        </div>
+    </div>
+    
+    <div id="debug-log" class="debug">
+        <strong>Debug Log:</strong><br>
+        <div id="log-content">Initializing...</div>
+    </div>
+    
+    <div id="status" class="debug">
+        <strong>Current Status:</strong> Loading...
+    </div>
+
+    <script>
+        let logContent = document.getElementById('log-content');
+        let statusDiv = document.getElementById('status');
+        
+        function log(message) {
+            console.log(message);
+            logContent.innerHTML += new Date().toLocaleTimeString() + ': ' + message + '<br>';
+        }
+        
+        function updateStatus(message, type = 'info') {
+            statusDiv.className = 'debug ' + type;
+            statusDiv.innerHTML = '<strong>Current Status:</strong> ' + message;
+        }
+        
+        // Test 1: Check if we can reach Cloudflare
+        log('Testing Cloudflare connectivity...');
+        fetch('https://challenges.cloudflare.com/turnstile/v0/api.js', {mode: 'no-cors'})
+            .then(() => log('✅ Cloudflare API reachable'))
+            .catch(error => log('❌ Cloudflare API unreachable: ' + error));
+        
+        // Test 2: Monitor script loading
+        log('Waiting for Turnstile script to load...');
+        
+        // Turnstile callbacks
+        function onSuccess(token) {
+            log('✅ Turnstile SUCCESS! Token: ' + token.substring(0, 20) + '...');
+            updateStatus('✅ Turnstile verification successful!', 'success');
+        }
+        
+        function onError(error) {
+            log('❌ Turnstile ERROR: ' + error);
+            updateStatus('❌ Turnstile error: ' + error, 'error');
+            
+            // Common error translations
+            if (error.includes('invalid-input-secret')) {
+                log('💡 This means the secret key is wrong or missing');
+            } else if (error.includes('invalid-input-response')) {
+                log('💡 This means the response token is invalid');
+            } else if (error.includes('bad-request')) {
+                log('💡 This means the request format is wrong');
+            } else if (error.includes('timeout-or-duplicate')) {
+                log('💡 This means the token was already used or expired');
+            }
+        }
+        
+        function onExpired() {
+            log('⚠️ Turnstile token expired');
+            updateStatus('⚠️ Turnstile token expired', 'error');
+        }
+        
+        function onTimeout() {
+            log('⏰ Turnstile timeout');
+            updateStatus('⏰ Turnstile timeout', 'error');
+        }
+        
+        // Test 3: Check if Turnstile object is available
+        function checkTurnstileAvailability() {
+            if (typeof turnstile !== 'undefined') {
+                log('✅ Turnstile object is available');
+                updateStatus('✅ Turnstile loaded successfully', 'success');
+            } else {
+                log('❌ Turnstile object not available');
+                updateStatus('❌ Turnstile script failed to load', 'error');
+            }
+        }
+        
+        // Test 4: Monitor network requests
+        window.addEventListener('error', function(e) {
+            if (e.filename && e.filename.includes('cloudflare')) {
+                log('❌ Cloudflare script error: ' + e.message);
+            }
+        });
+        
+        // Wait for page load then check
+        window.addEventListener('load', function() {
+            log('Page loaded, checking Turnstile availability...');
+            
+            // Check immediately
+            checkTurnstileAvailability();
+            
+            // Check again after 3 seconds
+            setTimeout(function() {
+                log('Second check after 3 seconds...');
+                checkTurnstileAvailability();
+            }, 3000);
+            
+            // Check again after 10 seconds
+            setTimeout(function() {
+                log('Final check after 10 seconds...');
+                checkTurnstileAvailability();
+                
+                if (typeof turnstile === 'undefined') {
+                    updateStatus('❌ Turnstile failed to load completely', 'error');
+                    log('🔧 Possible issues:');
+                    log('   - Network connectivity to Cloudflare');
+                    log('   - Browser blocking the script');
+                    log('   - Cloudflare service issues');
+                    log('   - Invalid site key format');
+                }
+            }, 10000);
+        });
+        
+        log('Debug script initialized');
+        updateStatus('🔄 Loading Turnstile script...', 'info');
+    </script>
+    
+    <!-- Load Cloudflare Turnstile Script -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer 
+            onload="log('✅ Turnstile script loaded successfully')"
+            onerror="log('❌ Failed to load Turnstile script')"></script>
+</body>
+</html>

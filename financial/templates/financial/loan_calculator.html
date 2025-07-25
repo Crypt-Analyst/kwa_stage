@@ -1,0 +1,335 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Loan Calculator - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-info text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-calculator me-2"></i>
+                                Loan Calculator
+                            </h1>
+                            <p class="card-text mb-0">
+                                Calculate your monthly payments and total loan cost
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:dashboard' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Dashboard
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Calculator Form -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-sliders-h me-2"></i>
+                        Loan Parameters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form id="loanCalculatorForm">
+                        <div class="mb-3">
+                            <label for="loanAmount" class="form-label">Loan Amount (KES)</label>
+                            <input type="number" class="form-control" id="loanAmount" 
+                                   min="10000" max="5000000" step="1000" value="500000"
+                                   placeholder="e.g., 500,000">
+                            <div class="form-text">Minimum: KES 10,000 | Maximum: KES 5,000,000</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="interestRate" class="form-label">Annual Interest Rate (%)</label>
+                            <input type="number" class="form-control" id="interestRate" 
+                                   min="5" max="30" step="0.1" value="15"
+                                   placeholder="e.g., 15.5">
+                            <div class="form-text">Typical range: 10% - 25% per year</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="loanTerm" class="form-label">Loan Term (Months)</label>
+                            <select class="form-select" id="loanTerm">
+                                <option value="6">6 months</option>
+                                <option value="12" selected>12 months (1 year)</option>
+                                <option value="18">18 months</option>
+                                <option value="24">24 months (2 years)</option>
+                                <option value="36">36 months (3 years)</option>
+                                <option value="48">48 months (4 years)</option>
+                                <option value="60">60 months (5 years)</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="loanType" class="form-label">Loan Type</label>
+                            <select class="form-select" id="loanType">
+                                <option value="motorcycle_loan">Motorcycle Loan</option>
+                                <option value="business_loan">Business Loan</option>
+                                <option value="personal_loan">Personal Loan</option>
+                                <option value="asset_financing">Asset Financing</option>
+                            </select>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="button" class="btn btn-primary" onclick="calculateLoan()">
+                                <i class="fas fa-calculator me-2"></i>
+                                Calculate Payment
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results -->
+        <div class="col-lg-6 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-chart-pie me-2"></i>
+                        Calculation Results
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div id="calculationResults">
+                        <div class="text-center text-muted py-5">
+                            <i class="fas fa-calculator fa-3x mb-3"></i>
+                            <p>Enter loan details and click "Calculate Payment" to see results</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Presets -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card shadow-sm">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-motorcycle me-2"></i>
+                        Quick Motorcycle Loan Presets
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <div class="card border-primary">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">New Motorcycle</h6>
+                                    <p class="text-muted small">KES 150,000 - 300,000</p>
+                                    <button class="btn btn-outline-primary btn-sm" 
+                                            onclick="setPreset(200000, 14, 24)">
+                                        Use Preset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-success">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Used Motorcycle</h6>
+                                    <p class="text-muted small">KES 80,000 - 150,000</p>
+                                    <button class="btn btn-outline-success btn-sm" 
+                                            onclick="setPreset(100000, 16, 18)">
+                                        Use Preset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-warning">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Business Expansion</h6>
+                                    <p class="text-muted small">KES 300,000 - 1,000,000</p>
+                                    <button class="btn btn-outline-warning btn-sm" 
+                                            onclick="setPreset(500000, 18, 36)">
+                                        Use Preset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card border-info">
+                                <div class="card-body text-center">
+                                    <h6 class="card-title">Emergency Fund</h6>
+                                    <p class="text-muted small">KES 50,000 - 200,000</p>
+                                    <button class="btn btn-outline-info btn-sm" 
+                                            onclick="setPreset(100000, 20, 12)">
+                                        Use Preset
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Tips -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card bg-light shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        <i class="fas fa-lightbulb me-2 text-warning"></i>
+                        Financial Tips for Boda Boda Riders
+                    </h5>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Compare interest rates from multiple lenders
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Consider shorter loan terms to save on interest
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Make sure you can afford the monthly payment
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Factor in insurance and maintenance costs
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Keep records of your income for loan applications
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    Consider joining a SACCO for better rates
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function calculateLoan() {
+    const amount = parseFloat(document.getElementById('loanAmount').value);
+    const annualRate = parseFloat(document.getElementById('interestRate').value);
+    const termMonths = parseInt(document.getElementById('loanTerm').value);
+    
+    if (!amount || !annualRate || !termMonths) {
+        alert('Please fill in all fields');
+        return;
+    }
+    
+    // Calculate monthly payment using standard loan formula
+    const monthlyRate = annualRate / 100 / 12;
+    const monthlyPayment = amount * (monthlyRate * Math.pow(1 + monthlyRate, termMonths)) / 
+                          (Math.pow(1 + monthlyRate, termMonths) - 1);
+    
+    const totalPayment = monthlyPayment * termMonths;
+    const totalInterest = totalPayment - amount;
+    
+    // Display results
+    const resultsHtml = `
+        <div class="row g-3">
+            <div class="col-12">
+                <div class="text-center mb-4">
+                    <h2 class="text-success mb-0">KES ${monthlyPayment.toLocaleString('en-KE', {maximumFractionDigits: 0})}</h2>
+                    <small class="text-muted">Monthly Payment</small>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card border-info">
+                    <div class="card-body text-center">
+                        <h6 class="text-info">Total Amount</h6>
+                        <h5>KES ${totalPayment.toLocaleString('en-KE', {maximumFractionDigits: 0})}</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-6">
+                <div class="card border-warning">
+                    <div class="card-body text-center">
+                        <h6 class="text-warning">Total Interest</h6>
+                        <h5>KES ${totalInterest.toLocaleString('en-KE', {maximumFractionDigits: 0})}</h5>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h6>Breakdown:</h6>
+                        <div class="row text-center">
+                            <div class="col-4">
+                                <small class="text-muted">Principal</small><br>
+                                <strong>KES ${amount.toLocaleString('en-KE', {maximumFractionDigits: 0})}</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Interest Rate</small><br>
+                                <strong>${annualRate}% p.a.</strong>
+                            </div>
+                            <div class="col-4">
+                                <small class="text-muted">Term</small><br>
+                                <strong>${termMonths} months</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 mt-3">
+                <div class="d-grid gap-2">
+                    <a href="/financial/banks/" class="btn btn-success">
+                        <i class="fas fa-university me-2"></i>
+                        Apply with Banks
+                    </a>
+                    <a href="/financial/saccos/" class="btn btn-primary">
+                        <i class="fas fa-handshake me-2"></i>
+                        Check SACCOs
+                    </a>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.getElementById('calculationResults').innerHTML = resultsHtml;
+}
+
+function setPreset(amount, rate, term) {
+    document.getElementById('loanAmount').value = amount;
+    document.getElementById('interestRate').value = rate;
+    document.getElementById('loanTerm').value = term;
+    calculateLoan();
+}
+
+// Auto-calculate on input change
+document.addEventListener('DOMContentLoaded', function() {
+    const inputs = ['loanAmount', 'interestRate', 'loanTerm'];
+    inputs.forEach(id => {
+        document.getElementById(id).addEventListener('input', calculateLoan);
+        document.getElementById(id).addEventListener('change', calculateLoan);
+    });
+    
+    // Initial calculation
+    calculateLoan();
+});
+</script>
+{% endblock %}

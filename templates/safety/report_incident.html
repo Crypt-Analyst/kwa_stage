@@ -1,0 +1,589 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Report Incident - {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-section {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #dc3545;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.form-help {
+    background: #fff3cd;
+    border-left: 4px solid #ffc107;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.required-field::after {
+    content: ' *';
+    color: #dc3545;
+}
+
+.severity-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.severity-low { background-color: #28a745; }
+.severity-medium { background-color: #ffc107; }
+.severity-high { background-color: #fd7e14; }
+.severity-critical { background-color: #dc3545; }
+
+.emergency-alert {
+    background: #f8d7da;
+    border: 1px solid #f5c6cb;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.injury-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 15px;
+}
+
+.hidden-section {
+    display: none;
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-exclamation-triangle me-3"></i>Report Safety Incident</h1>
+        <div>
+            <a href="{% url 'safety:incident_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Incidents
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="emergency-alert">
+            <h6><i class="fas fa-phone me-2"></i>Emergency Contacts</h6>
+            <p class="mb-2">
+                <strong>Police:</strong> 999 | <strong>Ambulance:</strong> 999 | <strong>Fire:</strong> 999
+            </p>
+            <p class="mb-0">
+                For immediate medical emergencies, call emergency services first, then report the incident here.
+            </p>
+        </div>
+
+        <div class="form-card">
+            <div class="card-body">
+                <div class="form-help">
+                    <h6><i class="fas fa-info-circle me-2"></i>Incident Reporting</h6>
+                    <p class="mb-0">
+                        Report any safety incidents, accidents, near-misses, or unsafe conditions. Your report helps 
+                        improve safety for all riders and may be required for insurance claims.
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="incidentForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Basic Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="incident_type" class="form-label required-field">Incident Type</label>
+                                <select class="form-select" id="incident_type" name="incident_type" required>
+                                    <option value="">Select incident type</option>
+                                    <option value="accident">Traffic Accident</option>
+                                    <option value="theft">Theft/Robbery</option>
+                                    <option value="harassment">Harassment</option>
+                                    <option value="mechanical">Mechanical Failure</option>
+                                    <option value="near_miss">Near Miss</option>
+                                    <option value="unsafe_condition">Unsafe Road Condition</option>
+                                    <option value="violence">Violence/Assault</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="severity" class="form-label required-field">Severity Level</label>
+                                <select class="form-select" id="severity" name="severity" required>
+                                    <option value="">Select severity</option>
+                                    <option value="low">
+                                        <span class="severity-indicator severity-low"></span>Low - Minor incident, no injuries
+                                    </option>
+                                    <option value="medium">Medium - Property damage, minor injuries</option>
+                                    <option value="high">High - Serious injuries, major damage</option>
+                                    <option value="critical">Critical - Life threatening, major accident</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="row" id="otherIncidentRow" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="other_incident_type" class="form-label">Specify Incident Type</label>
+                                <input type="text" class="form-control" id="other_incident_type" name="other_incident_type" 
+                                       placeholder="Describe the type of incident">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Date, Time & Location -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-map-marker-alt"></i>
+                            When & Where
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="incident_date" class="form-label required-field">Date</label>
+                                <input type="date" class="form-control" id="incident_date" name="incident_date" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="incident_time" class="form-label required-field">Time</label>
+                                <input type="time" class="form-control" id="incident_time" name="incident_time" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="weather_conditions" class="form-label">Weather</label>
+                                <select class="form-select" id="weather_conditions" name="weather_conditions">
+                                    <option value="">Select weather</option>
+                                    <option value="clear">Clear/Sunny</option>
+                                    <option value="cloudy">Cloudy</option>
+                                    <option value="rainy">Rainy</option>
+                                    <option value="foggy">Foggy</option>
+                                    <option value="windy">Windy</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="location" class="form-label required-field">Location</label>
+                            <input type="text" class="form-control" id="location" name="location" 
+                                   placeholder="Street address, landmark, or detailed location description" required>
+                            <div class="form-text">Be as specific as possible for investigation purposes</div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="road_conditions" class="form-label">Road Conditions</label>
+                                <select class="form-select" id="road_conditions" name="road_conditions">
+                                    <option value="">Select condition</option>
+                                    <option value="good">Good</option>
+                                    <option value="wet">Wet</option>
+                                    <option value="pothole">Potholes</option>
+                                    <option value="construction">Under Construction</option>
+                                    <option value="poor_lighting">Poor Lighting</option>
+                                    <option value="no_signs">Missing Signs</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="traffic_conditions" class="form-label">Traffic Conditions</label>
+                                <select class="form-select" id="traffic_conditions" name="traffic_conditions">
+                                    <option value="">Select traffic</option>
+                                    <option value="light">Light Traffic</option>
+                                    <option value="moderate">Moderate Traffic</option>
+                                    <option value="heavy">Heavy Traffic</option>
+                                    <option value="jam">Traffic Jam</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incident Details -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-file-text"></i>
+                            Incident Details
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="description" class="form-label required-field">What Happened?</label>
+                            <textarea class="form-control" id="description" name="description" rows="5" 
+                                      placeholder="Provide a detailed description of what happened. Include sequence of events, actions taken, and any relevant details." required></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="cause" class="form-label">Probable Cause</label>
+                            <textarea class="form-control" id="cause" name="cause" rows="3" 
+                                      placeholder="What do you think caused this incident?"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- Parties Involved -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-users"></i>
+                            Parties Involved
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="other_parties" class="form-label">Other Parties Involved</label>
+                                <textarea class="form-control" id="other_parties" name="other_parties" rows="3" 
+                                          placeholder="List other people involved (drivers, passengers, pedestrians, etc.)"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="witnesses" class="form-label">Witnesses</label>
+                                <textarea class="form-control" id="witnesses" name="witnesses" rows="3" 
+                                          placeholder="Names and contact information of witnesses"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="police_involved" class="form-label">Police Involvement</label>
+                                <select class="form-select" id="police_involved" name="police_involved">
+                                    <option value="">Select option</option>
+                                    <option value="yes">Police called and attended</option>
+                                    <option value="report_filed">Police report filed</option>
+                                    <option value="no">No police involvement</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="police_report_number" class="form-label">Police Report Number</label>
+                                <input type="text" class="form-control" id="police_report_number" name="police_report_number" 
+                                       placeholder="OB number or case reference">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Injuries & Medical -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-heartbeat"></i>
+                            Injuries & Medical Attention
+                        </h5>
+                        
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="injuries_sustained" name="injuries_sustained">
+                            <label class="form-check-label" for="injuries_sustained">
+                                Were there any injuries sustained?
+                            </label>
+                        </div>
+
+                        <div id="injurySection" class="injury-section hidden-section">
+                            <div class="mb-3">
+                                <label for="injury_details" class="form-label">Injury Details</label>
+                                <textarea class="form-control" id="injury_details" name="injury_details" rows="3" 
+                                          placeholder="Describe injuries sustained by you or others"></textarea>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="medical_attention" class="form-label">Medical Attention Received</label>
+                                    <select class="form-select" id="medical_attention" name="medical_attention">
+                                        <option value="">Select option</option>
+                                        <option value="none">No medical attention</option>
+                                        <option value="first_aid">First aid only</option>
+                                        <option value="clinic">Treated at clinic</option>
+                                        <option value="hospital">Hospital treatment</option>
+                                        <option value="ambulance">Ambulance called</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="hospital_name" class="form-label">Hospital/Clinic Name</label>
+                                    <input type="text" class="form-control" id="hospital_name" name="hospital_name" 
+                                           placeholder="Name of medical facility">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Vehicle/Property Damage -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-motorcycle"></i>
+                            Vehicle & Property Damage
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="vehicle_damage" class="form-label">Your Vehicle Damage</label>
+                                <textarea class="form-control" id="vehicle_damage" name="vehicle_damage" rows="3" 
+                                          placeholder="Describe damage to your motorcycle"></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="other_property_damage" class="form-label">Other Property Damage</label>
+                                <textarea class="form-control" id="other_property_damage" name="other_property_damage" rows="3" 
+                                          placeholder="Damage to other vehicles or property"></textarea>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="estimated_cost" class="form-label">Estimated Repair Cost (KES)</label>
+                                <input type="number" class="form-control" id="estimated_cost" name="estimated_cost" 
+                                       placeholder="0.00" step="0.01" min="0">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="towed" class="form-label">Vehicle Towed?</label>
+                                <select class="form-select" id="towed" name="towed">
+                                    <option value="">Select option</option>
+                                    <option value="yes">Yes, vehicle was towed</option>
+                                    <option value="no">No, driven away</option>
+                                    <option value="abandoned">Left at scene</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Evidence/Photos -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-camera"></i>
+                            Evidence & Photos
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="photos" class="form-label">Incident Photos</label>
+                            <div class="upload-area" id="photoUploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-camera"></i>
+                                </div>
+                                <h6>Upload incident photos</h6>
+                                <p class="text-muted mb-3">Take photos of damage, scene, and relevant details</p>
+                                <input type="file" class="form-control d-none" id="photos" name="photos" 
+                                       accept=".jpg,.jpeg,.png" multiple>
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('photos').click()">
+                                    Choose Files
+                                </button>
+                            </div>
+                            <div class="form-text">Upload multiple photos if available (Max: 5 photos, 10MB each)</div>
+                            <div id="photosList" class="mt-2"></div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="supporting_documents" class="form-label">Supporting Documents</label>
+                            <div class="upload-area" id="docUploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-file-alt"></i>
+                                </div>
+                                <h6>Upload supporting documents</h6>
+                                <p class="text-muted mb-3">Police reports, medical reports, receipts, etc.</p>
+                                <input type="file" class="form-control d-none" id="supporting_documents" name="supporting_documents" 
+                                       accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" multiple>
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('supporting_documents').click()">
+                                    Choose Files
+                                </button>
+                            </div>
+                            <div id="docsList" class="mt-2"></div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-sticky-note"></i>
+                            Additional Information
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="prevention_measures" class="form-label">How Could This Have Been Prevented?</label>
+                            <textarea class="form-control" id="prevention_measures" name="prevention_measures" rows="3" 
+                                      placeholder="Your suggestions for preventing similar incidents"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="additional_notes" class="form-label">Additional Notes</label>
+                            <textarea class="form-control" id="additional_notes" name="additional_notes" rows="3" 
+                                      placeholder="Any other relevant information"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="insurance_notified" name="insurance_notified">
+                                    <label class="form-check-label" for="insurance_notified">
+                                        Insurance company has been notified
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="follow_up_needed" name="follow_up_needed">
+                                    <label class="form-check-label" for="follow_up_needed">
+                                        Follow-up action needed
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between pt-3">
+                        <a href="{% url 'safety:incident_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-danger">
+                            <i class="fas fa-exclamation-triangle me-2"></i>Submit Incident Report
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Incident type handling
+    const incidentTypeSelect = document.getElementById('incident_type');
+    const otherIncidentRow = document.getElementById('otherIncidentRow');
+
+    incidentTypeSelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            otherIncidentRow.style.display = 'block';
+            document.getElementById('other_incident_type').required = true;
+        } else {
+            otherIncidentRow.style.display = 'none';
+            document.getElementById('other_incident_type').required = false;
+        }
+    });
+
+    // Injury section toggle
+    const injuriesCheckbox = document.getElementById('injuries_sustained');
+    const injurySection = document.getElementById('injurySection');
+
+    injuriesCheckbox.addEventListener('change', function() {
+        if (this.checked) {
+            injurySection.classList.remove('hidden-section');
+        } else {
+            injurySection.classList.add('hidden-section');
+        }
+    });
+
+    // File upload handling for photos
+    const photosInput = document.getElementById('photos');
+    const photosList = document.getElementById('photosList');
+
+    photosInput.addEventListener('change', function(e) {
+        displayFileList(e.target.files, photosList, 'photo');
+    });
+
+    // File upload handling for documents
+    const docsInput = document.getElementById('supporting_documents');
+    const docsList = document.getElementById('docsList');
+
+    docsInput.addEventListener('change', function(e) {
+        displayFileList(e.target.files, docsList, 'document');
+    });
+
+    function displayFileList(files, container, type) {
+        container.innerHTML = '';
+        
+        Array.from(files).forEach((file, index) => {
+            const fileItem = document.createElement('div');
+            fileItem.className = 'alert alert-info d-flex align-items-center mt-2';
+            fileItem.innerHTML = `
+                <i class="fas fa-${type === 'photo' ? 'image' : 'file-alt'} me-2"></i>
+                <span>${file.name} (${formatFileSize(file.size)})</span>
+                <button type="button" class="btn-close ms-auto" onclick="removeFile('${type}', ${index})"></button>
+            `;
+            container.appendChild(fileItem);
+        });
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Set current date and time as default
+    const now = new Date();
+    document.getElementById('incident_date').value = now.toISOString().split('T')[0];
+    document.getElementById('incident_time').value = now.toTimeString().slice(0, 5);
+
+    // Form validation
+    document.getElementById('incidentForm').addEventListener('submit', function(e) {
+        const incidentType = document.getElementById('incident_type').value;
+        const severity = document.getElementById('severity').value;
+        const description = document.getElementById('description').value.trim();
+        const location = document.getElementById('location').value.trim();
+        
+        if (!incidentType || !severity || !description || !location) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+
+        if (description.length < 20) {
+            e.preventDefault();
+            alert('Please provide a more detailed description of the incident (at least 20 characters)');
+            return false;
+        }
+    });
+});
+
+function removeFile(type, index) {
+    // Note: This is a simplified version. In a real implementation,
+    // you'd need to handle file removal from the input element
+    alert('File removal functionality would be implemented here');
+}
+</script>
+{% endblock %}

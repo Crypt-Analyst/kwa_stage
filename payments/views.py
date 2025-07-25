@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.core.paginator import Paginator
 from decimal import Decimal
 import uuid
+from members.models import Member
 
 from .models import (EWallet, WalletTransaction, MobileMoneyTransaction, 
                     DigitalToken, PaymentMethod, PaymentTransaction, MobileMoneyProvider)
@@ -65,7 +66,8 @@ def payments_dashboard(request):
         }
         
         return render(request, 'payments/dashboard.html', context)
-    except:
+    except Member.DoesNotExist:
+        messages.error(request, "Please complete your member profile first.")
         return redirect('members:profile_setup')
 
 

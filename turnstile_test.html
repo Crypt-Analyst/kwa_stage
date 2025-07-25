@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare Turnstile Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Cloudflare Turnstile Test</h1>
+        
+        <div class="status success">
+            <strong>Configuration Status:</strong><br>
+            Site Key: 1x00000000000000000000AA<br>
+            Environment: Development (Test Keys)
+        </div>
+        
+        <h3>Turnstile Widget Test:</h3>
+        <form method="post" action="#" onsubmit="return testSubmit(event)">
+            <!-- Cloudflare Turnstile Widget -->
+            <div class="cf-turnstile" 
+                 data-sitekey="1x00000000000000000000AA"
+                 data-theme="light"
+                 data-callback="onTurnstileSuccess"
+                 data-error-callback="onTurnstileError">
+            </div>
+            
+            <br>
+            <button type="submit" style="padding: 10px 20px; background: #007bff; color: white; border: none; border-radius: 5px;">
+                Test Submit
+            </button>
+        </form>
+        
+        <div id="result" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Cloudflare Turnstile Script -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+    
+    <script>
+        function onTurnstileSuccess(token) {
+            document.getElementById('result').innerHTML = 
+                '<div class="status success"><strong>SUCCESS!</strong><br>Token received: ' + 
+                token.substring(0, 20) + '...</div>';
+        }
+        
+        function onTurnstileError(error) {
+            document.getElementById('result').innerHTML = 
+                '<div class="status error"><strong>Turnstile Error:</strong><br>' + error + '</div>';
+        }
+        
+        function testSubmit(event) {
+            event.preventDefault();
+            const token = document.querySelector('[name="cf-turnstile-response"]');
+            if (token && token.value) {
+                document.getElementById('result').innerHTML = 
+                    '<div class="status success"><strong>Form Ready!</strong><br>Turnstile token is present and form can be submitted.</div>';
+            } else {
+                document.getElementById('result').innerHTML = 
+                    '<div class="status error"><strong>No Token!</strong><br>Turnstile verification not completed.</div>';
+            }
+            return false;
+        }
+        
+        // Check if Turnstile script loaded
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                if (typeof turnstile === 'undefined') {
+                    document.getElementById('result').innerHTML = 
+                        '<div class="status error"><strong>Script Error:</strong><br>Cloudflare Turnstile script failed to load.</div>';
+                }
+            }, 3000);
+        });
+    </script>
+</body>
+</html>

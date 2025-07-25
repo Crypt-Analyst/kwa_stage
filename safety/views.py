@@ -56,7 +56,8 @@ def safety_dashboard(request):
         }
         
         return render(request, 'safety/dashboard.html', context)
-    except:
+    except Member.DoesNotExist:
+        messages.error(request, "Please complete your member profile first.")
         return redirect('members:profile_setup')
 
 

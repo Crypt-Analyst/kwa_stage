@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Contact {{ bank.name }} - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-success text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-university me-2"></i>
+                                Contact {{ bank.name }}
+                            </h1>
+                            <p class="card-text mb-0">
+                                Get in touch with {{ bank.name }} for loan applications
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:bank_providers' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to Banks
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Bank Information -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">{{ bank.name }} - Contact Information</h5>
+                </div>
+                <div class="card-body">
+                    {% if message %}
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle me-2"></i>
+                        {{ message }}
+                    </div>
+                    {% endif %}
+
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-success">Bank Details</h6>
+                            <p class="mb-3">{{ bank.description }}</p>
+                            
+                            <div class="mb-3">
+                                <h6 class="text-secondary">Available Services:</h6>
+                                <div class="d-flex flex-wrap gap-2">
+                                    {% if bank.offers_motorcycle_loans %}
+                                    <span class="badge bg-primary">Motorcycle Loans</span>
+                                    {% endif %}
+                                    {% if bank.offers_business_loans %}
+                                    <span class="badge bg-info">Business Loans</span>
+                                    {% endif %}
+                                    {% if bank.offers_personal_loans %}
+                                    <span class="badge bg-warning text-dark">Personal Loans</span>
+                                    {% endif %}
+                                    {% if bank.offers_asset_financing %}
+                                    <span class="badge bg-secondary">Asset Financing</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            {% if bank.min_interest_rate and bank.max_interest_rate %}
+                            <div class="mb-3">
+                                <h6 class="text-secondary">Interest Rate Range:</h6>
+                                <p class="mb-0">{{ bank.min_interest_rate }}% - {{ bank.max_interest_rate }}% per annum</p>
+                            </div>
+                            {% endif %}
+                        </div>
+
+                        <div class="col-md-6 mb-4">
+                            <h6 class="text-success">Contact Information</h6>
+                            
+                            {% if bank.phone %}
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-phone text-success me-2"></i>
+                                    <strong>Phone:</strong>
+                                </div>
+                                <a href="tel:{{ bank.phone }}" class="btn btn-outline-success">
+                                    <i class="fas fa-phone me-2"></i>
+                                    {{ bank.phone }}
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            {% if bank.website %}
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-globe text-primary me-2"></i>
+                                    <strong>Website:</strong>
+                                </div>
+                                <a href="{{ bank.website }}" target="_blank" class="btn btn-outline-primary">
+                                    <i class="fas fa-external-link-alt me-2"></i>
+                                    Visit Website
+                                </a>
+                            </div>
+                            {% endif %}
+
+                            {% if bank.email %}
+                            <div class="mb-3">
+                                <div class="d-flex align-items-center mb-2">
+                                    <i class="fas fa-envelope text-info me-2"></i>
+                                    <strong>Email:</strong>
+                                </div>
+                                <a href="mailto:{{ bank.email }}" class="btn btn-outline-info">
+                                    <i class="fas fa-envelope me-2"></i>
+                                    {{ bank.email }}
+                                </a>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    {% if bank.key_features_list %}
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <h6 class="text-success border-bottom pb-2">Key Features:</h6>
+                            <ul class="list-unstyled">{% for feature in bank.key_features_list %}<li class="mb-2">
+                                    <i class="fas fa-check text-success me-2"></i>
+                                    {{ feature }}
+                                </li>{% endfor %}</ul>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Panel -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h6 class="mb-0">
+                        <i class="fas fa-hand-point-right me-2"></i>
+                        Next Steps
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-university fa-3x text-success mb-3"></i>
+                        <h5>Ready to Apply?</h5>
+                        <p class="text-muted">Contact {{ bank.name }} directly using the information provided.</p>
+                    </div>
+
+                    <div class="d-grid gap-2">
+                        {% if bank.website %}
+                        <a href="{{ bank.website }}" target="_blank" class="btn btn-success">
+                            <i class="fas fa-external-link-alt me-2"></i>
+                            Visit Bank Website
+                        </a>
+                        {% endif %}
+
+                        {% if bank.phone %}
+                        <a href="tel:{{ bank.phone }}" class="btn btn-outline-success">
+                            <i class="fas fa-phone me-2"></i>
+                            Call Now
+                        </a>
+                        {% endif %}
+
+                        <a href="{% url 'financial:loan_calculator' %}" class="btn btn-outline-primary">
+                            <i class="fas fa-calculator me-2"></i>
+                            Loan Calculator
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Application Tips
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <ul class="list-unstyled small">
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Have your ID and income proof ready
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Know your desired loan amount
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Prepare collateral information
+                        </li>
+                        <li class="mb-2">
+                            <i class="fas fa-check text-success me-2"></i>
+                            Have contact details for references
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

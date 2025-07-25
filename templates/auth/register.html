@@ -347,7 +347,7 @@
                 </div>
                 <h1 class="register-title">Join Our Family</h1>
                 <p class="register-subtitle">Become part of Kenya's largest Boda Boda welfare network</p>
-                <p class="family-motto">"Boda Boda is Family - Don't Forget That"</p>
+                <p class="family-motto">"Stage ni yetu, sauti ni yao — we just build the mic"</p>
             </div>
 
             <!-- Form Section -->
@@ -414,6 +414,11 @@
                             </label>
                         </div>
                     </div>
+
+                    <!-- Cloudflare Turnstile -->
+                    {% if turnstile_site_key %}
+                    <div class="cf-turnstile mb-3" data-sitekey="{{ turnstile_site_key }}" data-theme="light" style="display: flex; justify-content: center;"></div>
+                    {% endif %}
 
                     <!-- Register Button -->
                     <button type="submit" class="btn btn-primary register-btn">
@@ -545,4 +550,9 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 </script>
+
+<!-- Cloudflare Turnstile Script -->
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 {% endblock %}

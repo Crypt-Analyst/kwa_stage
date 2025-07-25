@@ -1,6 +1,41 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_css %}
+<style>
+    .stage-dropdown {
+        max-height: 200px;
+        overflow-y: auto;
+        display: none;
+        position: absolute;
+        z-index: 1000;
+        border: 1px solid #dee2e6;
+        border-radius: 0.375rem;
+        background: white;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+    }
+    
+    .dropdown-item.cursor-pointer {
+        cursor: pointer;
+        padding: 0.5rem 1rem;
+        border: none;
+        background: none;
+        width: 100%;
+        text-align: left;
+    }
+    
+    .dropdown-item.cursor-pointer:hover,
+    .dropdown-item.cursor-pointer.active {
+        background-color: #f8f9fa;
+    }
+    
+    .dropdown-item.cursor-pointer:focus {
+        background-color: #e9ecef;
+        outline: none;
+    }
+</style>
+{% endblock %}
+
 {% block title %}Complete Your Profile - KwaStage{% endblock %}
 
 {% block content %}
@@ -31,12 +66,16 @@
                     <!-- Profile Photo Section -->
                     <div class="profile-photo-section text-center mb-4">
                         <div class="photo-upload-area" id="photoUploadArea">
-                            <div id="photoPreview" class="profile-photo-preview default-avatar">
-                                <i class="fas fa-user"></i>
+                            <div id="photoPreview" class="profile-photo-preview {% if existing_member and existing_member.profile_photo %}{% else %}default-avatar{% endif %}">
+                                {% if existing_member and existing_member.profile_photo %}
+                                    <img src="{{ existing_member.profile_photo.url }}" alt="Profile Photo">
+                                {% else %}
+                                    <i class="fas fa-user"></i>
+                                {% endif %}
                             </div>
                             <div class="upload-overlay">
                                 <i class="fas fa-camera"></i>
-                                <p>Click to upload photo</p>
+                                <p>{% if existing_member and existing_member.profile_photo %}Click to change photo{% else %}Click to upload photo{% endif %}</p>
                             </div>
                             <input type="file" id="profilePhoto" name="profile_photo" accept="image/*" style="display: none;">
                         </div>
@@ -116,16 +155,21 @@
                             <div class="col-md-6">
                                 <div class="mb-3">
                                     <label class="form-label">Stage/Station *</label>
-                                    <select class="form-select" name="stage" required id="stageSelect">
-                                        <option value="">Select your stage</option>
-                                        {% for stage in stages %}
-                                        <option value="{{ stage.id }}" data-location="{{ stage.location }}"
-                                                data-county="{{ stage.county }}"
-                                                {% if form_data.stage == stage.id|stringformat:"s" %}selected{% endif %}>
-                                            {{ stage.name }} - {{ stage.location }}
-                                        </option>
-                                        {% endfor %}
-                                    </select>
+                                    <div class="position-relative">
+                                        <input type="text" 
+                                               class="form-control" 
+                                               id="stageInput" 
+                                               name="stage_name" 
+                                               placeholder="Type or select your stage/station"
+                                               autocomplete="off"
+                                               required
+                                               value="{% if form_data.stage %}{{ form_data.stage_name|default:'' }}{% endif %}">
+                                        <input type="hidden" id="selectedStageId" name="stage_id" value="{{ form_data.stage|default:'' }}">
+                                        <div id="stageDropdown" class="dropdown-menu w-100 stage-dropdown">
+                                            <!-- Dynamic stage options will be populated here -->
+                                        </div>
+                                    </div>
+                                    <small class="text-muted">Start typing to see available stages or enter a new one. New stages will be saved for future users.</small>
                                 </div>
                             </div>
                             <div class="col-md-6">
@@ -502,15 +546,138 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
     
-    // Stage selection handler
-    const stageSelect = document.getElementById('stageSelect');
-    stageSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const location = selectedOption.getAttribute('data-location');
-        const county = selectedOption.getAttribute('data-county');
+    // Stage autocomplete functionality
+    const stageInput = document.getElementById('stageInput');
+    const stageDropdown = document.getElementById('stageDropdown');
+    const selectedStageId = document.getElementById('selectedStageId');
+    
+    // Pre-load all stages data
+    const stagesData = [
+        {% for stage in stages %}
+        {
+            id: {{ stage.id }},
+            name: "{{ stage.name|escapejs }}",
+            location: "{{ stage.location|escapejs }}",
+            county: "{{ stage.county|escapejs }}"
+        },
+        {% endfor %}
+    ];
+    
+    // Filter and display stages based on input
+    function filterStages(searchTerm) {
+        const filtered = stagesData.filter(stage => 
+            stage.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            stage.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            stage.county.toLowerCase().includes(searchTerm.toLowerCase())
+        );
         
-        if (location && county) {
-            console.log('Selected stage:', this.value, 'Location:', location, 'County:', county);
+        stageDropdown.innerHTML = '';
+        
+        if (filtered.length > 0) {
+            filtered.forEach(stage => {
+                const option = document.createElement('div');
+                option.className = 'dropdown-item cursor-pointer';
+                option.innerHTML = `<strong>${stage.name}</strong><br><small class="text-muted">${stage.location}, ${stage.county}</small>`;
+                option.addEventListener('click', function() {
+                    stageInput.value = stage.name;
+                    selectedStageId.value = stage.id;
+                    stageDropdown.style.display = 'none';
+                });
+                stageDropdown.appendChild(option);
+            });
+        }
+        
+        // Always show option to create new stage
+        if (searchTerm.trim().length > 0) {
+            const newStageOption = document.createElement('div');
+            newStageOption.className = 'dropdown-item cursor-pointer bg-light';
+            newStageOption.innerHTML = `<i class="fas fa-plus"></i> <strong>Create "${searchTerm}" as new stage</strong><br><small class="text-muted">This will be available for other users too</small>`;
+            newStageOption.addEventListener('click', function() {
+                stageInput.value = searchTerm;
+                selectedStageId.value = 'new';
+                stageDropdown.style.display = 'none';
+            });
+            stageDropdown.appendChild(newStageOption);
+        }
+        
+        stageDropdown.style.display = filtered.length > 0 || searchTerm.trim().length > 0 ? 'block' : 'none';
+    }
+    
+    // Handle input events
+    stageInput.addEventListener('input', function() {
+        const searchTerm = this.value.trim();
+        if (searchTerm.length > 0) {
+            filterStages(searchTerm);
+        } else {
+            stageDropdown.style.display = 'none';
+            selectedStageId.value = '';
+        }
+    });
+    
+    // Handle focus to show dropdown
+    stageInput.addEventListener('focus', function() {
+        if (this.value.trim().length > 0) {
+            filterStages(this.value.trim());
+        } else {
+            // Show all stages when focused
+            stageDropdown.innerHTML = '';
+            stagesData.forEach(stage => {
+                const option = document.createElement('div');
+                option.className = 'dropdown-item cursor-pointer';
+                option.innerHTML = `<strong>${stage.name}</strong><br><small class="text-muted">${stage.location}, ${stage.county}</small>`;
+                option.addEventListener('click', function() {
+                    stageInput.value = stage.name;
+                    selectedStageId.value = stage.id;
+                    stageDropdown.style.display = 'none';
+                });
+                stageDropdown.appendChild(option);
+            });
+            stageDropdown.style.display = 'block';
+        }
+    });
+    
+    // Hide dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!stageInput.contains(e.target) && !stageDropdown.contains(e.target)) {
+            stageDropdown.style.display = 'none';
+        }
+    });
+    
+    // Handle keyboard navigation
+    stageInput.addEventListener('keydown', function(e) {
+        const items = stageDropdown.querySelectorAll('.dropdown-item');
+        if (items.length === 0) return;
+        
+        let currentIndex = -1;
+        items.forEach((item, index) => {
+            if (item.classList.contains('active')) {
+                currentIndex = index;
+            }
+        });
+        
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            if (currentIndex < items.length - 1) {
+                if (currentIndex >= 0) items[currentIndex].classList.remove('active');
+                currentIndex++;
+                items[currentIndex].classList.add('active');
+                items[currentIndex].scrollIntoView({ block: 'nearest' });
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            if (currentIndex > 0) {
+                items[currentIndex].classList.remove('active');
+                currentIndex--;
+                items[currentIndex].classList.add('active');
+                items[currentIndex].scrollIntoView({ block: 'nearest' });
+            }
+        } else if (e.key === 'Enter') {
+            e.preventDefault();
+            if (currentIndex >= 0) {
+                items[currentIndex].click();
+            }
+        } else if (e.key === 'Escape') {
+            stageDropdown.style.display = 'none';
         }
     });
     
@@ -628,6 +795,23 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('input', function() {
             this.value = this.value.replace(/\D/g, '');
         });
+    });
+    
+    
+    // Form submission handling for custom stage
+    const profileForm = document.querySelector('form');
+    profileForm.addEventListener('submit', function(e) {
+        if (stageSelect.value === 'custom') {
+            if (!customStageName.value.trim()) {
+                e.preventDefault();
+                alert('Please enter your custom stage name');
+                customStageName.focus();
+                return false;
+            }
+            // Set the custom stage name as the stage value
+            stageSelect.name = 'custom_stage_name';
+            customStageName.name = 'stage';
+        }
     });
 });
 </script>

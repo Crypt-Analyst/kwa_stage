@@ -28,10 +28,49 @@ def member_profile(request):
     """View/edit member profile"""
     try:
         member = request.user.member
-    except:
+    except Member.DoesNotExist:
         return redirect('members:profile_setup')
     context = {'member': member}
     return render(request, 'members/profile.html', context)
+
+def create_new_stage(stage_name):
+    """Create a new stage with user-provided name"""
+    from datetime import datetime
+    from stages.models import Organization
+    
+    # Get default organization or create one
+    organization = Organization.objects.first()
+    if not organization:
+        # Create default organization if none exists
+        admin_user = User.objects.first()
+        organization = Organization.objects.create(
+            name="KwaStage Boda Boda Welfare",
+            organization_type='welfare_society',
+            registration_number='KWS-001-2025',
+            description='Main boda boda welfare organization',
+            phone_number='+254700000000',
+            email='info@kwastage.ke',
+            county='nairobi',
+            sub_county='Nairobi Central',
+            town='nairobi',
+            address='Nairobi, Kenya',
+            admin_user=admin_user
+        )
+    
+    # Create the new stage
+    stage = Stage.objects.create(
+        name=stage_name,
+        organization=organization,
+        location=f"{stage_name} Area",
+        county='Not Specified',
+        sub_county='Not Specified',
+        ward='Not Specified',
+        registration_date=datetime.now().date(),
+        description=f'User-created stage: {stage_name}',
+        is_active=True
+    )
+    
+    return stage
 
 @login_required
 def profile_setup(request):
@@ -51,6 +90,7 @@ def profile_setup(request):
             'date_of_birth': existing_member.date_of_birth.strftime('%Y-%m-%d') if existing_member.date_of_birth else '',
             'address': existing_member.address,
             'stage': existing_member.stage.id if existing_member.stage else '',
+            'stage_name': existing_member.stage.name if existing_member.stage else '',
             'zone': existing_member.zone,
             'sacco': existing_member.sacco,
             'next_of_kin_name': existing_member.next_of_kin_name,
@@ -70,7 +110,7 @@ def profile_setup(request):
             # Validate required fields
             required_fields = [
                 'first_name', 'last_name', 'national_id', 'phone_number', 
-                'date_of_birth', 'address', 'stage', 'zone', 
+                'date_of_birth', 'address', 'zone', 
                 'next_of_kin_name', 'next_of_kin_relationship', 
                 'next_of_kin_phone', 'next_of_kin_id'
             ]
@@ -79,6 +119,9 @@ def profile_setup(request):
             for field in required_fields:
                 if not request.POST.get(field, '').strip():
                     missing_fields.append(field.replace('_', ' ').title())
+            
+            # Check stage requirement (this is handled separately now in the stage processing section)
+            # Stage validation moved to the stage processing section below
             
             if missing_fields:
                 messages.error(request, f'Please fill in all required fields: {", ".join(missing_fields)}')
@@ -111,9 +154,31 @@ def profile_setup(request):
             request.user.last_name = request.POST.get('last_name', '').strip()
             request.user.save()
             
-            # Get stage
-            stage_id = request.POST.get('stage')
-            stage = get_object_or_404(Stage, id=stage_id)
+            # Get stage (existing or create new)
+            stage_id = request.POST.get('stage_id', '').strip()
+            stage_name = request.POST.get('stage_name', '').strip()
+            
+            if not stage_name:
+                missing_fields.append('Stage Name')
+            else:
+                if stage_id and stage_id != 'new' and stage_id.isdigit():
+                    # Existing stage selected
+                    try:
+                        stage = Stage.objects.get(id=stage_id)
+                    except Stage.DoesNotExist:
+                        # Fall back to creating new stage if ID doesn't exist
+                        stage = create_new_stage(stage_name)
+                        messages.success(request, f'New stage "{stage_name}" has been created and will be available for other users.')
+                else:
+                    # New stage - check if it already exists by name
+                    existing_stage = Stage.objects.filter(name__iexact=stage_name).first()
+                    if existing_stage:
+                        stage = existing_stage
+                        messages.info(request, f'Found existing stage: "{stage.name}"')
+                    else:
+                        # Create completely new stage
+                        stage = create_new_stage(stage_name)
+                        messages.success(request, f'New stage "{stage_name}" has been created and will be available for other users.')
             
             if existing_member:
                 # Update existing member
@@ -218,7 +283,7 @@ def member_documents(request):
     try:
         member = request.user.member
         documents = member.documents.all()
-    except:
+    except Member.DoesNotExist:
         documents = []
     context = {'documents': documents}
     return render(request, 'members/documents.html', context)

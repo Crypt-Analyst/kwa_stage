@@ -1,0 +1,498 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Add Training - {{ SITE_NAME }}{% endblock %}
+
+{% block extra_css %}
+<style>
+.form-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+}
+
+.form-section {
+    border-bottom: 1px solid #e9ecef;
+    padding: 20px 0;
+}
+
+.form-section:last-child {
+    border-bottom: none;
+}
+
+.section-title {
+    color: #343a40;
+    font-weight: 600;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+}
+
+.section-title i {
+    color: #007bff;
+    margin-right: 10px;
+    font-size: 1.2rem;
+}
+
+.upload-area {
+    border: 2px dashed #dee2e6;
+    border-radius: 8px;
+    padding: 40px 20px;
+    text-align: center;
+    transition: all 0.3s ease;
+    background: #f8f9fa;
+}
+
+.upload-area:hover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-area.dragover {
+    border-color: #007bff;
+    background: #e7f3ff;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #6c757d;
+    margin-bottom: 15px;
+}
+
+.form-help {
+    background: #f8f9fa;
+    border-left: 4px solid #007bff;
+    padding: 15px 20px;
+    margin-bottom: 20px;
+    border-radius: 0 8px 8px 0;
+}
+
+.required-field::after {
+    content: ' *';
+    color: #dc3545;
+}
+
+.training-type-info {
+    background: #e7f3ff;
+    border: 1px solid #b3d9ff;
+    border-radius: 8px;
+    padding: 15px;
+    margin-top: 10px;
+}
+
+.status-indicator {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+    margin-right: 8px;
+}
+
+.status-completed { background-color: #28a745; }
+.status-progress { background-color: #ffc107; }
+.status-planned { background-color: #6c757d; }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="main-content">
+    <div class="page-header">
+        <h1><i class="fas fa-graduation-cap me-3"></i>Add Training Record</h1>
+        <div>
+            <a href="{% url 'safety:training_list' %}" class="btn btn-outline">
+                <i class="fas fa-arrow-left me-2"></i>Back to Training
+            </a>
+        </div>
+    </div>
+
+    <div class="content-wrapper">
+        <div class="form-card">
+            <div class="card-body">
+                <div class="form-help">
+                    <h6><i class="fas fa-info-circle me-2"></i>Safety Training Record</h6>
+                    <p class="mb-0">
+                        Record your safety training to track your professional development and compliance with safety standards. 
+                        Upload certificates and keep track of expiry dates for renewals.
+                    </p>
+                </div>
+
+                <form method="post" enctype="multipart/form-data" id="trainingForm">
+                    {% csrf_token %}
+                    
+                    <!-- Basic Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-info-circle"></i>
+                            Training Information
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-8 mb-3">
+                                <label for="training_title" class="form-label required-field">Training Title</label>
+                                <input type="text" class="form-control" id="training_title" name="training_title" 
+                                       placeholder="Enter training course title" required>
+                                <div class="form-text">Full name of the training course or program</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="training_type" class="form-label required-field">Training Type</label>
+                                <select class="form-select" id="training_type" name="training_type" required>
+                                    <option value="">Select type</option>
+                                    <option value="defensive_driving">Defensive Driving</option>
+                                    <option value="first_aid">First Aid & CPR</option>
+                                    <option value="road_safety">Road Safety</option>
+                                    <option value="bike_maintenance">Bike Maintenance</option>
+                                    <option value="customer_service">Customer Service</option>
+                                    <option value="traffic_rules">Traffic Rules & Regulations</option>
+                                    <option value="emergency_response">Emergency Response</option>
+                                    <option value="financial_literacy">Financial Literacy</option>
+                                    <option value="other">Other</option>
+                                </select>
+                                <div id="trainingTypeInfo" class="training-type-info d-none">
+                                    <small id="typeDescription"></small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row" id="otherTypeRow" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label for="other_training_type" class="form-label">Specify Training Type</label>
+                                <input type="text" class="form-control" id="other_training_type" name="other_training_type" 
+                                       placeholder="Enter training type">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="training_institution" class="form-label required-field">Training Institution</label>
+                                <input type="text" class="form-control" id="training_institution" name="training_institution" 
+                                       placeholder="Name of training provider" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="trainer_name" class="form-label">Trainer/Instructor Name</label>
+                                <input type="text" class="form-control" id="trainer_name" name="trainer_name" 
+                                       placeholder="Lead trainer or instructor">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Dates & Status -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-calendar"></i>
+                            Training Dates & Status
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-4 mb-3">
+                                <label for="training_date" class="form-label required-field">Training Date</label>
+                                <input type="date" class="form-control" id="training_date" name="training_date" required>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="completion_date" class="form-label">Completion Date</label>
+                                <input type="date" class="form-control" id="completion_date" name="completion_date">
+                                <div class="form-text">Leave blank if not yet completed</div>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label for="expiry_date" class="form-label">Expiry Date</label>
+                                <input type="date" class="form-control" id="expiry_date" name="expiry_date">
+                                <div class="form-text">If training has validity period</div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="status" class="form-label required-field">Training Status</label>
+                                <select class="form-select" id="status" name="status" required>
+                                    <option value="">Select status</option>
+                                    <option value="completed">
+                                        <span class="status-indicator status-completed"></span>Completed
+                                    </option>
+                                    <option value="in_progress">In Progress</option>
+                                    <option value="planned">Planned</option>
+                                    <option value="expired">Expired</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="duration_hours" class="form-label">Duration (Hours)</label>
+                                <input type="number" class="form-control" id="duration_hours" name="duration_hours" 
+                                       placeholder="0" min="0" step="0.5">
+                                <div class="form-text">Total training hours</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Certification -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-certificate"></i>
+                            Certification Details
+                        </h5>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="certificate_number" class="form-label">Certificate Number</label>
+                                <input type="text" class="form-control" id="certificate_number" name="certificate_number" 
+                                       placeholder="Certificate ID or number">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="issuing_body" class="form-label">Issuing Body</label>
+                                <input type="text" class="form-control" id="issuing_body" name="issuing_body" 
+                                       placeholder="Organization that issued certificate">
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="accreditation" class="form-label">Accreditation</label>
+                                <input type="text" class="form-control" id="accreditation" name="accreditation" 
+                                       placeholder="Accreditation body (e.g., NITA, KIM)">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="ceu_credits" class="form-label">CEU Credits</label>
+                                <input type="number" class="form-control" id="ceu_credits" name="ceu_credits" 
+                                       placeholder="0" min="0" step="0.1">
+                                <div class="form-text">Continuing Education Units earned</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Documents -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-file-upload"></i>
+                            Training Documents
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="certificate_file" class="form-label">Certificate Document</label>
+                            <div class="upload-area" id="uploadArea">
+                                <div class="upload-icon">
+                                    <i class="fas fa-certificate"></i>
+                                </div>
+                                <h6>Upload training certificate</h6>
+                                <p class="text-muted mb-3">PDF, Word document, or image file</p>
+                                <input type="file" class="form-control d-none" id="certificate_file" name="certificate_file" 
+                                       accept=".pdf,.jpg,.jpeg,.png,.doc,.docx">
+                                <button type="button" class="btn btn-outline-primary" onclick="document.getElementById('certificate_file').click()">
+                                    Choose File
+                                </button>
+                            </div>
+                            <div class="form-text">Upload your training certificate or completion document (Max: 10MB)</div>
+                            <div id="fileInfo" class="mt-2 d-none">
+                                <div class="alert alert-info d-flex align-items-center">
+                                    <i class="fas fa-file-alt me-2"></i>
+                                    <span id="fileName"></span>
+                                    <button type="button" class="btn-close ms-auto" onclick="clearFile()"></button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Additional Information -->
+                    <div class="form-section">
+                        <h5 class="section-title">
+                            <i class="fas fa-sticky-note"></i>
+                            Additional Information
+                        </h5>
+                        
+                        <div class="mb-3">
+                            <label for="training_content" class="form-label">Training Content/Topics</label>
+                            <textarea class="form-control" id="training_content" name="training_content" rows="3" 
+                                      placeholder="List main topics covered in the training"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="skills_acquired" class="form-label">Skills Acquired</label>
+                            <textarea class="form-control" id="skills_acquired" name="skills_acquired" rows="3" 
+                                      placeholder="What skills or knowledge did you gain from this training?"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                      placeholder="Any additional notes about this training"></textarea>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="practical_component" name="practical_component">
+                                    <label class="form-check-label" for="practical_component">
+                                        Included practical/hands-on component
+                                    </label>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="renewal_required" name="renewal_required">
+                                    <label class="form-check-label" for="renewal_required">
+                                        Periodic renewal required
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Actions -->
+                    <div class="d-flex justify-content-between pt-3">
+                        <a href="{% url 'safety:training_list' %}" class="btn btn-secondary">
+                            <i class="fas fa-times me-2"></i>Cancel
+                        </a>
+                        <button type="submit" class="btn btn-success">
+                            <i class="fas fa-save me-2"></i>Save Training Record
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Training type information
+    const trainingTypeSelect = document.getElementById('training_type');
+    const trainingTypeInfo = document.getElementById('trainingTypeInfo');
+    const typeDescription = document.getElementById('typeDescription');
+    const otherTypeRow = document.getElementById('otherTypeRow');
+
+    const typeDescriptions = {
+        'defensive_driving': 'Learn advanced driving techniques to prevent accidents and handle emergency situations.',
+        'first_aid': 'Basic first aid, CPR, and emergency medical response training.',
+        'road_safety': 'Traffic laws, road signs, safe riding practices, and accident prevention.',
+        'bike_maintenance': 'Motorcycle maintenance, troubleshooting, and basic repair skills.',
+        'customer_service': 'Professional communication and service delivery skills for riders.',
+        'traffic_rules': 'Comprehensive traffic laws and regulations training.',
+        'emergency_response': 'Emergency procedures, crisis management, and safety protocols.',
+        'financial_literacy': 'Money management, savings, and financial planning for riders.'
+    };
+
+    trainingTypeSelect.addEventListener('change', function() {
+        if (this.value === 'other') {
+            otherTypeRow.style.display = 'block';
+            document.getElementById('other_training_type').required = true;
+            trainingTypeInfo.classList.add('d-none');
+        } else {
+            otherTypeRow.style.display = 'none';
+            document.getElementById('other_training_type').required = false;
+            
+            if (this.value && typeDescriptions[this.value]) {
+                typeDescription.textContent = typeDescriptions[this.value];
+                trainingTypeInfo.classList.remove('d-none');
+            } else {
+                trainingTypeInfo.classList.add('d-none');
+            }
+        }
+    });
+
+    // File upload handling
+    const uploadArea = document.getElementById('uploadArea');
+    const fileInput = document.getElementById('certificate_file');
+    const fileInfo = document.getElementById('fileInfo');
+    const fileName = document.getElementById('fileName');
+
+    // Drag and drop events
+    uploadArea.addEventListener('dragover', function(e) {
+        e.preventDefault();
+        uploadArea.classList.add('dragover');
+    });
+
+    uploadArea.addEventListener('dragleave', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+    });
+
+    uploadArea.addEventListener('drop', function(e) {
+        e.preventDefault();
+        uploadArea.classList.remove('dragover');
+        
+        const files = e.dataTransfer.files;
+        if (files.length > 0) {
+            fileInput.files = files;
+            showFileInfo(files[0]);
+        }
+    });
+
+    // File input change
+    fileInput.addEventListener('change', function(e) {
+        if (e.target.files.length > 0) {
+            showFileInfo(e.target.files[0]);
+        }
+    });
+
+    function showFileInfo(file) {
+        fileName.textContent = file.name + ' (' + formatFileSize(file.size) + ')';
+        fileInfo.classList.remove('d-none');
+    }
+
+    function formatFileSize(bytes) {
+        if (bytes === 0) return '0 Bytes';
+        const k = 1024;
+        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+        const i = Math.floor(Math.log(bytes) / Math.log(k));
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    }
+
+    // Date validation
+    const trainingDate = document.getElementById('training_date');
+    const completionDate = document.getElementById('completion_date');
+    const expiryDate = document.getElementById('expiry_date');
+
+    trainingDate.addEventListener('change', function() {
+        completionDate.min = this.value;
+        if (completionDate.value && completionDate.value < this.value) {
+            completionDate.value = '';
+        }
+    });
+
+    completionDate.addEventListener('change', function() {
+        if (trainingDate.value && this.value < trainingDate.value) {
+            alert('Completion date cannot be before training date');
+            this.value = '';
+        }
+        
+        if (this.value) {
+            expiryDate.min = this.value;
+        }
+    });
+
+    // Status handling
+    const statusSelect = document.getElementById('status');
+    
+    statusSelect.addEventListener('change', function() {
+        if (this.value === 'completed' && !completionDate.value) {
+            completionDate.value = trainingDate.value || new Date().toISOString().split('T')[0];
+        }
+    });
+
+    // Form validation
+    document.getElementById('trainingForm').addEventListener('submit', function(e) {
+        const title = document.getElementById('training_title').value.trim();
+        const type = document.getElementById('training_type').value;
+        const institution = document.getElementById('training_institution').value.trim();
+        const status = document.getElementById('status').value;
+        
+        if (!title || !type || !institution || !status) {
+            e.preventDefault();
+            alert('Please fill in all required fields');
+            return false;
+        }
+
+        // Validate completion date for completed status
+        if (status === 'completed' && !completionDate.value) {
+            e.preventDefault();
+            alert('Completion date is required for completed training');
+            return false;
+        }
+    });
+});
+
+function clearFile() {
+    document.getElementById('certificate_file').value = '';
+    document.getElementById('fileInfo').classList.add('d-none');
+}
+</script>
+{% endblock %}

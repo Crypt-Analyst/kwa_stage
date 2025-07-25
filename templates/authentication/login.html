@@ -150,6 +150,11 @@
                 </label>
             </div>
             
+            <!-- Cloudflare Turnstile -->
+            {% if turnstile_site_key %}
+            <div class="cf-turnstile mb-3" data-sitekey="{{ turnstile_site_key }}" data-theme="light"></div>
+            {% endif %}
+            
             <button type="submit" class="btn btn-login">
                 <i class="fas fa-sign-in-alt me-2"></i>Sign In
             </button>
@@ -209,7 +214,7 @@
         
         <div class="mt-4 pt-3 border-top">
             <p class="small text-muted mb-0">
-                Boda Boda is Family - Don't Forget That
+                Stage ni yetu, sauti ni yao — we just build the mic
             </p>
         </div>
     </div>
@@ -273,4 +278,9 @@ function handleCredentialResponse(response) {
     });
 }
 </script>
+
+<!-- Cloudflare Turnstile Script -->
+{% if turnstile_site_key %}
+<script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+{% endif %}
 {% endblock %}

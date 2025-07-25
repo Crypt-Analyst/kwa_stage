@@ -43,6 +43,7 @@ urlpatterns = [
     path('social/', include('social.urls', namespace='social')),
     path('safety/', include('safety.urls', namespace='safety')),
     path('payments/', include('payments.urls', namespace='payments')),
+    path('financial/', include('financial.urls', namespace='financial')),
     
     # Module views from main app
     path('analytics/', views.analytics, name='analytics'),

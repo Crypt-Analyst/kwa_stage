@@ -140,19 +140,26 @@
                             <p class="message-preview mb-0">
                                 <i class="fas fa-map-marker-alt me-1"></i>{{ stage_group.stage.name }}
                                 • {{ stage_group.members.count }} members
+                                {% if stage_group.online_count %}
+                                • <span class="text-success"><i class="fas fa-circle me-1" style="font-size: 8px;"></i>{{ stage_group.online_count }} online</span>
+                                {% endif %}
                             </p>
                             <small class="text-muted">Main stage communication channel</small>
                         </div>
                         <div class="text-end">
-                            <span class="unread-badge">3</span>
-                            <div class="time-stamp mt-1">2 min ago</div>
+                            {% if stage_group.unread_count %}
+                            <span class="unread-badge">{{ stage_group.unread_count }}</span>
+                            {% endif %}
+                            {% if stage_group.last_message %}
+                                <small class="text-muted">{{ stage_group.last_message.created_at|timesince }} ago</small>
+                            {% endif %}
                         </div>
                     </div>
                 </div>
                 {% endif %}
 
                 <!-- Other Group Chats -->
-                {% for group in member_groups %}
+                {% for group in group_chats %}
                     {% if group != stage_group %}
                     <div class="chat-item" onclick="location.href='{% url 'social:chat_detail' group.id %}'">
                         <div class="d-flex align-items-center">
@@ -160,28 +167,40 @@
                                 <div class="group-avatar">
                                     {{ group.name|first|upper }}
                                 </div>
-                                {% if forloop.counter|divisibleby:3 %}
+                                {% if group.online_count %}
                                 <div class="online-indicator"></div>
                                 {% endif %}
                             </div>
                             <div class="flex-grow-1">
                                 <h6 class="mb-1">{{ group.name }}</h6>
                                 <p class="message-preview mb-0">
-                                    {% if group.description %}
+                                    {% if group.last_message %}
+                                        <strong>{{ group.last_message.sender.user.first_name }}:</strong> 
+                                        {{ group.last_message.content|truncatechars:40 }}
+                                    {% elif group.description %}
                                         {{ group.description|truncatechars:50 }}
                                     {% else %}
                                         <i class="fas fa-lock me-1"></i>
                                         {% if group.is_private %}Private{% else %}Open{% endif %} group
-                                        • {{ group.members.count }} members
                                     {% endif %}
                                 </p>
+                                <small class="text-muted">
+                                    {{ group.members.count }} members
+                                    {% if group.online_count %}
+                                    • <span class="text-success"><i class="fas fa-circle me-1" style="font-size: 8px;"></i>{{ group.online_count }} online</span>
+                                    {% endif %}
+                                </small>
                             </div>
                             <div class="text-end">
-                                {% if forloop.counter|divisibleby:2 %}
-                                <span class="unread-badge">{{ forloop.counter }}</span>
+                                {% if group.unread_count %}
+                                <span class="unread-badge">{{ group.unread_count }}</span>
                                 {% endif %}
                                 <div class="time-stamp mt-1">
-                                    {{ group.created_at|timesince }} ago
+                                    {% if group.last_message %}
+                                        {{ group.last_message.created_at|timesince }} ago
+                                    {% else %}
+                                        {{ group.created_at|timesince }} ago
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>
@@ -190,7 +209,7 @@
                 {% endfor %}
 
                 <!-- No Additional Groups Message -->
-                {% if member_groups.count == 1 %}
+                {% if group_chats.count <= 1 %}
                 <div class="text-center py-5">
                     <i class="fas fa-comment-dots fa-3x text-muted mb-3"></i>
                     <h5 class="text-muted">No additional groups</h5>
@@ -224,7 +243,7 @@
                         <a href="{% url 'social:notifications' %}" class="btn btn-outline-warning">
                             <i class="fas fa-bell me-2"></i>Notifications
                         </a>
-                        <a href="{% url 'emergency:create' %}" class="btn btn-outline-danger">
+                        <a href="{% url 'emergency:report_case' %}" class="btn btn-outline-danger">
                             <i class="fas fa-exclamation-triangle me-2"></i>Emergency Alert
                         </a>
                     </div>

@@ -115,6 +115,7 @@ class GroupChat(models.Model):
     name = models.CharField(max_length=200)
     description = models.TextField(blank=True)
     stage = models.ForeignKey(Stage, on_delete=models.CASCADE, related_name='group_chats')
+    created_by = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='created_groups', null=True, blank=True)
     admins = models.ManyToManyField(Member, related_name='admin_groups')
     members = models.ManyToManyField(Member, related_name='group_memberships')
     

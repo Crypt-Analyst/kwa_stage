@@ -19,6 +19,7 @@ urlpatterns = [
     # Group chats
     path('chats/', views.group_chats, name='group_chats'),
     path('chats/<int:chat_id>/', views.chat_detail, name='chat_detail'),
+    path('chats/create/', views.create_chat, name='create_chat'),
     
     # Notifications
     path('notifications/', views.notifications, name='notifications'),

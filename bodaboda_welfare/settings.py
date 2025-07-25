@@ -11,10 +11,28 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
 from pathlib import Path
-from decouple import config
+from decouple import config, Config, RepositoryEnv
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Custom configuration that prioritizes .env file over system environment variables
+env_file = BASE_DIR / '.env'
+if env_file.exists():
+    # Load from .env file first, then fall back to system environment
+    env_config = Config(RepositoryEnv(str(env_file)))
+    
+    def get_config(key, default=None, cast=str):
+        try:
+            # Try .env file first
+            return env_config(key, default=default, cast=cast)
+        except:
+            # Fall back to system environment
+            return config(key, default=default, cast=cast)
+else:
+    # If no .env file, use regular config
+    get_config = config
 
 
 # Quick-start development settings - unsuitable for production
@@ -55,6 +73,7 @@ INSTALLED_APPS = [
     'social',
     'safety',
     'payments',
+    'financial',
 ]
 
 MIDDLEWARE = [
@@ -66,6 +85,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django_otp.middleware.OTPMiddleware',
     'authentication.middleware.TwoFactorMiddleware',
+    'members.middleware.OnlineStatusMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -83,6 +103,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'bodaboda_welfare.context_processors.google_maps_api_key',
+                'bodaboda_welfare.context_processors.site_settings',
             ],
         },
     },
@@ -94,19 +116,28 @@ WSGI_APPLICATION = 'bodaboda_welfare.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
+# Production PostgreSQL Database (Supabase)
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': config('DB_NAME', default='postgres'),
-        'USER': config('DB_USER', default='postgres'),
-        'PASSWORD': config('DB_PASSWORD'),
-        'HOST': config('DB_HOST', default='localhost'),
-        'PORT': config('DB_PORT', default='5432'),
+        'NAME': get_config('DB_NAME', default='postgres'),
+        'USER': get_config('DB_USER', default='postgres'),
+        'PASSWORD': get_config('DB_PASSWORD'),
+        'HOST': get_config('DB_HOST', default='localhost'),
+        'PORT': get_config('DB_PORT', default='5432'),
         'OPTIONS': {
             'sslmode': 'require',
         },
     }
 }
+
+# SQLite Database (for local development - commented out)
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.sqlite3',
+#         'NAME': BASE_DIR / 'db.sqlite3',
+#     }
+# }
 
 
 # Password validation
@@ -224,12 +255,12 @@ LOGOUT_REDIRECT_URL = '/'
 
 # Email Settings
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST', default='smtp.gmail.com')
-EMAIL_PORT = config('EMAIL_PORT', default=587, cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', default=True, cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER', default='')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD', default='')
-DEFAULT_FROM_EMAIL = config('DEFAULT_FROM_EMAIL', default='rahasoft.app@gmail.com')
+EMAIL_HOST = get_config('EMAIL_HOST', default='smtp.gmail.com')
+EMAIL_PORT = get_config('EMAIL_PORT', default=587, cast=int)
+EMAIL_USE_TLS = get_config('EMAIL_USE_TLS', default=True, cast=bool)
+EMAIL_HOST_USER = get_config('EMAIL_HOST_USER', default='')
+EMAIL_HOST_PASSWORD = get_config('EMAIL_HOST_PASSWORD', default='')
+DEFAULT_FROM_EMAIL = get_config('DEFAULT_FROM_EMAIL', default='rahasoft.app@gmail.com')
 EMAIL_USE_SSL = False
 
 # Account activation
@@ -244,6 +275,9 @@ AFRICASTALKING_API_KEY = config('AFRICASTALKING_API_KEY', default='')
 # Google OAuth Settings
 GOOGLE_OAUTH2_CLIENT_ID = config('GOOGLE_OAUTH2_CLIENT_ID', default='')
 GOOGLE_OAUTH2_CLIENT_SECRET = config('GOOGLE_OAUTH2_CLIENT_SECRET', default='')
+
+# Google Maps API Key
+GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='AIzaSyBOti4mM-6x9WDnZIjIeyEU21OpBXqWBgw')
 
 # QR Code Settings
 QR_CODE_URL_PREFIX = config('QR_CODE_URL_PREFIX', default='https://bodabodawelfare.com/')

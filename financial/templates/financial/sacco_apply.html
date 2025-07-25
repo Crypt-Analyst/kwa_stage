@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Apply to {{ sacco.name }} - Kwa Stage{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="card bg-primary text-white shadow-lg">
+                <div class="card-body">
+                    <div class="row align-items-center">
+                        <div class="col-md-8">
+                            <h1 class="card-title mb-2">
+                                <i class="fas fa-handshake me-2"></i>
+                                Apply to {{ sacco.name }}
+                            </h1>
+                            <p class="card-text mb-0">
+                                Complete your membership application form
+                            </p>
+                        </div>
+                        <div class="col-md-4 text-end">
+                            <a href="{% url 'financial:sacco_list' %}" class="btn btn-light">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                Back to SACCOs
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- SACCO Information -->
+        <div class="col-lg-4 mb-4">
+            <div class="card shadow-sm h-100">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0">{{ sacco.name }}</h5>
+                </div>
+                <div class="card-body">
+                    <p class="card-text">{{ sacco.description }}</p>
+                    
+                    <div class="mb-3">
+                        <h6 class="text-primary">Location:</h6>
+                        <p class="mb-1">{{ sacco.county }}, {{ sacco.town }}</p>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-primary">Services:</h6>
+                        <div class="d-flex flex-wrap gap-1">
+                            {% if sacco.offers_savings %}
+                            <span class="badge bg-success">Savings</span>
+                            {% endif %}
+                            {% if sacco.offers_credit %}
+                            <span class="badge bg-info">Credit</span>
+                            {% endif %}
+                            {% if sacco.offers_insurance %}
+                            <span class="badge bg-warning text-dark">Insurance</span>
+                            {% endif %}
+                            {% if sacco.offers_investment %}
+                            <span class="badge bg-secondary">Investment</span>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-primary">Requirements:</h6>
+                        <ul class="list-unstyled small">{% for req in sacco.membership_requirements_list %}<li class="mb-1">
+                                <i class="fas fa-check text-success me-1"></i>
+                                {{ req }}
+                            </li>{% endfor %}</ul>
+                    </div>
+
+                    <div class="mb-3">
+                        <h6 class="text-primary">Contact:</h6>
+                        {% if sacco.phone %}
+                        <p class="mb-1">
+                            <i class="fas fa-phone me-1"></i>
+                            <a href="tel:{{ sacco.phone }}">{{ sacco.phone }}</a>
+                        </p>
+                        {% endif %}
+                        {% if sacco.email %}
+                        <p class="mb-1">
+                            <i class="fas fa-envelope me-1"></i>
+                            <a href="mailto:{{ sacco.email }}">{{ sacco.email }}</a>
+                        </p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Application Form -->
+        <div class="col-lg-8 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-success text-white">
+                    <h5 class="mb-0">
+                        <i class="fas fa-file-alt me-2"></i>
+                        Membership Application Form
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        
+                        <!-- Personal Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Personal Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="full_name" class="form-label">Full Name *</label>
+                                <input type="text" class="form-control" id="full_name" name="full_name" 
+                                       value="{{ user.get_full_name }}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_number" class="form-label">ID Number *</label>
+                                <input type="text" class="form-control" id="id_number" name="id_number" 
+                                       pattern="[0-9]{7,8}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="phone" class="form-label">Phone Number *</label>
+                                <input type="tel" class="form-control" id="phone" name="phone" 
+                                       pattern="[0-9]{10}" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="email" class="form-label">Email Address *</label>
+                                <input type="email" class="form-control" id="email" name="email" 
+                                       value="{{ user.email }}" required>
+                            </div>
+                        </div>
+
+                        <!-- Address Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Address Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="county" class="form-label">County *</label>
+                                <input type="text" class="form-control" id="county" name="county" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="town" class="form-label">Town/City *</label>
+                                <input type="text" class="form-control" id="town" name="town" required>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="physical_address" class="form-label">Physical Address *</label>
+                                <textarea class="form-control" id="physical_address" name="physical_address" 
+                                          rows="2" required></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Work Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Work & Income Information</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="occupation" class="form-label">Occupation *</label>
+                                <select class="form-select" id="occupation" name="occupation" required>
+                                    <option value="">Select Occupation</option>
+                                    <option value="boda_boda_rider">Boda Boda Rider</option>
+                                    <option value="transport_operator">Transport Operator</option>
+                                    <option value="motorcycle_mechanic">Motorcycle Mechanic</option>
+                                    <option value="spare_parts_dealer">Spare Parts Dealer</option>
+                                    <option value="other_transport">Other Transport Related</option>
+                                    <option value="other">Other</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="monthly_income" class="form-label">Monthly Income (KES) *</label>
+                                <select class="form-select" id="monthly_income" name="monthly_income" required>
+                                    <option value="">Select Income Range</option>
+                                    <option value="10000-20000">KES 10,000 - 20,000</option>
+                                    <option value="20000-30000">KES 20,000 - 30,000</option>
+                                    <option value="30000-50000">KES 30,000 - 50,000</option>
+                                    <option value="50000-100000">KES 50,000 - 100,000</option>
+                                    <option value="100000+">Above KES 100,000</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="years_experience" class="form-label">Years of Experience</label>
+                                <input type="number" class="form-control" id="years_experience" 
+                                       name="years_experience" min="0" max="50">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="motorcycle_registration" class="form-label">Motorcycle Registration</label>
+                                <input type="text" class="form-control" id="motorcycle_registration" 
+                                       name="motorcycle_registration" placeholder="e.g., KCA 123A">
+                            </div>
+                        </div>
+
+                        <!-- SACCO Services -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Services of Interest</h6>
+                            </div>
+                            <div class="col-12">
+                                <div class="row">
+                                    {% if sacco.offers_savings %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="interested_savings" name="interested_services" 
+                                                   value="savings">
+                                            <label class="form-check-label" for="interested_savings">
+                                                Savings Account
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if sacco.offers_credit %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="interested_credit" name="interested_services" 
+                                                   value="credit">
+                                            <label class="form-check-label" for="interested_credit">
+                                                Credit/Loans
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if sacco.offers_insurance %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="interested_insurance" name="interested_services" 
+                                                   value="insurance">
+                                            <label class="form-check-label" for="interested_insurance">
+                                                Insurance Services
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                    {% if sacco.offers_investment %}
+                                    <div class="col-md-6 mb-2">
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" 
+                                                   id="interested_investment" name="interested_services" 
+                                                   value="investment">
+                                            <label class="form-check-label" for="interested_investment">
+                                                Investment Opportunities
+                                            </label>
+                                        </div>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Additional Information -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Additional Information</h6>
+                            </div>
+                            <div class="col-12 mb-3">
+                                <label for="additional_info" class="form-label">
+                                    Why do you want to join this SACCO?
+                                </label>
+                                <textarea class="form-control" id="additional_info" name="additional_info" 
+                                          rows="3" placeholder="Tell us about your goals and how this SACCO can help you..."></textarea>
+                            </div>
+                        </div>
+
+                        <!-- Document Upload -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <h6 class="border-bottom pb-2 mb-3">Required Documents</h6>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="id_copy" class="form-label">ID Copy *</label>
+                                <input type="file" class="form-control" id="id_copy" name="id_copy" 
+                                       accept=".pdf,.jpg,.jpeg,.png" required>
+                                <div class="form-text">Upload a clear copy of your national ID</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="passport_photo" class="form-label">Passport Photo *</label>
+                                <input type="file" class="form-control" id="passport_photo" name="passport_photo" 
+                                       accept=".jpg,.jpeg,.png" required>
+                                <div class="form-text">Upload a recent passport-size photo</div>
+                            </div>
+                        </div>
+
+                        <!-- Terms and Conditions -->
+                        <div class="row mb-4">
+                            <div class="col-12">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="terms_accepted" 
+                                           name="terms_accepted" required>
+                                    <label class="form-check-label" for="terms_accepted">
+                                        I agree to the SACCO's terms and conditions and authorize them to 
+                                        contact me regarding my application *
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="row">
+                            <div class="col-12">
+                                <div class="d-grid gap-2">
+                                    <button type="submit" class="btn btn-primary btn-lg">
+                                        <i class="fas fa-paper-plane me-2"></i>
+                                        Submit Application
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-fill some fields from user profile if available
+document.addEventListener('DOMContentLoaded', function() {
+    // You can add JavaScript here to auto-populate fields
+    // from user profile or validate form data
+});
+</script>
+{% endblock %}

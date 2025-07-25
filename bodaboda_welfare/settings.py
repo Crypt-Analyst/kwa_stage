@@ -39,12 +39,12 @@ else:
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-7jv8=tz2t_3kztm9r(q45jd!ev9+py+$ra-lzv(@sq^i_br&w1'
+SECRET_KEY = get_config('SECRET_KEY', default='django-insecure-7jv8=tz2t_3kztm9r(q45jd!ev9+py+$ra-lzv(@sq^i_br&w1')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = get_config('DEBUG', default=False, cast=bool)
 
-ALLOWED_HOSTS = ['testserver', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = get_config('ALLOWED_HOSTS', default='localhost,127.0.0.1,testserver,kwastage.com,www.kwastage.com', cast=lambda v: [s.strip() for s in v.split(',')])
 
 
 # Application definition
@@ -131,7 +131,7 @@ DATABASES = {
     }
 }
 
-# SQLite Database (for local development - commented out)
+# SQLite Database (for local development - uncomment if needed)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',
@@ -281,3 +281,94 @@ GOOGLE_MAPS_API_KEY = config('GOOGLE_MAPS_API_KEY', default='AIzaSyBOti4mM-6x9WD
 
 # QR Code Settings
 QR_CODE_URL_PREFIX = config('QR_CODE_URL_PREFIX', default='https://bodabodawelfare.com/')
+
+# Security Headers and Production Settings
+SECURE_SSL_REDIRECT = get_config('SECURE_SSL_REDIRECT', default=False, cast=bool)
+SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+SECURE_HSTS_SECONDS = get_config('SECURE_HSTS_SECONDS', default=31536000, cast=int)
+SECURE_HSTS_INCLUDE_SUBDOMAINS = get_config('SECURE_HSTS_INCLUDE_SUBDOMAINS', default=True, cast=bool)
+SECURE_HSTS_PRELOAD = get_config('SECURE_HSTS_PRELOAD', default=True, cast=bool)
+SECURE_CONTENT_TYPE_NOSNIFF = get_config('SECURE_CONTENT_TYPE_NOSNIFF', default=True, cast=bool)
+SECURE_BROWSER_XSS_FILTER = get_config('SECURE_BROWSER_XSS_FILTER', default=True, cast=bool)
+X_FRAME_OPTIONS = get_config('X_FRAME_OPTIONS', default='DENY')
+SECURE_REFERRER_POLICY = get_config('SECURE_REFERRER_POLICY', default='strict-origin-when-cross-origin')
+
+# Session Security
+SESSION_COOKIE_SECURE = get_config('SESSION_COOKIE_SECURE', default=False, cast=bool)
+SESSION_COOKIE_HTTPONLY = get_config('SESSION_COOKIE_HTTPONLY', default=True, cast=bool)
+SESSION_COOKIE_SAMESITE = get_config('SESSION_COOKIE_SAMESITE', default='Lax')
+CSRF_COOKIE_SECURE = get_config('CSRF_COOKIE_SECURE', default=False, cast=bool)
+CSRF_COOKIE_HTTPONLY = get_config('CSRF_COOKIE_HTTPONLY', default=True, cast=bool)
+CSRF_COOKIE_SAMESITE = get_config('CSRF_COOKIE_SAMESITE', default='Lax')
+
+# CORS Settings (if using django-cors-headers)
+CORS_ALLOW_ALL_ORIGINS = get_config('CORS_ALLOW_ALL_ORIGINS', default=False, cast=bool)
+CORS_ALLOWED_ORIGINS = get_config('CORS_ALLOWED_ORIGINS', default='', cast=lambda v: [s.strip() for s in v.split(',') if s.strip()])
+
+# Error Logging Configuration
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'formatters': {
+        'verbose': {
+            'format': '{levelname} {asctime} {module} {process:d} {thread:d} {message}',
+            'style': '{',
+        },
+        'simple': {
+            'format': '{levelname} {message}',
+            'style': '{',
+        },
+    },
+    'handlers': {
+        'file': {
+            'level': 'ERROR',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs', 'django_errors.log'),
+            'maxBytes': 1024*1024*15,  # 15MB
+            'backupCount': 10,
+            'formatter': 'verbose',
+        },
+        'console': {
+            'level': 'DEBUG',
+            'class': 'logging.StreamHandler',
+            'formatter': 'simple',
+        },
+        'mail_admins': {
+            'level': 'ERROR',
+            'class': 'django.utils.log.AdminEmailHandler',
+            'formatter': 'verbose',
+        },
+    },
+    'loggers': {
+        'django': {
+            'handlers': ['file', 'console'],
+            'level': 'INFO',
+            'propagate': True,
+        },
+        'django.request': {
+            'handlers': ['file', 'mail_admins'],
+            'level': 'ERROR',
+            'propagate': False,
+        },
+        'bodaboda_welfare': {
+            'handlers': ['file', 'console'],
+            'level': 'DEBUG',
+            'propagate': True,
+        },
+    },
+}
+
+# Create logs directory if it doesn't exist
+os.makedirs(os.path.join(BASE_DIR, 'logs'), exist_ok=True)
+
+# Cache Configuration
+CACHES = {
+    'default': {
+        'BACKEND': get_config('CACHE_BACKEND', default='django.core.cache.backends.locmem.LocMemCache'),
+        'LOCATION': get_config('CACHE_LOCATION', default=''),
+        'TIMEOUT': get_config('CACHE_TIMEOUT', default=300, cast=int),
+        'OPTIONS': {
+            'MAX_ENTRIES': get_config('CACHE_MAX_ENTRIES', default=1000, cast=int),
+        }
+    }
+}

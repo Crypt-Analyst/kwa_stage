@@ -1,7 +1,21 @@
 from django.contrib.auth.models import User
 from django.db import models
 from django.utils import timezone
+from django.core.exceptions import ValidationError
 import uuid
+
+
+class NonDeletableUser(User):
+    """Proxy model to prevent deletion of admin users"""
+    
+    class Meta:
+        proxy = True
+    
+    def delete(self, *args, **kwargs):
+        # Prevent deletion of superusers and admin users
+        if self.is_superuser or (hasattr(self, 'memberprofile') and self.memberprofile.is_super_admin):
+            raise ValidationError("👑 This admin user cannot be deleted for system security.")
+        return super().delete(*args, **kwargs)
 
 
 class EmailVerification(models.Model):

@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+from django.core.exceptions import ValidationError
 
 class Member(models.Model):
     """
@@ -131,3 +132,65 @@ class SaccoAffiliation(models.Model):
     
     def __str__(self):
         return self.name
+
+
+class MemberProfile(models.Model):
+    """
+    Extended profile for member users with admin capabilities and king cap indicator
+    """
+    ACCOUNT_STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('active', 'Active'),
+        ('inactive', 'Inactive'),
+        ('suspended', 'Suspended'),
+    ]
+    
+    COMPLETION_STATUS_CHOICES = [
+        ('incomplete', 'Incomplete'),
+        ('pending_verification', 'Pending Verification'),
+        ('complete', 'Complete'),
+    ]
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='memberprofile')
+    phone_number = models.CharField(max_length=15, blank=True)
+    national_id = models.CharField(max_length=20, blank=True)
+    bike_registration = models.CharField(max_length=50, blank=True)
+    stage = models.ForeignKey('stages.Stage', on_delete=models.SET_NULL, null=True, blank=True)
+    emergency_contact = models.CharField(max_length=15, blank=True)
+    emergency_contact_relationship = models.CharField(max_length=100, blank=True)
+    next_of_kin = models.CharField(max_length=200, blank=True)
+    next_of_kin_contact = models.CharField(max_length=15, blank=True)
+    
+    # Admin privileges
+    is_admin = models.BooleanField(default=False, help_text="👑 Admin user with elevated privileges")
+    is_super_admin = models.BooleanField(default=False, help_text="👑 Super admin with full system access")
+    
+    # Profile status
+    account_status = models.CharField(max_length=20, choices=ACCOUNT_STATUS_CHOICES, default='pending')
+    profile_completion_status = models.CharField(max_length=20, choices=COMPLETION_STATUS_CHOICES, default='incomplete')
+    
+    # Profile photo
+    profile_photo = models.ImageField(upload_to='profiles/', blank=True, null=True)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        verbose_name = 'Member Profile'
+        verbose_name_plural = 'Member Profiles'
+    
+    def __str__(self):
+        crown = "👑 " if self.is_super_admin else "🛡️ " if self.is_admin else ""
+        return f"{crown}{self.user.get_full_name() or self.user.username}"
+    
+    @property
+    def display_name_with_crown(self):
+        """Return display name with crown indicator for admin users"""
+        crown = "👑 " if self.is_super_admin else "🛡️ " if self.is_admin else ""
+        return f"{crown}{self.user.get_full_name() or self.user.username}"
+    
+    def delete(self, *args, **kwargs):
+        """Prevent deletion of super admin profiles"""
+        if self.is_super_admin:
+            raise ValidationError("👑 Super admin profiles cannot be deleted for system security.")
+        return super().delete(*args, **kwargs)

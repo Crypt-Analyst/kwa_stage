@@ -5,13 +5,16 @@
 
 {% block extra_css %}
 <style>
-    /* Landing page specific styles */
+    /* Modern Dark Landing Page */
     .hero-section {
-        background: linear-gradient(135deg, var(--primary-color) 0%, #1e3d72 100%);
+        background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
         color: white;
-        padding: 100px 0;
+        padding: 120px 0;
         position: relative;
         overflow: hidden;
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
     }
     
     .hero-section::before {
@@ -21,7 +24,13 @@
         left: 0;
         right: 0;
         bottom: 0;
-        background: url("data:image/svg+xml,%3Csvg width='40' height='40' viewBox='0 0 40 40' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23ffffff' fill-opacity='0.03'%3E%3Cpath d='m0 40l40-40h-40v40zm40 0v-40h-40l40 40z'/%3E%3C/g%3E%3C/svg%3E");
+        background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.02'%3E%3Ccircle cx='30' cy='30' r='4'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        animation: float 20s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+        0%, 100% { transform: translateY(0px); }
+        50% { transform: translateY(-20px); }
     }
     
     .hero-content {
@@ -30,90 +39,143 @@
     }
     
     .hero-title {
-        font-size: 4rem;
-        font-weight: 800;
+        font-size: 4.5rem;
+        font-weight: 900;
         margin-bottom: 1.5rem;
-        line-height: 1.2;
-        color: #FFD700;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        line-height: 1.1;
+        background: linear-gradient(135deg, #3b82f6, #10b981, #f59e0b);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        text-shadow: 0 0 30px rgba(59, 130, 246, 0.3);
     }
     
     .hero-subtitle {
-        font-size: 1.4rem;
+        font-size: 1.5rem;
         margin-bottom: 2rem;
-        opacity: 0.9;
-        font-weight: 400;
+        color: var(--text-secondary);
+        font-weight: 300;
     }
     
     .hero-slogan {
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         font-style: italic;
-        color: var(--secondary-color);
+        color: var(--accent-secondary);
         margin-bottom: 3rem;
-        font-weight: 600;
+        font-weight: 500;
+        text-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
     }
     
     .btn-cta {
-        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        background: linear-gradient(135deg, #3b82f6, #1d4ed8);
         border: none;
         color: white;
-        padding: 15px 40px;
+        padding: 18px 45px;
         font-size: 1.1rem;
         font-weight: 600;
         border-radius: 50px;
-        transition: all 0.3s;
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         text-decoration: none;
         display: inline-block;
         margin: 0 10px;
+        box-shadow: 0 10px 30px rgba(59, 130, 246, 0.3);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .btn-cta::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .btn-cta:hover::before {
+        left: 100%;
     }
     
     .btn-cta:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(44, 90, 160, 0.3);
+        transform: translateY(-3px) scale(1.05);
+        box-shadow: 0 15px 40px rgba(59, 130, 246, 0.4);
         color: white;
         text-decoration: none;
     }
     
     .btn-cta-secondary {
-        background: white;
-        color: var(--primary-color);
-        border: 2px solid var(--primary-color);
+        background: rgba(255, 255, 255, 0.1);
+        color: white;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
     }
     
     .btn-cta-secondary:hover {
-        background: var(--primary-color);
+        background: rgba(255, 255, 255, 0.2);
         color: white;
+        border-color: rgba(255, 255, 255, 0.6);
     }
     
     .stats-section {
-        background: white;
-        padding: 80px 0;
-        margin-top: -50px;
+        background: var(--bg-card);
+        padding: 100px 0;
+        margin-top: -80px;
         position: relative;
         z-index: 3;
+        border-radius: 50px 50px 0 0;
     }
     
     .stat-card {
-        background: white;
+        background: var(--bg-light);
         border-radius: 20px;
-        padding: 2rem;
+        padding: 3rem 2rem;
         text-align: center;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-        border: 1px solid #f0f0f0;
+        box-shadow: 0 10px 30px var(--shadow-dark);
+        transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        border: 1px solid var(--border-color);
         height: 100%;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(135deg, #3b82f6, #10b981);
     }
     
     .stat-card:hover {
-        transform: translateY(-10px);
-        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        transform: translateY(-15px) scale(1.02);
+        box-shadow: 0 25px 50px rgba(59, 130, 246, 0.2);
     }
     
     .stat-icon {
-        font-size: 3rem;
-        margin-bottom: 1rem;
-        background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
+        font-size: 3.5rem;
+        margin-bottom: 1.5rem;
+        background: linear-gradient(135deg, #3b82f6, #10b981);
         -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+    
+    .stat-number {
+        font-size: 3rem;
+        font-weight: 900;
+        color: var(--text-primary);
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-label {
+        font-size: 1.1rem;
+        color: var(--text-secondary);
+        font-weight: 500;
+    }
         -webkit-text-fill-color: transparent;
         background-clip: text;
     }

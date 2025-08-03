@@ -10,44 +10,54 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0f1419 0%, #1a1f2e 50%, #2d3748 100%);
     padding: 20px;
 }
 
 .auth-card {
-    background: white;
-    border-radius: 15px;
-    box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+    background: var(--bg-card);
+    border: 1px solid var(--border-color);
+    border-radius: 20px;
+    box-shadow: 0 25px 50px var(--shadow-dark);
     max-width: 450px;
     width: 100%;
-    padding: 40px;
+    padding: 50px;
     text-align: center;
 }
 
 .verification-icon {
-    width: 80px;
-    height: 80px;
-    background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+    width: 90px;
+    height: 90px;
+    background: linear-gradient(135deg, #10b981, #059669);
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin: 0 auto 20px;
+    margin: 0 auto 25px;
     color: white;
-    font-size: 2rem;
+    font-size: 2.5rem;
+    box-shadow: 0 10px 30px rgba(16, 185, 129, 0.3);
 }
 
 .code-input {
-    font-size: 1.5rem;
+    font-size: 1.8rem;
     text-align: center;
-    letter-spacing: 0.5rem;
-    padding: 15px;
-    border: 2px solid #dee2e6;
-    border-radius: 10px;
-    margin-bottom: 20px;
+    letter-spacing: 0.8rem;
+    padding: 20px;
+    border: 2px solid var(--border-color);
+    border-radius: 12px;
+    margin-bottom: 25px;
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+    transition: all 0.3s ease;
 }
 
 .code-input:focus {
+    border-color: var(--accent-secondary);
+    box-shadow: 0 0 0 0.25rem rgba(16, 185, 129, 0.25);
+    background-color: var(--bg-light);
+    color: var(--text-primary);
+}
     border-color: #667eea;
     box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
 }

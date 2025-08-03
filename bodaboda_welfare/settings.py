@@ -116,26 +116,26 @@ WSGI_APPLICATION = 'bodaboda_welfare.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# Production PostgreSQL Database (Supabase)
+# SQLite Database (for local development)
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': get_config('DB_NAME', default='postgres'),
-        'USER': get_config('DB_USER', default='postgres'),
-        'PASSWORD': get_config('DB_PASSWORD'),
-        'HOST': get_config('DB_HOST', default='localhost'),
-        'PORT': get_config('DB_PORT', default='5432'),
-        'OPTIONS': {
-            'sslmode': 'require',
-        },
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
 
-# SQLite Database (for local development - uncomment if needed)
+# Production PostgreSQL Database (Supabase) - uncomment for production
 # DATABASES = {
 #     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': get_config('DB_NAME', default='postgres'),
+#         'USER': get_config('DB_USER', default='postgres'),
+#         'PASSWORD': get_config('DB_PASSWORD'),
+#         'HOST': get_config('DB_HOST', default='localhost'),
+#         'PORT': get_config('DB_PORT', default='5432'),
+#         'OPTIONS': {
+#             'sslmode': 'require',
+#         },
 #     }
 # }
 
